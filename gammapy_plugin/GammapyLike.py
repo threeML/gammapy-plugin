@@ -107,8 +107,8 @@ class GammapyLike(PluginPrototype):
              geom = WcsGeom.create(npix=(1000, 1000), binsz=0.005, skydir=skydir, proj="TAN", frame="icrs")
              exclusion_mask = ~geom.region_mask([reg0, reg1, reg2, reg3, reg4, reg5, reg6, reg7, reg8])
 
-             energy_ax = MapAxis.from_energy_bounds(self.emin, self.emax, nbin=self.nbin,  unit="TeV", name="energy")
-             energy_ax_true = MapAxis.from_energy_bounds(self.emin, self.emax, nbin=self.nbin, unit="TeV", name="energy_true")
+             energy_ax = MapAxis.from_energy_bounds(1e-2, 1e4, nbin=self.nbin,  per_decade=True, unit="TeV", name="energy")
+             energy_ax_true = MapAxis.from_energy_bounds(1e-2, 1e4, nbin=self.nbin, per_decade=True, unit="TeV", name="energy_true")
              
              geom = RegionGeom.create(region=on_region, axes=[energy_ax])
              dataset_empty = SpectrumDataset.create(geom=geom, energy_axis_true=energy_ax_true)
@@ -132,28 +132,6 @@ class GammapyLike(PluginPrototype):
              self.dataset_stacked = Datasets(datasets).stack_reduce(name="stacked")
 
              
-
-    def _get_gammapy_instance(self, likelihood_model):
-#        self.model = likelihood_model
-        for point_source in list(likelihood_model.point_sources.values()):
-            pivot_energy = point_source.spectrum.main.Powerlaw.parameters['piv'].value
-            pivot_eunit = point_source.spectrum.main.Powerlaw.parameters['piv'].unit
-            index = point_source.spectrum.main.Powerlaw.parameters['index'].value
-            k_value = point_source.spectrum.main.Powerlaw.parameters['K'].value
-            k_unit = point_source.spectrum.main.Powerlaw.parameters['K'].unit
-            self.spectral_model = PowerLawSpectralModel(
-                index=-index, 
-                amplitude=k_value * u.Unit(k_unit), 
-                reference=1 * u.Unit(pivot_eunit)
-            )
-
-        
-
-
-        model = SkyModel(spectral_model=self.spectral_model, name="{}".format(self.obs_table['OBJECT'][0]))
-        return model
-        #self.dataset_stacked.models = [self.model]
-        #return self.dataset_stacked
 
 
     def _update_model_parameters(self):

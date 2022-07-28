@@ -208,7 +208,7 @@ class GammapyLike(PluginPrototype):
         try:
 
             value = self.dataset_stacked.stat_sum()
-            print(value)
+#            print(value)
 
         except:
 

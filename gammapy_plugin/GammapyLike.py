@@ -142,7 +142,7 @@ class GammapyLike(PluginPrototype):
             k_value = point_source.spectrum.main.Powerlaw.parameters['K'].value
             k_unit = point_source.spectrum.main.Powerlaw.parameters['K'].unit
             self.spectral_model = PowerLawSpectralModel(
-                index=index, 
+                index=-index, 
                 amplitude=k_value * u.Unit(k_unit), 
                 reference=1 * u.Unit(pivot_eunit)
             )

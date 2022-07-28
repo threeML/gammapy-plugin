@@ -156,6 +156,19 @@ class GammapyLike(PluginPrototype):
         #return self.dataset_stacked
 
 
+    def _update_model_parameters(self):
+        for point_source in list(self._likelihood_model.point_sources.values()):
+            pivot_energy = point_source.spectrum.main.Powerlaw.parameters['piv'].value
+            pivot_eunit = point_source.spectrum.main.Powerlaw.parameters['piv'].unit
+            index = point_source.spectrum.main.Powerlaw.parameters['index'].value
+            k_value = point_source.spectrum.main.Powerlaw.parameters['K'].value
+            k_unit = point_source.spectrum.main.Powerlaw.parameters['K'].unit
+            spectral_model = PowerLawSpectralModel(
+                index=-index,
+                amplitude=k_value * u.Unit(k_unit),
+                reference=1 * u.Unit(pivot_eunit)
+            )
+        self.model = SkyModel(spectral_model=spectral_model, name="{}".format(self.obs_table['OBJECT'][0]))
 
 
 
@@ -169,6 +182,8 @@ class GammapyLike(PluginPrototype):
         # produce livetime cube, expomap, source maps and so on
 
         self._likelihood_model = likelihood_model_instance
+        self._update_model_parameters()
+
 
 #        self._dataset_stacked = self._get_gammapy_instance(likelihood_model_instance)
         #self._update_model_in_fermipy( update_dictionary = True, force_update = True)
@@ -187,8 +202,9 @@ class GammapyLike(PluginPrototype):
         #self._update_model_in_gammapy()
 
         # Get value of the log likelihood
-        model = self._get_gammapy_instance(self._likelihood_model)
-        self.dataset_stacked.models = [model]                                                                                                                                                              
+        self._update_model_parameters()
+        #model = self._get_gammapy_instance(self._likelihood_model)
+        self.dataset_stacked.models = [self.model]                                                                                                                                                              
         try:
 
             value = self.dataset_stacked.stat_sum()
@@ -199,7 +215,7 @@ class GammapyLike(PluginPrototype):
             raise
 
 #        return value #- logfactorial(int(self._gta.like.total_nobs()))
-        return value - logfactorial(int(271))
+        return -value #- logfactorial(int(271))
 
     def inner_fit(self):
         """

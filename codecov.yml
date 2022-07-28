@@ -1,0 +1,3 @@
+ignore:
+  - "gammapy_plugin/test"
+  - "gammapy_plugin/_version.py"

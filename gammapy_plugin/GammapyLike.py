@@ -213,4 +213,4 @@ class GammapyLike(PluginPrototype):
         evaluated on the likelihood
         """
 
-        return int(6)  
+        return self.dataset_stacked.data_shape[0] * self.dataset_stacked.data_shape[1] * self.dataset_stacked.data_shape[2]

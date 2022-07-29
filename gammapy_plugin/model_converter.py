@@ -1,3 +1,4 @@
+__author__ = "J Michael Burgess"
 import os
 import uuid
 from typing import List

@@ -1,55 +1,55 @@
-import os
-import glob
-import pickle
 import copy
+import getopt
+import glob
+import os
+import pickle
 import re
-from astropy.io import fits
-import matplotlib.pyplot as plt 
-import sys, getopt
-import yaml
-import gammapy
-import numpy as np
+import sys
+
 import astropy
-import regions
-from astropy.time import Time
+
 #from pathlib import Path
 import astropy.units as u
-from astropy.coordinates import SkyCoord, Angle
-from regions import CircleSkyRegion
-from gammapy.maps import Map, MapAxis, WcsGeom,  RegionGeom
-from gammapy.modeling import Fit 
+import gammapy
+import matplotlib.pyplot as plt
+import numpy as np
+import regions
+import yaml
+from astropy.coordinates import Angle, SkyCoord
+from astropy.io import fits
+from astropy.time import Time
 from gammapy.data import DataStore
 from gammapy.datasets import (
     Datasets,
-    SpectrumDataset,
-    SpectrumDatasetOnOff,
     FluxPointsDataset,
     MapDataset,
-)
-from gammapy.modeling.models import (
-    PowerLawSpectralModel,
-    ExpCutoffPowerLawSpectralModel,
-    #create_crab_spectral_model,
-    SkyModel,
+    SpectrumDataset,
+    SpectrumDatasetOnOff,
 )
 from gammapy.makers import (
+    MapDatasetMaker,
+    ReflectedRegionsBackgroundMaker,
     SafeMaskMaker,
     SpectrumDatasetMaker,
-    ReflectedRegionsBackgroundMaker,
-    MapDatasetMaker,
 )
-
-
+from gammapy.maps import Map, MapAxis, RegionGeom, WcsGeom
+from gammapy.modeling import Fit
+from gammapy.modeling.models import (  # create_crab_spectral_model,
+    ExpCutoffPowerLawSpectralModel,
+    PowerLawSpectralModel,
+    SkyModel,
+)
+from regions import CircleSkyRegion
 from threeML.exceptions.custom_exceptions import custom_warnings
+from threeML.io.dict_with_pretty_print import DictWithPrettyPrint
 from threeML.io.file_utils import sanitize_filename
+from threeML.io.logging import setup_logger
+from threeML.io.package_data import get_path_of_data_file
 from threeML.plugin_prototype import PluginPrototype
+from threeML.utils.power_of_two_utils import is_power_of_2
 from threeML.utils.statistics.gammaln import logfactorial
 from threeML.utils.unique_deterministic_tag import get_unique_deterministic_tag
-from threeML.utils.power_of_two_utils import is_power_of_2
-from threeML.io.package_data import get_path_of_data_file
-from threeML.io.dict_with_pretty_print import DictWithPrettyPrint
-from threeML.io.logging import setup_logger
-from threeML.io.logging import setup_logger
+
 log = setup_logger(__name__)
 
 __instrument_name = "VERITAS (with gammapy)"

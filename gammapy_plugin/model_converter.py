@@ -41,9 +41,16 @@ class SpectralModelGenerator:
 
         class_dict = {}
 
-        for k, v in self._function.parameters.items():
+        for i, (k, v) in enumerate(self._function.parameters.items()):
 
-            class_dict[k] = gpyspec.Parameter(k, v.value * v._unit)
+            is_norm = False
+
+            if i == 0:
+                is_norm = True
+
+            class_dict[k] = gpyspec.Parameter(
+                k, v.value * v._unit, is_norm=is_norm
+            )
 
         class_dict["_astro_func"] = self._function
         class_dict["evaluate"] = evaluate
@@ -59,6 +66,8 @@ class GammapyModelWrapper:
         self._model: Model = model
 
         self._point_sources: List[gpyspec.SpectralModel] = []
+
+        self._extended_sources = None
 
         # check for point sources
 

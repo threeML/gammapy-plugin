@@ -44,7 +44,7 @@ from threeML.utils.power_of_two_utils import is_power_of_2
 from threeML.utils.statistics.gammaln import logfactorial
 from threeML.utils.unique_deterministic_tag import get_unique_deterministic_tag
 
-from model_converter import GammapyModelWrapper
+from .model_converter import GammapyModelWrapper
 
 log = setup_logger(__name__)
 
@@ -306,4 +306,3 @@ class GammapyLike(PluginPrototype):
             * self.dataset_stacked.data_shape[1]
             * self.dataset_stacked.data_shape[2]
         )
-

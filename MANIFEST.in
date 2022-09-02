@@ -1,0 +1,2 @@
+include versioneer.py
+include gammapy_plugin/_version.py

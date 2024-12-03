@@ -1,50 +1,28 @@
 from typing import Optional
 
-import astropy
-
 # from pathlib import Path
 import astropy.units as u
-import gammapy
-import matplotlib.pyplot as plt
 import numpy as np
-import regions
 import yaml
 from astromodels import Model
-from astromodels.core.model_parser import model
 from astropy.coordinates import Angle, SkyCoord
-from astropy.io import fits
-from astropy.time import Time
 from gammapy.data import DataStore
 from gammapy.datasets import (
     Datasets,
-    FluxPointsDataset,
-    MapDataset,
     SpectrumDataset,
-    SpectrumDatasetOnOff,
 )
 from gammapy.makers import (
-    MapDatasetMaker,
     ReflectedRegionsBackgroundMaker,
     SafeMaskMaker,
     SpectrumDatasetMaker,
 )
-from gammapy.maps import Map, MapAxis, RegionGeom, WcsGeom
-from gammapy.modeling import Fit
-from gammapy.modeling.models import (  # create_crab_spectral_model,
-    ExpCutoffPowerLawSpectralModel,
-    PowerLawSpectralModel,
-    SkyModel,
-)
+from gammapy.modeling.models import SkyModel
+from gammapy.maps import MapAxis, RegionGeom, WcsGeom
 from regions import CircleSkyRegion
-from threeML.io.file_utils import sanitize_filename
 from threeML.io.logging import setup_logger
-from threeML.io.package_data import get_path_of_data_file
 from threeML.plugin_prototype import PluginPrototype
-from threeML.utils.power_of_two_utils import is_power_of_2
-from threeML.utils.statistics.gammaln import logfactorial
-from threeML.utils.unique_deterministic_tag import get_unique_deterministic_tag
 
-from .model_converter import GammapyModelWrapper
+from gammapy_plugin.model_converter import GammapyModelWrapper
 
 log = setup_logger(__name__)
 
@@ -63,39 +41,36 @@ class GammapyLike(PluginPrototype):
             name, nuisance_parameters=nuisance_parameters
         )
         instrument = "veritas"
+        super(GammapyLike, self).__init__(name, nuisance_parameters=nuisance_parameters)
         if instrument == "veritas":
 
             # try to make private variables with _
 
             config_file = yaml.load(open(config_file), Loader=yaml.FullLoader)
-            self.data_dir = config_file['data']['anasum']
-            self.output_dir = config_file['fileio']['outdir']
+            self.data_dir = config_file["data"]["anasum"]
+            self.output_dir = config_file["fileio"]["outdir"]
             self.on_region_radius = Angle(
-                "{} deg".format(np.sqrt(config_file['cuts']['th2cut']))
+                "{} deg".format(np.sqrt(config_file["cuts"]["th2cut"]))
             )
-            self.emin = config_file['selection']['emin']
-            self.emax = config_file['selection']['emax']
-            self.nbin = config_file['selection']['nbin']
-            self.exclusion_on = config_file['selection']['exc_on_region_radius']
-            self.exc_radius = config_file['selection']['exc_radius']
+            self.emin = config_file["selection"]["emin"]
+            self.emax = config_file["selection"]["emax"]
+            self.nbin = config_file["selection"]["nbin"]
+            self.exclusion_on = config_file["selection"]["exc_on_region_radius"]
+            self.exc_radius = config_file["selection"]["exc_radius"]
             datastore = DataStore.from_dir(self.data_dir)
             self.obs_table = datastore.obs_table
-            obs_ids = self.obs_table['OBS_ID']
+            obs_ids = self.obs_table["OBS_ID"]
             available_irf = ["aeff", "edisp"]
             observations = datastore.get_observations(
                 obs_ids, required_irf=available_irf
             )
-            RA = self.obs_table['RA_OBJ']
-            DEC = self.obs_table['DEC_OBJ']
+            RA = self.obs_table["RA_OBJ"]
+            DEC = self.obs_table["DEC_OBJ"]
             RA_OBJ = RA[0]
             DEC_OBJ = DEC[0]
-            target_position = SkyCoord(
-                ra=RA_OBJ, dec=DEC_OBJ, unit="deg", frame="icrs"
-            )
+            target_position = SkyCoord(ra=RA_OBJ, dec=DEC_OBJ, unit="deg", frame="icrs")
             on_region_radius = Angle("{} deg".format(np.sqrt(0.008)))
-            on_region = CircleSkyRegion(
-                center=target_position, radius=on_region_radius
-            )
+            on_region = CircleSkyRegion(center=target_position, radius=on_region_radius)
 
             exclusion_mask = []
 
@@ -174,13 +149,9 @@ class GammapyLike(PluginPrototype):
                 containment_correction=False,
                 selection=["counts", "exposure", "edisp"],
             )
-            bkg_maker = ReflectedRegionsBackgroundMaker(
-                exclusion_mask=exclusion_mask
-            )
+            bkg_maker = ReflectedRegionsBackgroundMaker(exclusion_mask=exclusion_mask)
 
-            safe_mask_masker = SafeMaskMaker(
-                methods=["aeff-max"], aeff_percent=10
-            )
+            safe_mask_masker = SafeMaskMaker(methods=["aeff-max"], aeff_percent=10)
 
             datasets = Datasets()
             for obs_id, observation in zip(obs_ids, observations):
@@ -188,14 +159,10 @@ class GammapyLike(PluginPrototype):
                     dataset_empty.copy(name=str(obs_id)), observation
                 )
                 dataset_on_off = bkg_maker.run(dataset, observation)
-                dataset_on_off = safe_mask_masker.run(
-                    dataset_on_off, observation
-                )
+                dataset_on_off = safe_mask_masker.run(dataset_on_off, observation)
                 datasets.append(dataset_on_off)
 
-            self.dataset_stacked = Datasets(datasets).stack_reduce(
-                name="stacked"
-            )
+            self.dataset_stacked = Datasets(datasets).stack_reduce(name="stacked")
 
             self._gammapy_model: Optional[SkyModel] = None
             self._gammapy_wrapper: Optional[GammapyModelWrapper] = None

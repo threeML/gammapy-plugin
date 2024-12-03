@@ -50,15 +50,15 @@ class SpectralModelGenerator:
                 is_norm = True
 
             class_dict[k] = gpyspec.Parameter(
-                k, v.value * v._unit, is_norm=is_norm
+                name=k,
+                value=v.value,
+                unit=v._unit,
             )
 
         class_dict["_astro_func"] = self._function
         class_dict["evaluate"] = evaluate
 
-        self._class_def = type(
-            self._class_name, (gpyspec.SpectralModel,), class_dict
-        )
+        self._class_def = type(self._class_name, (gpyspec.SpectralModel,), class_dict)
 
 
 class GammapyModelWrapper:

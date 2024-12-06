@@ -34,13 +34,12 @@ class GammapyLike(PluginPrototype):
         instance = object.__new__(cls)
         return instance
 
-    def __init__(self, name: str, config_file: str = "config.yaml") -> None:
+    def __init__(
+        self, name: str, instrument: str, config_file: str = "config.yaml"
+    ) -> None:
+        """ """
         nuisance_parameters = {}
 
-        super(GammapyLike, self).__init__(
-            name, nuisance_parameters=nuisance_parameters
-        )
-        instrument = "veritas"
         super(GammapyLike, self).__init__(name, nuisance_parameters=nuisance_parameters)
         if instrument == "veritas":
 
@@ -167,28 +166,6 @@ class GammapyLike(PluginPrototype):
             self._gammapy_model: Optional[SkyModel] = None
             self._gammapy_wrapper: Optional[GammapyModelWrapper] = None
 
-    # def _update_model_parameters(self):
-    #     for point_source in list(self._likelihood_model.point_sources.values()):
-    #         pivot_energy = point_source.spectrum.main.Powerlaw.parameters[
-    #             'piv'
-    #         ].value
-    #         pivot_eunit = point_source.spectrum.main.Powerlaw.parameters[
-    #             'piv'
-    #         ].unit
-    #         index = point_source.spectrum.main.Powerlaw.parameters[
-    #             'index'
-    #         ].value
-    #         k_value = point_source.spectrum.main.Powerlaw.parameters['K'].value
-    #         k_unit = point_source.spectrum.main.Powerlaw.parameters['K'].unit
-    #         spectral_model = PowerLawSpectralModel(
-    #             index=-index,
-    #             amplitude=k_value * u.Unit(k_unit),
-    #             reference=1 * u.Unit(pivot_eunit),
-    #         )
-    #     self.model = SkyModel(
-    #         spectral_model=spectral_model,
-    #         name="{}".format(self.obs_table['OBJECT'][0]),
-    #     )
 
     def set_model(self, likelihood_model_instance: Model) -> None:
         """

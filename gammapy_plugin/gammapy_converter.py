@@ -151,9 +151,9 @@ class SpatialModelConverted(SpatialModel):
             type(function), Function
         ), "function must be astromodels function"
         self._astromodel_function = function
-        if self._frame is None:
+        if frame is None:
             log.warning("No frame passed (not implemented yet) will use ICRS!")
-            self._frame = "icrs"
+            frame = "icrs"
         self._frame = frame
         self._setup_parameters()
 

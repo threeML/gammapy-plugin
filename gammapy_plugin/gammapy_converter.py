@@ -19,7 +19,6 @@ class AstromodelConverter:
     # TODO need to find way to connect temporal evolution
     def __init__(self, model: Model, frame: str = None) -> None:
         assert isinstance(model, Model), "Needs an astromodels Model"
-
         self._astromodel_model = model
         self._frame = frame
 
@@ -73,7 +72,6 @@ class SourceConverter:
         self._temporal_model = None
         self._source = source
         self._all_para_names = list(self._source.parameters.keys())
-        self._source.display()
 
         if isinstance(self._source, PointSource):
             log.debug("Source is a PointSource")
@@ -107,9 +105,7 @@ class SourceConverter:
         spectral_models = []
         for comp_name, comp in self._source.components.items():
             para_names = []
-            log.debug(f"This is the comp_name {comp_name}")
             for p in self._all_para_names:
-                log.debug(p)
                 if comp_name in p:
                     para_names.append(p)
             spectral_models.append(SpectralModelConverted(comp.shape, para_names))
@@ -150,14 +146,12 @@ class SourceConverter:
 
 class SpectralModelConverted(SpectralModel):
     def __init__(self, function: Function, para_names: list) -> None:
-        log.debug("type of spectral function: " + str(type(function)))
         assert issubclass(
             type(function), Function
         ), "function must be astromodels function"
         self._astromodel_function = function
         self._source_name = self._astromodel_function.name
         self._para_names = para_names
-        log.debug(f"para_names: {self._para_names}")
         self._setup_parameters()
 
     def _setup_parameters(self):
@@ -174,15 +168,12 @@ class SpectralModelConverted(SpectralModel):
             name = None
             while True and i < len(self._para_names):
                 splitted = self._para_names[i].split(".")
-                log.debug(k)
-                log.debug(splitted)
                 if k == splitted[-1]:
                     name = self._para_names[i]
                     break
                 i += 1
             if name is None:
                 raise ValueError
-            log.debug(f"Final name {name}")
             self._mapping[name] = k
             paras.append(
                 Parameter(

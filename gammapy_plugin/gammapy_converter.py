@@ -48,8 +48,14 @@ class AstromodelConverter:
             )
 
     def _create_gammapy_models(self):
-        for source in self._converted_sources:
+        for name, source in self._converted_sources.items():
             self._gammapy_models.append(source.skymodel)
+
+    def _update_parameters(self, model):
+        for name, source in self._converted_sources.items():
+            for pn, p in self._astromodel_model.free_parameters.items():
+                if name in pn:
+                    source._update_parameter(pn, p.value)
 
     @property
     def gammapy_models(self) -> list[SkyModel]:
@@ -57,13 +63,18 @@ class AstromodelConverter:
 
 
 class SourceConverter:
-    def __init__(self, source: Source, **kwargs) -> None:
+    def __init__(
+        self, source: Source, converter: AstromodelConverter, **kwargs
+    ) -> None:
         self._frame = kwargs.get("frame", None)
+        self._converter = converter
         self._spatial_model = None
         self._spectral_model = None
         self._temporal_model = None
-
         self._source = source
+        self._all_para_names = list(self._source.parameters.keys())
+        self._source.display()
+
         if isinstance(self._source, PointSource):
             log.debug("Source is a PointSource")
             self._convert_spectral_model()
@@ -78,10 +89,30 @@ class SourceConverter:
 
         self._create_skymodel()
 
+    def _create_parameter_dict(self):
+        # TODO thats likely inefficient
+        self._parameter_dict = {}
+        # This initalizes the parameter dict for an indiviudal source
+        for name in self._skymodel.parameters.names:
+            self._parameter_dict[name] = {}
+            astromodel_para = self._converter._astromodel_model.parameters[name]
+            self._parameter_dict[name]["value"] = astromodel_para.value
+            self._parameter_dict[name]["unit"] = astromodel_para.unit
+            self._parameter_dict[name]["min"] = astromodel_para.min_value
+            self._parameter_dict[name]["max"] = astromodel_para.max_value
+            self._parameter_dict[name]["frozen"] = not astromodel_para.free
+            self._parameter_dict[name]["prior"] = ""
+
     def _convert_spectral_model(self):
         spectral_models = []
         for comp_name, comp in self._source.components.items():
-            spectral_models.append(SpectralModelConverted(comp.shape))
+            para_names = []
+            log.debug(f"This is the comp_name {comp_name}")
+            for p in self._all_para_names:
+                log.debug(p)
+                if comp_name in p:
+                    para_names.append(p)
+            spectral_models.append(SpectralModelConverted(comp.shape, para_names))
         assert len(spectral_models) <= 1, "Only one spec component supported yet"
         if len(spectral_models) > 0:
             self._spectral_model = spectral_models[0]
@@ -100,6 +131,13 @@ class SourceConverter:
             spatial_model=self._spatial_model,
             temporal_model=self._temporal_model,
         )
+        self._create_parameter_dict()
+
+    def _update_parameter(self, name, val):
+        # update the parameter dict for this skymodel
+        self._parameter_dict[name]["value"] = val
+        # update the skymodel itself
+        self._skymodel.parameters[name].update_from_dict(self._parameter_dict[name])
 
     @property
     def skymodel(self):
@@ -111,16 +149,20 @@ class SourceConverter:
 
 
 class SpectralModelConverted(SpectralModel):
-    def __init__(self, function: Function) -> None:
+    def __init__(self, function: Function, para_names: list) -> None:
         log.debug("type of spectral function: " + str(type(function)))
         assert issubclass(
             type(function), Function
         ), "function must be astromodels function"
         self._astromodel_function = function
+        self._source_name = self._astromodel_function.name
+        self._para_names = para_names
+        log.debug(f"para_names: {self._para_names}")
         self._setup_parameters()
 
     def _setup_parameters(self):
         paras = []
+        self._mapping = {}
         for k, v in self._astromodel_function.parameters.items():
             vmin = np.nan
             vmax = np.nan
@@ -128,10 +170,23 @@ class SpectralModelConverted(SpectralModel):
                 vmin = v.min_value
             if v.max_value is not None:
                 vmax = v.max_value
-
+            i = 0
+            name = None
+            while True and i < len(self._para_names):
+                splitted = self._para_names[i].split(".")
+                log.debug(k)
+                log.debug(splitted)
+                if k == splitted[-1]:
+                    name = self._para_names[i]
+                    break
+                i += 1
+            if name is None:
+                raise ValueError
+            log.debug(f"Final name {name}")
+            self._mapping[name] = k
             paras.append(
                 Parameter(
-                    name=k,
+                    name=name,
                     value=v.value,
                     unit=v.unit,
                     min=vmin,
@@ -139,11 +194,17 @@ class SpectralModelConverted(SpectralModel):
                     frozen=not bool(v.free),
                 )
             )
-            setattr(self, k, paras[-1])
+            setattr(self, name, paras[-1])
         self.default_parameters = Parameters(paras)
 
     def evaluate(self, *args, **kwargs):
-        return self._astromodel_function.evaluate(args[0], **kwargs)
+        kwargs_new = {}
+        for k in kwargs.keys():
+            if k in self._mapping.keys():
+                kwargs_new[self._mapping[k]] = kwargs[k]
+            else:
+                kwargs_new[k] = kwargs[k]
+        return self._astromodel_function.evaluate(args[0], **kwargs_new)
 
 
 class SpatialModelConverted(SpatialModel):

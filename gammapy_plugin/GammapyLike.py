@@ -40,63 +40,22 @@ class GammapyLike(PluginPrototype):
 
     def set_model(self, likelihood_model_instance: Model) -> None:
         """
-        Set the model to be used in the joint minimization. Must be a LikelihoodModel instance.
+        Set the model to be used in the joint minimization.
+        Must be a Astromodels Model instance.
         """
 
-        # This will take a long time if it's the first time we run, as it will select the data,
-        # produce livetime cube, expomap, source maps and so on
-
         self._likelihood_model: Model = likelihood_model_instance
-
-        self._gammapy_wrapper = GammapyModelWrapper(self._likelihood_model)
-
-        self._gammapy_model = SkyModel(
-            spectral_model=self._gammapy_wrapper.point_sources[0],
-            name=f"{self.obs_table['OBJECT'][0]}",
-        )
-
-    #        self._dataset_stacked = self._get_gammapy_instance(likelihood_model_instance)
-    # self._update_model_in_fermipy( update_dictionary = True, force_update = True)
-
-    @property
-    def gammapy_model(self) -> Optional[SkyModel]:
-        return self._gammapy_model
-
-    @property
-    def gammapy_wrapper(self) -> GammapyModelWrapper:
-        return self._gammapy_wrapper
+        self._likelihood_model_converted = AstromodelConverter(self._likelihood_model)
 
     def get_log_like(self) -> float:
         """
         Return the value of the log-likelihood with the current values for the
-        parameters stored in the ModelManager instance
+        parameters stored in the model instance
         """
+        self._likelihood_model_converted._update_parameters(self._likelihood_model)
+        self._stacked.models = self.gammapy_model
 
-        # Update all sources on the fermipy side
-        # self.set_model(likelihood_model_instance)
-        # self._update_model_in_fermipy() #   # I still dont understnad this but should be easy if you dig a little deeper
-        # should be something like this
-        # self._update_model_in_gammapy()
-
-        # Get value of the log likelihood
-
-        # model = self._get_gammapy_instance(self._likelihood_model)
-
-        # maybe do this onley once?
-
-        self.dataset_stacked.models = [self.gammapy_model]
-
-        try:
-
-            value = self.dataset_stacked.stat_sum()
-        #            print(value)
-
-        except:
-
-            raise
-
-        #        return value #- logfactorial(int(self._gta.like.total_nobs()))
-        return -value  # - logfactorial(int(271))
+        return -self._stacked.stat_sum()
 
     def inner_fit(self):
         """

@@ -16,138 +16,27 @@ class GammapyLike(PluginPrototype):
         instance = object.__new__(cls)
         return instance
 
-    def __init__(
-        self, name: str, instrument: str, config_file: str = "config.yaml"
-    ) -> None:
+    def __init__(self, name: str, config_file: str = "config.yaml") -> None:
         """ """
         nuisance_parameters = {}
 
         super(GammapyLike, self).__init__(name, nuisance_parameters=nuisance_parameters)
-        if instrument == "veritas":
 
-            # try to make private variables with _
-
-            config_file = yaml.load(open(config_file), Loader=yaml.FullLoader)
-            self.data_dir = config_file["data"]["anasum"]
-            self.output_dir = config_file["fileio"]["outdir"]
-            self.on_region_radius = Angle(
-                "{} deg".format(np.sqrt(config_file["cuts"]["th2cut"]))
-            )
-            self.emin = config_file["selection"]["emin"]
-            self.emax = config_file["selection"]["emax"]
-            self.nbin = config_file["selection"]["nbin"]
-            self.exclusion_on = config_file["selection"]["exc_on_region_radius"]
-            self.exc_radius = config_file["selection"]["exc_radius"]
-            datastore = DataStore.from_dir(self.data_dir)
-            self.obs_table = datastore.obs_table
-            obs_ids = self.obs_table["OBS_ID"]
-            available_irf = ["aeff", "edisp"]
-            observations = datastore.get_observations(
-                obs_ids, required_irf=available_irf
-            )
-            RA = self.obs_table["RA_OBJ"]
-            DEC = self.obs_table["DEC_OBJ"]
-            RA_OBJ = RA[0]
-            DEC_OBJ = DEC[0]
-            target_position = SkyCoord(ra=RA_OBJ, dec=DEC_OBJ, unit="deg", frame="icrs")
-            on_region_radius = Angle("{} deg".format(np.sqrt(0.008)))
-            on_region = CircleSkyRegion(center=target_position, radius=on_region_radius)
-
-            exclusion_mask = []
-
-            reg0 = CircleSkyRegion(
-                center=SkyCoord(RA_OBJ, DEC_OBJ, unit="deg", frame="icrs"),
-                radius=self.exclusion_on * u.deg,
-            )
-            reg1 = CircleSkyRegion(
-                center=SkyCoord(81.9087, 21.937, unit="deg", frame="icrs"),
-                radius=self.exc_radius * u.deg,
-            )
-            reg2 = CircleSkyRegion(
-                center=SkyCoord(82.6806, 22.4623, unit="deg", frame="icrs"),
-                radius=self.exc_radius * u.deg,
-            )
-            reg3 = CircleSkyRegion(
-                center=SkyCoord(83.4118, 20.4742, unit="deg", frame="icrs"),
-                radius=self.exc_radius * u.deg,
-            )
-            reg4 = CircleSkyRegion(
-                center=SkyCoord(84.1099, 21.9931, unit="deg", frame="icrs"),
-                radius=self.exc_radius * u.deg,
-            )
-            reg5 = CircleSkyRegion(
-                center=SkyCoord(84.4112, 21.1425, unit="deg", frame="icrs"),
-                radius=self.exc_radius * u.deg,
-            )
-            reg6 = CircleSkyRegion(
-                center=SkyCoord(84.8629, 21.7629, unit="deg", frame="icrs"),
-                radius=self.exc_radius * u.deg,
-            )
-            reg7 = CircleSkyRegion(
-                center=SkyCoord(85.4782, 23.3262, unit="deg", frame="icrs"),
-                radius=self.exc_radius * u.deg,
-            )
-            reg8 = CircleSkyRegion(
-                center=SkyCoord(85.5166, 22.6603, unit="deg", frame="icrs"),
-                radius=self.exc_radius * u.deg,
-            )
-
-            skydir = target_position.galactic
-            geom = WcsGeom.create(
-                npix=(1000, 1000),
-                binsz=0.005,
-                skydir=skydir,
-                proj="TAN",
-                frame="icrs",
-            )
-            exclusion_mask = ~geom.region_mask(
-                [reg0, reg1, reg2, reg3, reg4, reg5, reg6, reg7, reg8]
-            )
-
-            energy_ax = MapAxis.from_energy_bounds(
-                1e-2,
-                1e4,
-                nbin=self.nbin,
-                per_decade=True,
-                unit="TeV",
-                name="energy",
-            )
-            energy_ax_true = MapAxis.from_energy_bounds(
-                1e-2,
-                1e4,
-                nbin=self.nbin,
-                per_decade=True,
-                unit="TeV",
-                name="energy_true",
-            )
-
-            geom = RegionGeom.create(region=on_region, axes=[energy_ax])
-            dataset_empty = SpectrumDataset.create(
-                geom=geom, energy_axis_true=energy_ax_true
-            )
-
-            dataset_maker = SpectrumDatasetMaker(
-                containment_correction=False,
-                selection=["counts", "exposure", "edisp"],
-            )
-            bkg_maker = ReflectedRegionsBackgroundMaker(exclusion_mask=exclusion_mask)
-
-            safe_mask_masker = SafeMaskMaker(methods=["aeff-max"], aeff_percent=10)
-
-            datasets = Datasets()
-            for obs_id, observation in zip(obs_ids, observations):
-                dataset = dataset_maker.run(
-                    dataset_empty.copy(name=str(obs_id)), observation
-                )
-                dataset_on_off = bkg_maker.run(dataset, observation)
-                dataset_on_off = safe_mask_masker.run(dataset_on_off, observation)
-                datasets.append(dataset_on_off)
-
-            self.dataset_stacked = Datasets(datasets).stack_reduce(name="stacked")
-
-            self._gammapy_model: Optional[SkyModel] = None
-            self._gammapy_wrapper: Optional[GammapyModelWrapper] = None
-
+    def set_datasets(self, datasets, **kwargs):
+        """
+        Set the Gammapy Dataset
+        :param datasets: list of Gammapy datasets or a single Datasets object
+        """
+        if isinstance(datasets, list):
+            self._datasets = Datasets()
+            for d in datasets:
+                self._datasets.append(d)
+        elif isinstance(datasets, Datasets):
+            self._datasets = datasets
+        else:
+            msg = "Datasets has to be list of Dataset or a single Datasets object"
+            raise TypeError(msg)
+        self._stacked = self._datasets.stack_reduce(name="stacked")
 
     def set_model(self, likelihood_model_instance: Model) -> None:
         """

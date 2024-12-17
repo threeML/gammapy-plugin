@@ -24,13 +24,10 @@ class Logging:
     level: str = "WARNING"
 
 
-
-
 @dataclass
 class gammapy_pluginConfig:
 
     logging: Logging = Logging()
-
 
 
 # Read the default config
@@ -81,9 +78,7 @@ def recurse_dict(d, tree) -> None:
 
 def show_configuration() -> None:
 
-    tree = Tree(
-        "config", guide_style="bold medium_orchid", style="bold medium_orchid"
-    )
+    tree = Tree("config", guide_style="bold medium_orchid", style="bold medium_orchid")
 
     recurse_dict(gammapy_plugin_config, tree)
 

@@ -74,9 +74,15 @@ class GammapyLike(PluginPrototype):
         unbinned measurements, this would be the number of photons/particles that are
         evaluated on the likelihood
         """
+    @property
+    def model(self):
+        return self._likelihood_model
 
         return (
             self.dataset_stacked.data_shape[0]
             * self.dataset_stacked.data_shape[1]
             * self.dataset_stacked.data_shape[2]
         )
+    @property
+    def gammapy_model(self):
+        return self._likelihood_model_converted.gammapy_models

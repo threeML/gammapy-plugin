@@ -1,32 +1,14 @@
 from typing import Optional
-
-# from pathlib import Path
-import astropy.units as u
 import numpy as np
-import yaml
 from astromodels import Model
-from astropy.coordinates import Angle, SkyCoord
-from gammapy.data import DataStore
-from gammapy.datasets import (
-    Datasets,
-    SpectrumDataset,
-)
-from gammapy.makers import (
-    ReflectedRegionsBackgroundMaker,
-    SafeMaskMaker,
-    SpectrumDatasetMaker,
-)
-from gammapy.modeling.models import SkyModel
-from gammapy.maps import MapAxis, RegionGeom, WcsGeom
-from regions import CircleSkyRegion
 from threeML.io.logging import setup_logger
 from threeML.plugin_prototype import PluginPrototype
-
-from gammapy_plugin.model_converter import GammapyModelWrapper
+from gammapy_plugin.gammapy_converter import AstromodelConverter
+from gammapy.datasets import Datasets, Dataset
 
 log = setup_logger(__name__)
 
-__instrument_name = "VERITAS (with gammapy)"
+__instrument_name = "Gammapy"
 
 
 class GammapyLike(PluginPrototype):

@@ -23,7 +23,7 @@ class AstromodelConverter:
         self._astromodel_model = model
         self._frame = frame
 
-        self._converted_sources = []
+        self._converted_sources = {}
         self._gammapy_models = []
         self._convert_extendend_sources()
         self._convert_point_sources()
@@ -34,8 +34,8 @@ class AstromodelConverter:
             source_name,
             source_instance,
         ) in self._astromodel_model.extended_sources.items():
-            self._converted_sources.append(
-                SourceConverter(source_instance, frame=self._frame)
+            self._converted_sources[source_name] = SourceConverter(
+                source_instance, frame=self._frame, converter=self
             )
 
     def _convert_point_sources(self):
@@ -43,7 +43,9 @@ class AstromodelConverter:
             source_name,
             source_instance,
         ) in self._astromodel_model.point_sources.items():
-            self._converted_sources.append(SourceConverter(source_instance))
+            self._converted_sources[source_name] = SourceConverter(
+                source_instance, converter=self
+            )
 
     def _create_gammapy_models(self):
         for source in self._converted_sources:

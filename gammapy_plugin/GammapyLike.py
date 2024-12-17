@@ -52,28 +52,15 @@ class GammapyLike(PluginPrototype):
         Return the value of the log-likelihood with the current values for the
         parameters stored in the model instance
         """
-        self._likelihood_model_converted._update_parameters(self._likelihood_model)
+        self._likelihood_model_converted._update_parameters()
         self._stacked.models = self.gammapy_model
 
         return -self._stacked.stat_sum()
 
     def inner_fit(self):
-        """
-        This is used for the profile likelihood. Keeping fixed all parameters in the
-        LikelihoodModel, this method minimize the logLike over the remaining nuisance
-        parameters, i.e., the parameters belonging only to the model for this
-        particular detector. If there are no nuisance parameters, simply return the
-        logLike value.
-        """
         return self.get_log_like()
 
     def get_number_of_data_points(self):
-        """
-        This returns the number of data points that are used to evaluate the likelihood.
-        For binned measurements, this is the number of active bins used in the fit. For
-        unbinned measurements, this would be the number of photons/particles that are
-        evaluated on the likelihood
-        """
         return np.prod(self._stacked.counts.data.shape)
 
     @property

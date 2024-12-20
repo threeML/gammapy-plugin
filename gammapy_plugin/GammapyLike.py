@@ -1,10 +1,10 @@
-from typing import Optional
 import numpy as np
 from astromodels import Model
 from threeML.io.logging import setup_logger
 from threeML.plugin_prototype import PluginPrototype
 from gammapy_plugin.gammapy_converter import AstromodelConverter
 from gammapy.datasets import Datasets, Dataset
+from gammapy.modeling.models import SkyModel
 
 log = setup_logger(__name__)
 
@@ -12,14 +12,12 @@ __instrument_name = "Gammapy"
 
 
 class GammapyLike(PluginPrototype):
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls, *args, **kwargs) -> PluginPrototype:
         instance = object.__new__(cls)
         return instance
 
-    def __init__(self, name: str, config_file: str = "config.yaml") -> None:
-        """ """
+    def __init__(self, name: str) -> None:
         nuisance_parameters = {}
-
         super(GammapyLike, self).__init__(name, nuisance_parameters=nuisance_parameters)
 
     def set_datasets(self, datasets, **kwargs):
@@ -64,9 +62,13 @@ class GammapyLike(PluginPrototype):
         return np.prod(self._stacked.counts.data.shape)
 
     @property
-    def model(self):
+    def stacked(self) -> Dataset:
+        return self._stacked
+
+    @property
+    def model(self) -> Model:
         return self._likelihood_model
 
     @property
-    def gammapy_model(self):
+    def gammapy_model(self) -> list[SkyModel]:
         return self._likelihood_model_converted.gammapy_models

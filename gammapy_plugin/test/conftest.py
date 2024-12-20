@@ -8,7 +8,6 @@ import pytest
 from gammapy_plugin.utils.package_data import get_path_of_data_file
 
 
-
 @pytest.fixture(scope="session")
 def thing():
-    pass
+    return True

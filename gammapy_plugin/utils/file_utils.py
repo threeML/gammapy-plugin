@@ -4,6 +4,8 @@ import tempfile
 from builtins import str
 from contextlib import contextmanager
 from pathlib import Path
+import logging
+log = logging.getLogger(__name__)
 
 
 def sanitize_filename(filename, abspath: bool = False) -> Path:
@@ -89,7 +91,7 @@ def temporary_directory(prefix="", within_directory=None):
 
     except:
 
-        custom_warnings.warn(
+        log.warning(
             "Couldn't remove temporary directory %s" % directory)
 
 

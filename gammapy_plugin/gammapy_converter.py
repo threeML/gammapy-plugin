@@ -129,8 +129,14 @@ class SourceConverter:
             astromodel_para = self._converter._astromodel_model.parameters[name]
             self._parameter_dict[name]["value"] = astromodel_para.value
             self._parameter_dict[name]["unit"] = astromodel_para.unit
-            self._parameter_dict[name]["min"] = astromodel_para.min_value
-            self._parameter_dict[name]["max"] = astromodel_para.max_value
+            val = np.nan
+            if astromodel_para.min_value is not None:
+                val = astromodel_para.min_value
+            self._parameter_dict[name]["min"] = val
+            val = np.nan
+            if astromodel_para.max_value is not None:
+                val = astromodel_para.max_value
+            self._parameter_dict[name]["max"] = val
             self._parameter_dict[name]["frozen"] = not astromodel_para.free
             self._parameter_dict[name]["prior"] = ""
 

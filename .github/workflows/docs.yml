@@ -20,8 +20,7 @@ jobs:
           pip install black
           pip install --upgrade numpy ipython jupyter cython astropy
           pip install jupytext jupyterthemes
-          #pip3 install git+https://github.com/threeML/astromodels.git@dev#egg=astromodels
-          #pip3 install git+https://github.com/threeML/threeML.git@dev#egg=threeML
+          pip install git+https://github.com/threeml/hawc_hal.git
           
           python setup.py develop
           
@@ -118,7 +117,7 @@ jobs:
           pip3 install mock recommonmark
           pip3 install sphinx_rtd_theme
           pip3 install -U sphinx nbsphinx sphinx-gallery
-          
+          pip3 install git+https://github.com/threeml/hawc_hal.git 
           python3 setup.py develop
 
           rm -rf docs/md/*

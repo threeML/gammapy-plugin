@@ -2,11 +2,9 @@ cuts:
   th2cut: 0.008
   
 data:
-  anasum: /home/sajan/research/EDAnalysis/v2DL3_example/
-
+  anasum: /home/tobi/sw/gammapy-plugin/datafiles/
 fileio:
-  outdir: /home/sajan/research/EDAnalysis/v2DL3_example/
-
+  outdir: /data/tobi/gammapy-plugin_test/
 selection:
   emax: 10
   emin: 0.1

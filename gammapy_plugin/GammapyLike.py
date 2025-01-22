@@ -40,14 +40,16 @@ class GammapyLike(PluginPrototype):
             msg = "Datasets has to be list of Dataset or a single Datasets object"
             raise TypeError(msg)
 
-    def set_model(self, likelihood_model_instance: Model) -> None:
+    def set_model(self, likelihood_model_instance: Model, **kwargs) -> None:
         """
         Set the model to be used in the joint minimization.
         Must be a Astromodels Model instance.
         """
 
         self._likelihood_model: Model = likelihood_model_instance
-        self._likelihood_model_converted = AstromodelConverter(self._likelihood_model)
+        self._likelihood_model_converted = AstromodelConverter(
+            self._likelihood_model, **kwargs
+        )
 
     def get_log_like(self) -> float:
         """

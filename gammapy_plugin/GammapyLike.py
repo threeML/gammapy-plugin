@@ -29,12 +29,16 @@ class GammapyLike(PluginPrototype):
             self._datasets = Datasets()
             for d in datasets:
                 self._datasets.append(d)
+            self._stacked = self._datasets.stack_reduce(name="stacked")
         elif isinstance(datasets, Datasets):
             self._datasets = datasets
+            self._stacked = self._datasets.stack_reduce(name="stacked")
+        elif isinstance(datasets, Dataset):
+            self._datasets = Datasets(datasets)
+            self._stacked = datasets.copy(name="stacked")
         else:
             msg = "Datasets has to be list of Dataset or a single Datasets object"
             raise TypeError(msg)
-        self._stacked = self._datasets.stack_reduce(name="stacked")
 
     def set_model(self, likelihood_model_instance: Model) -> None:
         """

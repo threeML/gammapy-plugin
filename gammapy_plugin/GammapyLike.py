@@ -43,6 +43,11 @@ class GammapyLike(PluginPrototype):
             raise TypeError(msg)
 
     def set_model(self, likelihood_model_instance: Model, **kwargs) -> None:
+    def set_sources(self, sources: list = None):
+        assert isinstance(sources, list) or isinstance(
+            sources, None
+        ), "Wrong source type"
+        self._sources = sources
         """
         Set the model to be used in the joint minimization.
         Must be a Astromodels Model instance.

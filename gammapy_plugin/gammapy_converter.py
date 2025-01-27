@@ -363,13 +363,18 @@ class SpatialModelConverted(SpatialModel):
         self.default_parameters = Parameters(paras)
 
     # todo check return type
-    def evaluate(self, *paras, **kwargs):
+    def evaluate(self, *args, **kwargs):
         """
         Evaluates astromodels function instead of gammapy one
         """
-        raise NotImplementedError("Not yet correctly implemented")
-        return self._astromodel_function.evaluate(*paras, **kwargs)
+        kwargs_new = {}
+        for k in kwargs.keys():
+            if k in self._mapping.keys():
+                kwargs_new[self._mapping[k]] = kwargs[k]
+            else:
+                kwargs_new[k] = kwargs[k]
 
+        return self._astromodel_function.evaluate(args[0], args[1], **kwargs_new)
 
 class TemporalModelConverted(TemporalModel):
     def __init__(self, function: Function) -> None:

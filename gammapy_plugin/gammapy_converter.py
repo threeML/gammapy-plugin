@@ -157,8 +157,10 @@ class SourceConverter:
                 if comp_name in p:
                     para_names.append(p)
             spectral_models.append(SpectralModelConverted(comp.shape, para_names))
-        for spectral_model in spectral_models:
-            self._spectral_model += spectral_model
+        self._spectral_model = spectral_models[0]
+        if len(spectral_models) > 1:
+            for spectral_model in spectral_models:
+                self._spectral_model += spectral_model
 
     def _convert_spatial_model(self) -> None:
         """

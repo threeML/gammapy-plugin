@@ -322,12 +322,14 @@ class SpatialModelConverted(SpatialModel):
         self._para_names = para_names
         self._setup_parameters()
 
-    def _setup_parameters(self) -> None:
+    def _setup_parameters(self):
         """
-        Sets up all the parameters, same as spectral one
+        Setup the parameters by creating gammapy Parameters and setting
+        them as attributes to this class
         """
-        raise NotImplementedError("Need to adapt naming!")
         paras = []
+        # needed later for correctly evaluating the function
+        self._mapping = {}
         for k, v in self._astromodel_function.parameters.items():
             vmin = np.nan
             vmax = np.nan
@@ -335,10 +337,21 @@ class SpatialModelConverted(SpatialModel):
                 vmin = v.min_value
             if v.max_value is not None:
                 vmax = v.max_value
-
+            # find the correct name
+            i = 0
+            name = None
+            while True and i < len(self._para_names):
+                splitted = self._para_names[i].split(".")
+                if k == splitted[-1]:
+                    name = self._para_names[i]
+                    break
+                i += 1
+            if name is None:
+                raise ValueError(f"Parameter name {k} not found in {self._para_names}")
+            self._mapping[name] = k
             paras.append(
                 Parameter(
-                    name=k,
+                    name=name,
                     value=v.value,
                     unit=v.unit,
                     min=vmin,
@@ -346,8 +359,7 @@ class SpatialModelConverted(SpatialModel):
                     frozen=not bool(v.free),
                 )
             )
-            setattr(self, k, paras[-1])
-        setattr(self, "frame", self._frame)
+            setattr(self, name, paras[-1])
         self.default_parameters = Parameters(paras)
 
     # todo check return type

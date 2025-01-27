@@ -91,3 +91,6 @@ class GammapyLike(PluginPrototype):
     @property
     def gammapy_model(self) -> list[SkyModel]:
         return self._likelihood_model_converted.gammapy_models
+    @property
+    def frame(self) -> str:
+        return self._frame

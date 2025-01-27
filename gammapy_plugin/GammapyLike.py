@@ -16,9 +16,11 @@ class GammapyLike(PluginPrototype):
         instance = object.__new__(cls)
         return instance
 
-    def __init__(self, name: str) -> None:
+    def __init__(self, name: str, **kwargs) -> None:
         nuisance_parameters = {}
         super(GammapyLike, self).__init__(name, nuisance_parameters=nuisance_parameters)
+        self._frame = kwargs.get("frame", "icrs")
+        self._sources = kwargs.get("sources", None)
 
     def set_datasets(self, datasets, **kwargs):
         """

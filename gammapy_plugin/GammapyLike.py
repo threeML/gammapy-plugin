@@ -47,12 +47,12 @@ class GammapyLike(PluginPrototype):
             sources, None
         ), "Wrong source type"
         self._sources = sources
+
     def set_model(self, likelihood_model_instance: Model) -> None:
         """
         Set the model to be used in the joint minimization.
         Must be a Astromodels Model instance.
         """
-
         if self._sources is None:
             log.warning(
                 "If you want to specify sources for this Plugin you MUST do so before"
@@ -91,6 +91,7 @@ class GammapyLike(PluginPrototype):
     @property
     def gammapy_model(self) -> list[SkyModel]:
         return self._likelihood_model_converted.gammapy_models
+
     @property
     def frame(self) -> str:
         return self._frame

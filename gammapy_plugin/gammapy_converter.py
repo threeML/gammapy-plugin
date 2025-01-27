@@ -376,6 +376,7 @@ class SpatialModelConverted(SpatialModel):
 
         return self._astromodel_function.evaluate(args[0], args[1], **kwargs_new)
 
+
 class TemporalModelConverted(TemporalModel):
     def __init__(self, function: Function) -> None:
         raise NotImplementedError("Check how this is handled in gammapy")

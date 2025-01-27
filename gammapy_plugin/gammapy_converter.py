@@ -18,10 +18,9 @@ class AstromodelConverter:
     Every Source in the Model will get its own Gammapy skymodel.
     The evaluation happens via the astromodel definition.
 
-    !!! Currently only single source Models supported !!!
     """
 
-    def __init__(self, model: Model, frame: str = None) -> None:
+    def __init__(self, model: Model, frame: str = None, sources: str = None) -> None:
         """
         :param model: the astromodel model
         :type model: astromodel.core.model.Model
@@ -35,6 +34,7 @@ class AstromodelConverter:
         assert isinstance(model, Model), "Needs an astromodels Model"
         self._astromodel_model = model
         self._frame = frame
+        self._sources = sources
 
         self._converted_sources = {}
         self._gammapy_models = []
@@ -50,11 +50,10 @@ class AstromodelConverter:
             source_name,
             source_instance,
         ) in self._astromodel_model.extended_sources.items():
-            raise NotImplementedError("currently fails")
-
-            self._converted_sources[source_name] = SourceConverter(
-                source_instance, frame=self._frame, converter=self
-            )
+            if self._sources is None or source_name in self._sources:
+                self._converted_sources[source_name] = SourceConverter(
+                    source_instance, frame=self._frame, converter=self
+                )
 
     def _convert_point_sources(self) -> None:
         """
@@ -64,9 +63,10 @@ class AstromodelConverter:
             source_name,
             source_instance,
         ) in self._astromodel_model.point_sources.items():
-            self._converted_sources[source_name] = SourceConverter(
-                source_instance, converter=self
-            )
+            if self._sources is None or source_name in self._sources:
+                self._converted_sources[source_name] = SourceConverter(
+                    source_instance, converter=self
+                )
 
     def _create_gammapy_models(self) -> None:
         for name, source in self._converted_sources.items():
@@ -77,15 +77,20 @@ class AstromodelConverter:
         Update all the
         """
         for name, source in self._converted_sources.items():
-            for pn, p in self._astromodel_model.free_parameters.items():
-                if name in pn:
-                    source._update_parameter(pn, p.value)
+            if self._sources is None or name in self._sources:
+                for pn, p in self._astromodel_model.free_parameters.items():
+                    if name in pn:
+                        source._update_parameter(pn, p.value)
 
     @property
     def gammapy_models(self) -> list[SkyModel]:
         """
         Returns all the gammapy skymodels for that model
         """
+        if self._sources is not None:
+            assert len(self._sources) == len(
+                self._gammapy_models
+            ), "Number of sources and gammapy models does not match"
         return self._gammapy_models
 
 
@@ -144,6 +149,7 @@ class SourceConverter:
         """
         Convert the spectral model of the source
         """
+        log.warning("Multiple spectral components well be simply added!")
         spectral_models = []
         for comp_name, comp in self._source.components.items():
             para_names = []
@@ -151,18 +157,20 @@ class SourceConverter:
                 if comp_name in p:
                     para_names.append(p)
             spectral_models.append(SpectralModelConverted(comp.shape, para_names))
-        assert len(spectral_models) <= 1, "Only one spec component supported yet"
-        if len(spectral_models) > 0:
-            self._spectral_model = spectral_models[0]
+        for spectral_model in spectral_models:
+            self._spectral_model += spectral_model
 
     def _convert_spatial_model(self) -> None:
         """
         Convert the spatial model of the source if it is an extended one
         """
-        raise NotImplementedError("currently fails")
-        # need to adapt same style as spectral
+        comp_name = self._source.spatial_shape.name
+        para_names = []
+        for p in self._all_para_names:
+            if comp_name in p:
+                para_names.append(p)
         self._spatial_model = SpatialModelConverted(
-            self._source.spatial_shape, frame=self._frame
+            self._source.spatial_shape, para_names, frame=self._frame
         )
 
     def _convert_temporal_model(self) -> None:

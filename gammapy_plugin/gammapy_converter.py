@@ -300,7 +300,7 @@ class SpatialModelConverted(SpatialModel):
     an gammapy SpatialModel
     """
 
-    def __init__(self, function: Function, frame: str = None) -> None:
+    def __init__(self, function: Function, para_names: list, frame: str = None) -> None:
         """
         :param function: astromodel function describing the morphology
         :type function: astromodels.functions.function.Function
@@ -317,6 +317,9 @@ class SpatialModelConverted(SpatialModel):
             log.warning("No frame passed (not implemented yet) will use ICRS!")
             frame = "icrs"
         self._frame = frame
+        setattr(self, "frame", self._frame)
+        self._source_name = self._astromodel_function.name
+        self._para_names = para_names
         self._setup_parameters()
 
     def _setup_parameters(self) -> None:

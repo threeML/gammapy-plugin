@@ -5,6 +5,7 @@ from builtins import str
 from contextlib import contextmanager
 from pathlib import Path
 import logging
+
 log = logging.getLogger(__name__)
 
 
@@ -62,7 +63,7 @@ def if_directory_not_existing_then_make(directory) -> None:
 
         sanitized_directory.mkdir(parents=True, exist_ok=False)
 
-    except (FileExistsError):
+    except FileExistsError:
 
         # should add logging here!
 
@@ -91,8 +92,7 @@ def temporary_directory(prefix="", within_directory=None):
 
     except:
 
-        log.warning(
-            "Couldn't remove temporary directory %s" % directory)
+        log.warning("Couldn't remove temporary directory %s" % directory)
 
 
 @contextmanager

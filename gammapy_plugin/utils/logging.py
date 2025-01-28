@@ -59,13 +59,16 @@ mytheme = Theme().read(get_path_of_data_file("log_theme.ini"))
 console = Console(theme=mytheme)
 
 _console_formatter = logging.Formatter(
-    ' %(message)s',
+    " %(message)s",
     datefmt="%H:%M:%S",
 )
 
 
 gammapy_plugin_console_log_handler = RichHandler(
-    level=gammapy_plugin_config.logging.level, rich_tracebacks=True, markup=True, console=console
+    level=gammapy_plugin_config.logging.level,
+    rich_tracebacks=True,
+    markup=True,
+    console=console,
 )
 gammapy_plugin_console_log_handler.setFormatter(_console_formatter)
 

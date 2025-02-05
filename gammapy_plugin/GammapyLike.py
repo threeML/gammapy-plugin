@@ -43,6 +43,11 @@ class GammapyLike(PluginPrototype):
             raise TypeError(msg)
 
     def set_sources(self, sources: list = None):
+        """
+        Set the sources to be used by this plugin
+        Needed e.g. for assigning different background models to the plugins
+        """
+        # todo assert source is in model
         assert isinstance(sources, list) or isinstance(
             sources, None
         ), "Wrong source type"

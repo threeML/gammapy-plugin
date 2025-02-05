@@ -77,7 +77,6 @@ class GammapyLike(PluginPrototype):
         self._likelihood_model_converted._update_parameters()
         self._stacked.models = self.gammapy_model
 
-        return -self._stacked.stat_sum()
         return -self._stacked._stat_sum_likelihood()
 
     def inner_fit(self):

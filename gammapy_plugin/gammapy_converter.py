@@ -1,6 +1,12 @@
 import numpy as np
 from threeML.io.logging import setup_logger
-from gammapy.modeling.models import SkyModel, SpectralModel, SpatialModel, TemporalModel
+from gammapy.modeling.models import (
+    SkyModel,
+    SpectralModel,
+    SpatialModel,
+    TemporalModel,
+    ModelBase,
+)
 from gammapy.modeling.parameter import Parameter, Parameters
 from astromodels.core.model import Model
 from astromodels.sources import PointSource, ExtendedSource, Source
@@ -412,3 +418,22 @@ class TemporalModelConverted(TemporalModel):
 
     def evaluate(self, *paras, **kwargs):
         return self._astromodel_function.evaluate(*paras, **kwargs)
+
+
+class GammapyConverter(Function):
+    """
+    Class for incorporating a Gammapy model in a threeML/astromdodels
+    analysis
+
+    Goal is to treat this as a astromodel function, such that we can
+    simply add this to the astromodel model
+    """
+
+    def __init__(self, gammapy_model: ModelBase):
+        self._gp_model = gammapy_model.copy()  # Todo check if necessary
+
+    def get_parameters(self):
+        """
+        Get all the parameters from the model and put them
+        """
+        print(self._gp_model.parameters)

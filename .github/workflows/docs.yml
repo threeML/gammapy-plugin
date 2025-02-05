@@ -20,7 +20,6 @@ jobs:
           pip install black
           pip install --upgrade numpy ipython jupyter cython astropy
           pip install jupytext jupyterthemes
-          pip install git+https://github.com/threeml/hawc_hal.git
           
           python setup.py develop
           

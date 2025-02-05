@@ -4,7 +4,7 @@ from threeML.io.logging import setup_logger
 from threeML.plugin_prototype import PluginPrototype
 from gammapy_plugin.gammapy_converter import AstromodelConverter
 from gammapy.datasets import Datasets, Dataset
-from gammapy.modeling.models import SkyModel
+from gammapy.modeling.models import SkyModel, ModelBase
 
 log = setup_logger(__name__)
 
@@ -53,11 +53,14 @@ class GammapyLike(PluginPrototype):
         ), "Wrong source type"
         self._sources = sources
 
-    def set_model(self, likelihood_model_instance: Model) -> None:
+    def set_model(
+        self, likelihood_model_instance: Model, gammapy_model: ModelBase = None
+    ) -> None:
         """
         Set the model to be used in the joint minimization.
         Must be a Astromodels Model instance.
         """
+
         if self._sources is None:
             log.warning(
                 "If you want to specify sources for this Plugin you MUST do so before"

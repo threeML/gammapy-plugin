@@ -90,9 +90,9 @@ def temporary_directory(prefix="", within_directory=None):
 
         shutil.rmtree(directory)
 
-    except:
+    except Exception as e:
 
-        log.warning("Couldn't remove temporary directory %s" % directory)
+        log.warning("Couldn't remove temporary directory %s \n %s" % (directory, e))
 
 
 @contextmanager

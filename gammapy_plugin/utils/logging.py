@@ -1,6 +1,5 @@
 import logging
 import logging.handlers as handlers
-import sys
 
 from rich.console import Console
 from rich.logging import RichHandler
@@ -10,7 +9,6 @@ from .configuration import gammapy_plugin_config
 
 from .package_data import (
     get_path_of_data_file,
-    get_path_of_log_dir,
     get_path_of_log_file,
 )
 

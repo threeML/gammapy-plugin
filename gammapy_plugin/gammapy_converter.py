@@ -12,6 +12,7 @@ from astromodels.core.model import Model
 from astromodels.sources import PointSource, ExtendedSource, Source
 from astromodels.functions.function import Function, Function1D, Function2D, Function3D
 
+from astromodels.functions.function import Function
 
 log = setup_logger(__name__)
 

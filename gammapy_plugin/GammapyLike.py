@@ -4,7 +4,7 @@ from threeML.io.logging import setup_logger
 from threeML.plugin_prototype import PluginPrototype
 from gammapy_plugin.gammapy_converter import AstromodelConverter
 from gammapy.datasets import Datasets, Dataset
-from gammapy.modeling.models import SkyModel, ModelBase
+from gammapy.modeling.models import SkyModel
 
 log = setup_logger(__name__)
 

@@ -29,6 +29,7 @@ jobs:
         # needed for bug_fix py3.12.x install
         pip install --upgrade git+https://github.com/threeml/astromodels.git 
         pip install --upgrade git+https://github.com/threeml/threeML.git
+        pip install --upgrade gammapy --use-pep517
         python setup.py install
     - name: Lint with flake8
       

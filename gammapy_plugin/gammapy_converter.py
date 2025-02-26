@@ -10,9 +10,8 @@ from gammapy.modeling.models import (
 from gammapy.modeling.parameter import Parameter, Parameters
 from astromodels.core.model import Model
 from astromodels.sources import PointSource, ExtendedSource, Source
-from astromodels.functions.function import Function, Function1D, Function2D, Function3D
-
 from astromodels.functions.function import Function
+from gammapy_plugin.gammapy_source import GammapySource
 
 log = setup_logger(__name__)
 
@@ -24,7 +23,6 @@ class AstromodelConverter:
 
     Every Source in the Model will get its own Gammapy skymodel.
     The evaluation happens via the astromodel definition.
-
     """
 
     def __init__(self, model: Model, frame: str = None, sources: str = None) -> None:
@@ -57,7 +55,19 @@ class AstromodelConverter:
             source_name,
             source_instance,
         ) in self._astromodel_model.extended_sources.items():
-            if self._sources is None or source_name in self._sources:
+            if (
+                self._sources is None
+                or source_name in self._sources
+                and not isinstance(source_instance, GammapySource)
+            ):
+                self._converted_sources[source_name] = SourceConverter(
+                    source_instance, frame=self._frame, converter=self
+                )
+            elif (
+                self._sources is None
+                or source_name in self._sources
+                and isinstance(source_instance, GammapySource)
+            ):
                 self._converted_sources[source_name] = SourceConverter(
                     source_instance, frame=self._frame, converter=self
                 )
@@ -81,7 +91,7 @@ class AstromodelConverter:
 
     def _update_parameters(self) -> None:
         """
-        Update all the
+        Update all the parameters
         """
         for name, source in self._converted_sources.items():
             if self._sources is None or name in self._sources:
@@ -89,15 +99,20 @@ class AstromodelConverter:
                     if name in pn:
                         source._update_parameter(pn, p.value)
 
+    def add_gammapy_model(self, gammapy_model) -> None:
+        self._gp_model = gammapy_model
+        self._converted_sources[
+            f"gammapy_model_{self._gp_model.name.replace('-','_')}"
+        ] = GammapySource(
+            f"gammapy_model_{self._gp_model.name.replace('-','_')}",
+            self._gp_model,
+        )
+
     @property
     def gammapy_models(self) -> list[SkyModel]:
         """
         Returns all the gammapy skymodels for that model
         """
-        if self._sources is not None:
-            assert len(self._sources) == len(
-                self._gammapy_models
-            ), "Number of sources and gammapy models does not match"
         return self._gammapy_models
 
 
@@ -110,6 +125,8 @@ class SourceConverter:
         self._spatial_model = None
         self._spectral_model = None
         self._temporal_model = None
+        self._gammapy_model = None
+        self._parameter_dict = None
         self._source = source
         self._all_para_names = list(self._source.parameters.keys())
 
@@ -121,6 +138,9 @@ class SourceConverter:
             log.debug("Source is an ExtendedSource")
             self._convert_spatial_model()
             self._convert_spectral_model()
+        elif isinstance(self._source, GammapySource):
+            log.debug("Source is a GammapySource")
+            self._convert_gammapy_model()
         else:
             log.error("This astromodels source type is not yet supported.")
             raise NotImplementedError
@@ -134,11 +154,22 @@ class SourceConverter:
         which should be faster
         """
         # TODO thats likely inefficient
-        self._parameter_dict = {}
+        if self._parameter_dict is None:
+            self._parameter_dict = {}
         # This initalizes the parameter dict for an indiviudal source
         for name in self._skymodel.parameters.names:
             self._parameter_dict[name] = {}
-            astromodel_para = self._converter._astromodel_model.parameters[name]
+            if name in self._converter._astromodel_model.parameters.keys():
+                astromodel_para = self._converter._astromodel_model.parameters[name]
+            elif (
+                self._source.name + "." + name
+                in self._converter._astromodel_model.parameters.keys()
+            ):
+                astromodel_para = self._converter._astromodel_model.parameters[
+                    self._source.name + "." + name
+                ]
+            else:
+                raise NotImplementedError
             self._parameter_dict[name]["value"] = astromodel_para.value
             self._parameter_dict[name]["unit"] = astromodel_para.unit
             val = np.nan
@@ -151,6 +182,20 @@ class SourceConverter:
             self._parameter_dict[name]["max"] = val
             self._parameter_dict[name]["frozen"] = not astromodel_para.free
             self._parameter_dict[name]["prior"] = ""
+
+    def _update_parameter(self, name, val) -> None:
+        """
+        Update the skymodel parameters during the sampling process using the parameter dict
+        """
+        # update the parameter dict for this skymodel
+        if isinstance(self._source, GammapySource):
+            name = name.split(".")[-1]
+        # update the skymodel itself
+        self._parameter_dict[name]["value"] = val
+        self._skymodel.parameters[name].update_from_dict(self._parameter_dict[name])
+
+    def _convert_gammapy_model(self) -> None:
+        self._gammapy_model = self._source.gammapy_model
 
     def _convert_spectral_model(self) -> None:
         """
@@ -194,21 +239,15 @@ class SourceConverter:
         """
         Create the skymodel instance out of the individual components
         """
-        self._skymodel = SkyModel(
-            spectral_model=self._spectral_model,
-            spatial_model=self._spatial_model,
-            temporal_model=self._temporal_model,
-        )
+        if self._gammapy_model is None:
+            self._skymodel = SkyModel(
+                spectral_model=self._spectral_model,
+                spatial_model=self._spatial_model,
+                temporal_model=self._temporal_model,
+            )
+        else:
+            self._skymodel = self._gammapy_model
         self._create_parameter_dict()
-
-    def _update_parameter(self, name, val) -> None:
-        """
-        Update the skymodel parameters during the sampling process
-        """
-        # update the parameter dict for this skymodel
-        self._parameter_dict[name]["value"] = val
-        # update the skymodel itself
-        self._skymodel.parameters[name].update_from_dict(self._parameter_dict[name])
 
     @property
     def skymodel(self):

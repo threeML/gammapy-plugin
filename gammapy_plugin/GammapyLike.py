@@ -39,7 +39,7 @@ class GammapyLike(PluginPrototype):
             self._datasets = Datasets(datasets)
             self._stacked = datasets.copy(name="stacked")
         else:
-            msg = "Datasets has to be list of Dataset or a single Datasets object"
+            msg = "datasets has to be list of Dataset, a single Datasets or Dataset object"
             raise TypeError(msg)
 
     def set_sources(self, sources: list = None):

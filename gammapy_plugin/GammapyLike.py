@@ -48,29 +48,21 @@ class GammapyLike(PluginPrototype):
         Needed e.g. for assigning different background models to the plugins
         """
         # todo assert source is in model
-        assert isinstance(sources, list) or isinstance(
-            sources, None
-        ), "Wrong source type"
+        assert isinstance(sources, list) or sources is None, "Wrong source type"
         self._sources = sources
 
-    def set_model(
-        self, likelihood_model_instance: Model, gammapy_model: ModelBase = None
-    ) -> None:
+    def set_model(self, likelihood_model_instance: Model) -> None:
         """
         Set the model to be used in the joint minimization.
         Must be a Astromodels Model instance.
         """
 
         if self._sources is None:
-            log.warning(
-                "If you want to specify sources for this Plugin you MUST do so before"
-            )
+            log.warning("If you want to specify sources for this Plugin you MUST do so before")
         else:
             log.info(f"Will use {self._sources} for this plugin")
         self._likelihood_model: Model = likelihood_model_instance
-        self._likelihood_model_converted = AstromodelConverter(
-            self._likelihood_model, self._frame, self._sources
-        )
+        self._likelihood_model_converted = AstromodelConverter(self._likelihood_model, self._frame, self._sources)
 
     def get_log_like(self) -> float:
         """
@@ -78,7 +70,7 @@ class GammapyLike(PluginPrototype):
         parameters stored in the model instance
         """
         self._likelihood_model_converted._update_parameters()
-        self._stacked.models = self.gammapy_model
+        self._stacked.models = [*self.gammapy_model]
 
         return -self._stacked._stat_sum_likelihood()
 
@@ -98,7 +90,7 @@ class GammapyLike(PluginPrototype):
 
     @property
     def gammapy_model(self) -> list[SkyModel]:
-        return self._likelihood_model_converted.gammapy_models
+        return [*self._likelihood_model_converted.gammapy_models]
 
     @property
     def frame(self) -> str:

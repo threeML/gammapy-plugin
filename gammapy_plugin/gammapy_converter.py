@@ -1,3 +1,4 @@
+from typing import Optional
 import numpy as np
 from threeML.io.logging import setup_logger
 from gammapy.modeling.models import (
@@ -5,7 +6,6 @@ from gammapy.modeling.models import (
     SpectralModel,
     SpatialModel,
     TemporalModel,
-    ModelBase,
 )
 from gammapy.modeling.parameter import Parameter, Parameters
 from astromodels.core.model import Model
@@ -23,19 +23,17 @@ class AstromodelConverter:
 
     Every Source in the Model will get its own Gammapy skymodel.
     The evaluation happens via the astromodel definition.
+
+
+    :param model: the astromodel model
+    :param frame: geometry frame for gammapy, defaults to ICRS
+    :param sources: list with name of sources
+
     """
 
-    def __init__(self, model: Model, frame: str = None, sources: str = None) -> None:
-        """
-        :param model: the astromodel model
-        :type model: astromodel.core.model.Model
-        :param frame: geometry frame for gammapy, defaults to ICRS
-        :type frame: str
-        :return:
-
-        :example:
-
-        """
+    def __init__(
+        self, model: Model, frame: Optional[str] = None, sources: Optional[str] = None
+    ) -> None:
         assert isinstance(model, Model), "Needs an astromodels Model"
         self._astromodel_model = model
         self._frame = frame
@@ -45,7 +43,7 @@ class AstromodelConverter:
         self._gammapy_models = []
         self._convert_extendend_sources()
         self._convert_point_sources()
-        self._create_gammapy_models()
+        self._create_gammapy_models_list()
 
     def _convert_extendend_sources(self) -> None:
         """
@@ -74,7 +72,7 @@ class AstromodelConverter:
 
     def _convert_point_sources(self) -> None:
         """
-        Converts a point source into a skymodel
+        Converts point sources into individual skymodels
         """
         for (
             source_name,
@@ -85,28 +83,25 @@ class AstromodelConverter:
                     source_instance, converter=self
                 )
 
-    def _create_gammapy_models(self) -> None:
+    def _create_gammapy_models_list(self) -> None:
+        """
+        Creates a list with all SkyModels fro the converted sources
+        """
         for name, source in self._converted_sources.items():
             self._gammapy_models.append(source.skymodel)
 
     def _update_parameters(self) -> None:
         """
-        Update all the parameters
+        Update all the parameters in the SkyModels with the values from
+        the astromodels model
         """
+        # TODO this is a very stupid way of checking if a parameter
+        # belongs to a source
         for name, source in self._converted_sources.items():
             if self._sources is None or name in self._sources:
                 for pn, p in self._astromodel_model.free_parameters.items():
                     if name in pn:
                         source._update_parameter(pn, p.value)
-
-    def add_gammapy_model(self, gammapy_model) -> None:
-        self._gp_model = gammapy_model
-        self._converted_sources[
-            f"gammapy_model_{self._gp_model.name.replace('-','_')}"
-        ] = GammapySource(
-            f"gammapy_model_{self._gp_model.name.replace('-','_')}",
-            self._gp_model,
-        )
 
     @property
     def gammapy_models(self) -> list[SkyModel]:
@@ -117,6 +112,13 @@ class AstromodelConverter:
 
 
 class SourceConverter:
+    """
+    Takes a astromodels source and converts it to a SkyModel
+    :param source: The astromodels source
+    :param converter: The used AstromodelConverter instance
+    :param kwargs: frame
+    """
+
     def __init__(
         self, source: Source, converter: AstromodelConverter, **kwargs
     ) -> None:
@@ -150,13 +152,13 @@ class SourceConverter:
     def _create_parameter_dict(self) -> None:
         """
         Initially creates the parameter dict for that source
-        Only the value will be updated during the sampling
-        which should be faster
+        the SkyModel is updated using the update_from_dict function
         """
+
         # TODO thats likely inefficient
         if self._parameter_dict is None:
             self._parameter_dict = {}
-        # This initalizes the parameter dict for an indiviudal source
+
         for name in self._skymodel.parameters.names:
             self._parameter_dict[name] = {}
             if name in self._converter._astromodel_model.parameters.keys():
@@ -181,20 +183,28 @@ class SourceConverter:
                 val = astromodel_para.max_value
             self._parameter_dict[name]["max"] = val
             self._parameter_dict[name]["frozen"] = not astromodel_para.free
+            # no need for that, 3ML handles that
             self._parameter_dict[name]["prior"] = ""
 
     def _update_parameter(self, name, val) -> None:
         """
-        Update the skymodel parameters during the sampling process using the parameter dict
+        Update the skymodel parameters during the sampling process
+        using the parameter dict
         """
-        # update the parameter dict for this skymodel
         if isinstance(self._source, GammapySource):
+            # in case of the GammapySource we need to currently remove the
+            # rest of the full astromodels path
+            # TODO find a way with less ambiguity
             name = name.split(".")[-1]
+        # update the parameter dict for this skymodel
         # update the skymodel itself
         self._parameter_dict[name]["value"] = val
         self._skymodel.parameters[name].update_from_dict(self._parameter_dict[name])
 
     def _convert_gammapy_model(self) -> None:
+        """
+        Sets the gammapy model from a GammapySource as the gammapy model here
+        """
         self._gammapy_model = self._source.gammapy_model
 
     def _convert_spectral_model(self) -> None:
@@ -231,7 +241,7 @@ class SourceConverter:
         """
         Convert the temporal evolution of the source if available
         """
-        raise NotImplementedError("currently fails")
+        raise NotImplementedError("Not yet implemented")
         # need to adapt same style as spectral
         self._temporal_model = TemporalModelConverted(self._source.temporal_shape)
 
@@ -250,14 +260,14 @@ class SourceConverter:
         self._create_parameter_dict()
 
     @property
-    def skymodel(self):
+    def skymodel(self) -> SkyModel:
         """
         Returns the Gammapy skymodel for this source
         """
         return self._skymodel
 
     @property
-    def astromdodels_source(self):
+    def astromdodels_source(self) -> Source:
         """
         Returns the original astromodel source
         """
@@ -273,9 +283,7 @@ class SpectralModelConverted(SpectralModel):
     def __init__(self, function: Function, para_names: list) -> None:
         """
         :param function: the spectral function, must be an astromodels Function
-        :type function: astromodels.functions.function.Function
         :param para_names: list of the parameter names for this component
-        :type para_names: list[str]
         """
         assert issubclass(
             type(function), Function
@@ -330,7 +338,6 @@ class SpectralModelConverted(SpectralModel):
         """
         Evaluates the astromodels function instead of a gammapy one
         """
-
         kwargs_new = {}
         for k in kwargs.keys():
             if k in self._mapping.keys():
@@ -349,9 +356,7 @@ class SpatialModelConverted(SpatialModel):
     def __init__(self, function: Function, para_names: list, frame: str = None) -> None:
         """
         :param function: astromodel function describing the morphology
-        :type function: astromodels.functions.function.Function
         :param frame: reference frame of the geometry, defaults to ICRS
-        :type frame: str
 
         """
         log.debug("type of spatial function: " + str(type(function)))
@@ -360,7 +365,7 @@ class SpatialModelConverted(SpatialModel):
         ), "function must be astromodels function"
         self._astromodel_function = function
         if frame is None:
-            log.warning("No frame passed (not implemented yet) will use ICRS!")
+            log.warning("No frame passed - will use ICRS!")
             frame = "icrs"
         self._frame = frame
         setattr(self, "frame", self._frame)
@@ -384,6 +389,7 @@ class SpatialModelConverted(SpatialModel):
             if v.max_value is not None:
                 vmax = v.max_value
             # find the correct name
+            # TODO this is fairly inefficient
             i = 0
             name = None
             while True and i < len(self._para_names):
@@ -458,22 +464,3 @@ class TemporalModelConverted(TemporalModel):
 
     def evaluate(self, *paras, **kwargs):
         return self._astromodel_function.evaluate(*paras, **kwargs)
-
-
-class GammapyConverter(Function):
-    """
-    Class for incorporating a Gammapy model in a threeML/astromdodels
-    analysis
-
-    Goal is to treat this as a astromodel function, such that we can
-    simply add this to the astromodel model
-    """
-
-    def __init__(self, gammapy_model: ModelBase):
-        self._gp_model = gammapy_model.copy()  # Todo check if necessary
-
-    def get_parameters(self):
-        """
-        Get all the parameters from the model and put them
-        """
-        print(self._gp_model.parameters)

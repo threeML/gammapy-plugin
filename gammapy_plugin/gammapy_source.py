@@ -13,19 +13,26 @@ from gammapy.modeling.models.core import ModelBase
 class GammapySource(Source, Node):
     """
     A dummy source for using a GammaPy Model
-    Only works in the case of it being directly assigned to
 
+    :param name: name of the source
+    :param gammapy_model: the Gammapy Model
     """
 
-    def __init__(self, name, gammapy_model: ModelBase):
+    def __init__(self, name: str, gammapy_model: ModelBase) -> None:
         self._gammapy_model = gammapy_model
         Source.__init__(self, [], SourceType.EXTENDED_SOURCE)
         Node.__init__(self, name)
         self._get_parameters()
+
+        # needed for all astromodel display functionalities to work
         spectrum_node = Node("spectrum")
         self._add_child(spectrum_node)
 
-    def _get_parameters(self):
+    def _get_parameters(self) -> None:
+        """
+        Load all the parameters from the GP model and create them in the
+        astromodel source
+        """
         self._parameters = collections.OrderedDict()
         tp = self._gammapy_model.parameters.to_dict()
         parameters = collections.OrderedDict()
@@ -52,19 +59,20 @@ class GammapySource(Source, Node):
                 desc=f"Gammapy Model Parameter {ttp['name']}",
             )
         for child_name, child in parameters.items():
+            # set all the parameters as childs of the source
             self._parameters[child_name] = child
             self._add_child(child)
 
     @property
-    def parameters(self):
+    def parameters(self) -> collections.OrderedDict:
         return self._parameters
 
     @property
-    def free_parameters(self):
+    def free_parameters(self) -> list[Parameter]:
         return [p for k, p in self._parameters.items() if p.free]
 
     @property
-    def has_free_parameters(self):
+    def has_free_parameters(self) -> bool:
         ret = False
         for k, v in self._parameters.items():
             if v.free:
@@ -73,15 +81,14 @@ class GammapySource(Source, Node):
         return ret
 
     @property
-    def gammapy_model(self):
+    def gammapy_model(self) -> ModelBase:
+        """
+        Gammapy model set when initiating
+        """
         return self._gammapy_model
 
-    @property
-    def linked_parameters(self):
-        return self._wrapped.linked_parameters
-
     def _repr__base(self, rich_output=False):
-
+        # TODO
         repr_dict = collections.OrderedDict()
         key = "%s (gammapy source)" % self.name
         repr_dict[key] = collections.OrderedDict()

@@ -18,11 +18,10 @@ jobs:
         run: |
           python -m pip install --upgrade pip wheel
           pip install black
-          pip install --upgrade numpy ipython jupyter cython astropy
+          pip install numpy ipython jupyter cython astropy 
+          pip install matplotlib==3.8.4
           pip install jupytext jupyterthemes
-          
-          python setup.py develop
-          
+          pip install . 
           
       - name: Execute the notebooks
         shell: bash -l {0}
@@ -59,12 +58,9 @@ jobs:
 
 
           pip3 install cython
-          pip3 install numpy scipy numba astropy
-          #pip3 install git+https://github.com/threeML/astromodels.git@dev#egg=astromodels
-          #pip3 install git+https://github.com/threeML/threeML.git@dev#egg=threeML
-          python setup.py develop
-
-
+          pip3 install numpy scipy numba astropy 
+          pip3 install matplotlib==3.8.4
+          pip3 install .
           
           brew install sphinx-doc pandoc
 
@@ -105,19 +101,14 @@ jobs:
 
           brew install c-blosc
           brew install hdf5
-
-
-          pip3 install numpy scipy numba astropy
-          #pip3 install git+https://github.com/threeML/astromodels.git@dev#egg=astromodels
-          #pip3 install git+https://github.com/threeML/threeML.git@dev#egg=threeML
+          pip3 install numpy scipy numba astropy matplotlib==3.8.4
           brew install sphinx-doc pandoc
 
           pip3 install wheel
           pip3 install mock recommonmark
           pip3 install sphinx_rtd_theme
           pip3 install -U sphinx nbsphinx sphinx-gallery
-          pip3 install git+https://github.com/threeml/hawc_hal.git 
-          python3 setup.py develop
+          pip3 install .
 
           rm -rf docs/md/*
           

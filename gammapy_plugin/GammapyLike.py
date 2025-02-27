@@ -1,3 +1,4 @@
+from typing import Union
 import numpy as np
 from astromodels import Model
 from threeML.io.logging import setup_logger
@@ -29,7 +30,7 @@ class GammapyLike(PluginPrototype):
         self._frame = kwargs.get("frame", "icrs")
         self._sources = kwargs.get("sources", None)
 
-    def set_datasets(self, datasets, **kwargs) -> None:
+    def set_datasets(self, datasets: Union[Dataset, Datasets], **kwargs) -> None:
         """
         Set the Gammapy Dataset
         :param datasets: list of Gammapy datasets or a single Dataset object

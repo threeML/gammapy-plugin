@@ -6,9 +6,6 @@ from astromodels.core.parameter import Parameter
 from astromodels.utils.pretty_list import dict_to_list
 from gammapy.modeling.models.core import ModelBase
 
-# TODO docs
-# TODO typ hinting
-
 
 class GammapySource(Source, Node):
     """
@@ -87,7 +84,7 @@ class GammapySource(Source, Node):
         """
         return self._gammapy_model
 
-    def _repr__base(self, rich_output=False):
+    def _repr__base(self, rich_output: bool = False) -> list:
         # TODO
         repr_dict = collections.OrderedDict()
         key = "%s (gammapy source)" % self.name

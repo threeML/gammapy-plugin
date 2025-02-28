@@ -30,22 +30,33 @@ class GammapyLike(PluginPrototype):
         self._frame = kwargs.get("frame", "icrs")
         self._sources = kwargs.get("sources", None)
 
-    def set_datasets(self, datasets: Union[Dataset, Datasets], **kwargs) -> None:
+    def set_datasets(
+        self, datasets: Union[Dataset, Datasets], mode: str = "individual", **kwargs
+    ) -> None:
         """
         Set the Gammapy Dataset
         :param datasets: list of Gammapy datasets or a single Dataset object
+        :param mode: individual or stacked - defaults to individual
         """
+        assert mode in [
+            "individual",
+            "stacked",
+        ], "mode needs to be individual or stacked"
         if isinstance(datasets, list):
             self._datasets = Datasets()
             for d in datasets:
                 self._datasets.append(d)
-            self._dataset = self._datasets.stack_reduce(name="stacked")
+            if mode == "stacked":
+                self._datasets = Datasets(self._datasets.stack_reduce(name="stacked"))
+
         elif isinstance(datasets, Datasets):
             self._datasets = datasets
-            self._dataset = self._datasets.stack_reduce(name="stacked")
+            if mode == "stacked":
+                self._datasets = Datasets(self._datasets.stack_reduce(name="stacked"))
         elif isinstance(datasets, Dataset):
             self._datasets = Datasets(datasets)
-            self._dataset = datasets.copy(name="stacked")
+            if mode == "stacked":
+                log.info("Only using a single dataset - can not stack that")
         else:
             msg = "datasets has to be list of Dataset, a single Datasets or Dataset object"
             raise TypeError(msg)
@@ -82,15 +93,16 @@ class GammapyLike(PluginPrototype):
         parameters stored in the model instance
         """
         self._likelihood_model_converted._update_parameters()
-        self._dataset.models = [*self.gammapy_model]
+        for d in self._datasets:
+            d.models = [*self.gammapy_model]
 
-        return -self._dataset._stat_sum_likelihood()
+        return -self._datasets._stat_sum_likelihood()
 
     def inner_fit(self):
         return self.get_log_like()
 
     def get_number_of_data_points(self) -> np.int64:
-        return np.prod(self._dataset.counts.data.shape)
+        return np.sum([np.prod(d.counts.data.shape) for d in self._datasets])
 
     @property
     def dataset(self) -> Dataset:

@@ -1,4 +1,5 @@
 from typing import Union
+from importlib.metadata import version
 import numpy as np
 from astromodels import Model
 from threeML.io.logging import setup_logger
@@ -7,6 +8,8 @@ from gammapy_plugin.gammapy_converter import AstromodelConverter
 from gammapy.datasets import Datasets, Dataset
 from gammapy.modeling.models import SkyModel
 
+GAMMAPY_VERSION = version("gammapy")
+GAMMAPY_VERSION_MAJOR = int(GAMMAPY_VERSION.split(".")[0])
 log = setup_logger(__name__)
 
 __instrument_name = "Gammapy"
@@ -95,8 +98,10 @@ class GammapyLike(PluginPrototype):
         self._likelihood_model_converted._update_parameters()
         for d in self._datasets:
             d.models = [*self.gammapy_model]
-
-        return -self._datasets._stat_sum_likelihood()
+        if GAMMAPY_VERSION_MAJOR > 1:
+            return -self._datasets._stat_sum_likelihood()
+        else:
+            return -self._datasets.stat_sum()
 
     def inner_fit(self):
         return self.get_log_like()

@@ -18,50 +18,14 @@ from gammapy_plugin.GammapyLike import GammapyLike
 from gammapy.modeling.models import LogParabolaSpectralModel
 
 # from threeML.bayesian.bayesian_analysis import BayesianAnalysis
-from threeML.analysis_results import BayesianResults, MLEResults
+from gammapy_plugin.test.utils import get_close
 from threeML.classicMLE.joint_likelihood import JointLikelihood
 from threeML.data_list import DataList
 from astromodels.core.model import Model
 from astromodels.sources import PointSource
 from astromodels.functions import Log_parabola, Log_uniform_prior, Uniform_prior
 
-
-def get_close(threeML_results, gammapy_result_dict):
-    if isinstance(threeML_results, BayesianResults):
-        bm = threeML_results.get_median_fit_model().free_parameters
-    elif isinstance(threeML_results, MLEResults):
-        bm = threeML_results.optimized_model.free_parameters
-    else:
-        raise NotImplementedError
-    hdp = threeML_results.get_data_frame(error_type="hpd")
-    for p in bm.keys():
-        pn = p.split(".")[-1]
-        if pn == "K":
-            pn = "amplitude"
-        for gp in gammapy_result_dict["spectral"]["parameters"]:
-            if gp["name"] == pn:
-                break
-        if pn == "amplitude":
-            v = (bm[p].value * bm[p].unit).to("TeV-1 cm-2 s-1").value
-            min_v = (
-                ((hdp.loc[p]["negative_error"] + bm[p].value) * bm[p].unit)
-                .to("TeV-1 cm-2 s-1")
-                .value
-            )
-            max_v = (
-                ((hdp.loc[p]["positive_error"] + bm[p].value) * bm[p].unit)
-                .to("TeV-1 cm-2 s-1")
-                .value
-            )
-        elif pn == "alpha":
-            v = -bm[p].value
-            min_v = hdp.loc[p]["negative_error"] - bm[p].value
-            max_v = hdp.loc[p]["positive_error"] - bm[p].value
-        else:
-            v = bm[p].value
-            min_v = hdp.loc[p]["negative_error"] + bm[p].value
-            max_v = hdp.loc[p]["positive_error"] + bm[p].value
-        return bool(gp["value"] <= max_v and min_v <= gp["value"])
+# TODO: check if need of creating new gammapy datasets for comparing as models are stored
 
 
 def test_crab_spectrum():
@@ -105,6 +69,7 @@ def test_crab_spectrum():
         dataset_on_off = bkg_maker.run(dataset, observation)
         dataset_on_off = safe_mask_maker.run(dataset_on_off, observation)
         datasets.append(dataset_on_off)
+    datasets_copy = datasets.copy()
 
     logp = Log_parabola()
     logp.K.prior = Log_uniform_prior(lower_bound=1e-22, upper_bound=1e-19)
@@ -123,7 +88,7 @@ def test_crab_spectrum():
     )
     model = Model(ps)
     gl = GammapyLike("hess", sources="crab")
-    gl.set_datasets(datasets)
+    gl.set_datasets(datasets_copy)
     gl.set_model(model)
 
     # ba = BayesianAnalysis(likelihood_model=model, data_list=DataList(gl))
@@ -145,4 +110,4 @@ def test_crab_spectrum():
     fit_stacked = Fit()
     fit_stacked.run([dataset_stacked])
 
-    return get_close(res, models.spectral_model.to_dict())
+    assert get_close(res, models.spectral_model.to_dict()) is True

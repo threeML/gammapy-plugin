@@ -16,7 +16,6 @@ jupyter:
 ```python
 from pathlib import Path
 import numpy as np
-# Check package versions
 import astropy.units as u
 from astropy.coordinates import Angle, SkyCoord
 from regions import CircleSkyRegion
@@ -141,39 +140,16 @@ model = Model(ps)
 
 ```python
 gl = GammapyLike("hess",sources = "crab")
-```
-
-
-```python
 gl.set_datasets(datasets)
-```
-
-
-```python
 gl.set_model(model)
 ```
 
-
 ```python
-ba = BayesianAnalysis(likelihood_model=model,data_list=DataList(gl))
-```
-
-
-```python
+ba = BayesianAnalysis(model, data_list = DataList(gl))
 ba.set_sampler("multinest")
 ba.sampler.setup()
-```
-
-
-```python
 ba.sample()
 ```
-
-
-```python
-
-```
-
 
 ```python
 ba.results.plot_chains()

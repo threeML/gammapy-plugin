@@ -126,9 +126,11 @@ jobs:
           pip3 install --upgrade gammapy --use-pep517
 
 
-          pip3 install .
+          pip3 install -e . 
 
           rm -rf docs/md/*
+        env: 
+          ISDEV: ${{contains(/github.rev,'dev') || contains(github.base_ref, 'dev')}}
           
       - uses: actions/download-artifact@master
         with:
@@ -146,9 +148,11 @@ jobs:
         uses: sphinx-notes/pages@master
         with:
           documentation_path: docs
+          sphinx_version: 5.1.1
+          requirements_path: docs/requirements.txt
         
       - name: Push changes
-        if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+        if: github.event_name == 'push'
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

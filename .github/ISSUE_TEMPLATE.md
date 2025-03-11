@@ -1,5 +1,7 @@
 * Gammapy Plugin version:
+* Gammapy Version:
 * Python version:
+* Numpy version:
 * Operating System:
 
 ### Description

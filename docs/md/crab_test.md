@@ -106,19 +106,11 @@ safe_mask_maker = SafeMaskMaker(methods=["aeff-max"], aeff_percent=15)
 
 ```python
 datasets = Datasets()
-
 for obs_id, observation in zip(obs_ids, observations):
     dataset = dataset_maker.run(dataset_empty.copy(name=str(obs_id)), observation)
     dataset_on_off = bkg_maker.run(dataset, observation)
     dataset_on_off = safe_mask_maker.run(dataset_on_off, observation)
     datasets.append(dataset_on_off)
-
-
-```
-
-
-```python
-Log_parabola?
 ```
 
 
@@ -301,12 +293,6 @@ get_close(ba.results,models.spectral_model.to_dict())
 from threeML import JointLikelihood
 ```
 
-
-```python
-JointLikelihood?
-```
-
-
 ```python
 jl = JointLikelihood(model,DataList(gl))
 ```
@@ -331,13 +317,3 @@ jl.results
 ba.results
 ```
 
-
-```python
-from importlib.metadata import version
-version("gammapy")
-```
-
-
-```python
-
-```

@@ -130,7 +130,7 @@ jobs:
 
           rm -rf docs/md/*
         env: 
-          ISDEV: ${{contains(/github.rev,'dev') || contains(github.base_ref, 'dev')}}
+          ISDEV: ${{contains(github.rev,'dev') || contains(github.base_ref, 'dev')}}
           
       - uses: actions/download-artifact@master
         with:

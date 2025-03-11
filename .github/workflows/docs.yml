@@ -82,7 +82,7 @@ jobs:
   
           
           
-          sphinx-apidoc -f -o docs/api/ rball
+          sphinx-apidoc -f -o docs/api/ gammapy_plugin 
 
 
       - uses: actions/upload-artifact@v4

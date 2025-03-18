@@ -27,17 +27,13 @@ class AstromodelConverter:
 
     :param model: the astromodel model
     :param frame: geometry frame for gammapy, defaults to ICRS
-    :param sources: list with name of sources
 
     """
 
-    def __init__(
-        self, model: Model, frame: Optional[str] = None, sources: Optional[str] = None
-    ) -> None:
+    def __init__(self, model: Model, frame: Optional[str] = None) -> None:
         assert isinstance(model, Model), "Needs an astromodels Model"
         self._astromodel_model = model
         self._frame = frame
-        self._sources = sources
 
         self._converted_sources = {}
         self._gammapy_models = []
@@ -53,19 +49,11 @@ class AstromodelConverter:
             source_name,
             source_instance,
         ) in self._astromodel_model.extended_sources.items():
-            if (
-                self._sources is None
-                or source_name in self._sources
-                and not isinstance(source_instance, GammapySource)
-            ):
+            if not isinstance(source_instance, GammapySource):
                 self._converted_sources[source_name] = SourceConverter(
                     source_instance, frame=self._frame, converter=self
                 )
-            elif (
-                self._sources is None
-                or source_name in self._sources
-                and isinstance(source_instance, GammapySource)
-            ):
+            elif isinstance(source_instance, GammapySource):
                 self._converted_sources[source_name] = SourceConverter(
                     source_instance, frame=self._frame, converter=self
                 )
@@ -78,10 +66,9 @@ class AstromodelConverter:
             source_name,
             source_instance,
         ) in self._astromodel_model.point_sources.items():
-            if self._sources is None or source_name in self._sources:
-                self._converted_sources[source_name] = SourceConverter(
-                    source_instance, converter=self
-                )
+            self._converted_sources[source_name] = SourceConverter(
+                source_instance, converter=self
+            )
 
     def _create_gammapy_models_list(self) -> None:
         """
@@ -98,10 +85,9 @@ class AstromodelConverter:
         # TODO this is a very stupid way of checking if a parameter
         # belongs to a source
         for name, source in self._converted_sources.items():
-            if self._sources is None or name in self._sources:
-                for pn, p in self._astromodel_model.free_parameters.items():
-                    if name in pn:
-                        source._update_parameter(pn, p.value)
+            for pn, p in self._astromodel_model.free_parameters.items():
+                if name in pn:
+                    source._update_parameter(pn, p.value)
 
     @property
     def gammapy_models(self) -> list[SkyModel]:
@@ -170,7 +156,18 @@ class SourceConverter:
                 astromodel_para = self._converter._astromodel_model.parameters[
                     self._source.name + "." + name
                 ]
+            elif (
+                self._source.name + "." + self._source.name + "." + name
+                in self._converter._astromodel_model.parameters.keys()
+            ):
+                astromodel_para = self._converter._astromodel_model.parameters[
+                    self._source.name + "." + self._source.name + "." + name
+                ]
             else:
+                log.error(f"The skymodel parameter {name} is not known")
+                log.error(
+                    f"These are the astromodel paras {self._converter._astromodel_model.parameters.keys()}"
+                )
                 raise NotImplementedError
             self._parameter_dict[name]["value"] = astromodel_para.value
             self._parameter_dict[name]["unit"] = astromodel_para.unit
@@ -251,6 +248,7 @@ class SourceConverter:
         """
         if self._gammapy_model is None:
             self._skymodel = SkyModel(
+                name=self._source.name,
                 spectral_model=self._spectral_model,
                 spatial_model=self._spatial_model,
                 temporal_model=self._temporal_model,

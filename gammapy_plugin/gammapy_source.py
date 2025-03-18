@@ -4,6 +4,8 @@ from astromodels.sources.source import Source, SourceType
 from astromodels.core.tree import Node
 from astromodels.core.parameter import Parameter
 from astromodels.utils.pretty_list import dict_to_list
+from astromodels.functions.function import Function, FunctionMeta
+from astromodels.functions.functions_1D import Constant
 from gammapy.modeling.models.core import ModelBase
 
 
@@ -20,17 +22,28 @@ class GammapySource(Source, Node):
         Source.__init__(self, [], SourceType.EXTENDED_SOURCE)
         Node.__init__(self, name)
         self._get_parameters()
+        fct = {"description": "GP Model"}
+        fct = self._add_paras_fct_description(fct)
+        gp_shape = GPFunction(
+            name=name, function_definition=fct, parameters=self._parameters
+        )
 
         # needed for all astromodel display functionalities to work
-        spectrum_node = Node("spectrum")
-        self._add_child(spectrum_node)
+        # spectrum_node = Node("spectrum")
+        # self._add_child(spectrum_node)
+        self._add_child(gp_shape)
+
+    def _add_paras_fct_description(self, fct: dict) -> dict:
+        fct["parameters"] = {}
+        for k, v in self.parameters.items():
+            fct["parameters"][k] = v.to_dict()
+        return fct
 
     def _get_parameters(self) -> None:
         """
         Load all the parameters from the GP model and create them in the
         astromodel source
         """
-        self._parameters = collections.OrderedDict()
         tp = self._gammapy_model.parameters.to_dict()
         parameters = collections.OrderedDict()
         for i in range(len(tp)):
@@ -55,10 +68,7 @@ class GammapySource(Source, Node):
                 unit=ttp["unit"],
                 desc=f"Gammapy Model Parameter {ttp['name']}",
             )
-        for child_name, child in parameters.items():
-            # set all the parameters as childs of the source
-            self._parameters[child_name] = child
-            self._add_child(child)
+        self._parameters = parameters
 
     @property
     def parameters(self) -> collections.OrderedDict:
@@ -93,3 +103,28 @@ class GammapySource(Source, Node):
             repr_dict[key][component_name] = component.to_dict(minimal=True)
 
         return dict_to_list(repr_dict, rich_output)
+
+
+class GPFunction(Function):
+    r"""
+    description :
+
+    parameters :
+
+        norm :
+
+            desc : Integral between a and b
+            initial value : 1
+            is_normalization : True
+            transformation : log10
+            min : 1e-30
+            max : 1e3
+            delta : 0.1
+
+    """
+
+    def evaluate(self, x, norm):
+        pass
+
+    def _set_units(self, x_unit, y_unit):
+        pass

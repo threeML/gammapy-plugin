@@ -28,7 +28,7 @@ class GammapyLike(PluginPrototype):
         return instance
 
     def __init__(self, name: str, **kwargs) -> None:
-        nuisance_parameters = {}
+        nuisance_parameters = kwargs.get("nuisance_parameters", {})
         super(GammapyLike, self).__init__(name, nuisance_parameters=nuisance_parameters)
         self._frame = kwargs.get("frame", "icrs")
         self._sources = kwargs.get("sources", None)
@@ -73,7 +73,11 @@ class GammapyLike(PluginPrototype):
         assert isinstance(sources, list) or sources is None, "Wrong source type"
         self._sources = sources
 
-    def set_model(self, likelihood_model_instance: Model) -> None:
+    def set_model(
+        self,
+        likelihood_model_instance: Model,
+        converted_model: AstromodelConverter = None,
+    ) -> None:
         """
         Set the model to be used in the joint minimization.
         Must be a Astromodels Model instance.
@@ -86,15 +90,19 @@ class GammapyLike(PluginPrototype):
         else:
             log.info(f"Will use {self._sources} for this plugin")
         self._likelihood_model: Model = likelihood_model_instance
-        self._likelihood_model_converted = AstromodelConverter(
-            self._likelihood_model, self._frame, self._sources
-        )
+        if converted_model is not None:
+            self._likelihood_model_converted = converted_model
+        else:
+            self._likelihood_model_converted = AstromodelConverter(
+                model=self._likelihood_model, frame=self._frame
+            )
 
     def get_log_like(self) -> float:
         """
         Return the value of the log-likelihood with the current values for the
         parameters stored in the model instance
         """
+        # TODO: find a way that this is onyl run once per eval
         self._likelihood_model_converted._update_parameters()
         for d in self._datasets:
             d.models = [*self.gammapy_model]
@@ -128,7 +136,12 @@ class GammapyLike(PluginPrototype):
         """
         List of all the Gammapy SkyModels
         """
-        return [*self._likelihood_model_converted.gammapy_models]
+        # TODO: only assign sources listed in self._sources
+        return [
+            x
+            for x in self._likelihood_model_converted.gammapy_models
+            if x.name in self._sources or self._sources is None
+        ]
 
     @property
     def frame(self) -> str:

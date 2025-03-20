@@ -1,3 +1,4 @@
+import gc
 from typing import Union
 from importlib.metadata import version
 import numpy as np
@@ -6,7 +7,8 @@ from threeML.io.logging import setup_logger
 from threeML.plugin_prototype import PluginPrototype
 from gammapy_plugin.gammapy_converter import AstromodelConverter
 from gammapy.datasets import Datasets, Dataset
-from gammapy.modeling.models import SkyModel
+from gammapy.modeling.models import SkyModel, ModelBase
+from gammapy_plugin.gammapy_source import parse_gammapy_model, parameter_to_gammapy_dict
 
 GAMMAPY_VERSION = version("gammapy")
 GAMMAPY_VERSION_MAJOR = int(GAMMAPY_VERSION.split(".")[0])
@@ -20,7 +22,6 @@ class GammapyLike(PluginPrototype):
     A plugin for including instruments supported by Gammapy
     After initiating you need to set_datasets() to add Gammapy dataset(s) to the
     Plugin
-
     """
 
     def __new__(cls, *args, **kwargs) -> PluginPrototype:
@@ -32,9 +33,17 @@ class GammapyLike(PluginPrototype):
         super(GammapyLike, self).__init__(name, nuisance_parameters=nuisance_parameters)
         self._frame = kwargs.get("frame", "icrs")
         self._sources = kwargs.get("sources", None)
+        self._nuisance_mapping = {}
+        self._background_models = kwargs.get("background_models", {})
+        self._nuisance_parameters_dicts = {}
+        if len(self._background_models.keys()) > 0:
+            self._parse_background_models()
 
     def set_datasets(
-        self, datasets: Union[Dataset, Datasets], mode: str = "individual", **kwargs
+        self,
+        datasets: Union[Dataset, Datasets, list[Dataset]],
+        mode: str = "individual",
+        **kwargs,
     ) -> None:
         """
         Set the Gammapy Dataset
@@ -97,6 +106,40 @@ class GammapyLike(PluginPrototype):
                 model=self._likelihood_model, frame=self._frame
             )
 
+    def set_background_models(self, bkg_model):
+        if isinstance(bkg_model, ModelBase):
+            bkg_model = [bkg_model]
+        else:
+            assert isinstance(
+                bkg_model, list[ModelBase]
+            ), "either pass a singular gammapy model or a list of models"
+        for b in bkg_model:
+            self._background_models[b.name] = b
+        self._parse_background_models()
+
+    def _parse_background_models(self):
+        """ """
+        for name, bkg in self._background_models.items():
+            log.debug(bkg)
+            bkg_paras = parse_gammapy_model(bkg, self._name)
+            log.debug(bkg_paras)
+            for k, v in bkg_paras.items():
+                log.debug(f"setting parameter {k} with {v}")
+                para_path = k.split(".")
+                log.debug(f"This is the para_path {para_path}")
+                self._nuisance_mapping[k] = para_path
+                self._nuisance_parameters[k] = v
+                self._nuisance_parameters_dicts[k] = parameter_to_gammapy_dict(v)
+
+    def _update_background_models(self):
+        for k, v in self._nuisance_parameters.items():
+            self._nuisance_parameters_dicts[k]["value"] = v.value
+            p = self._nuisance_mapping[k]
+            # TODO find an elegant way to not hardcode this
+            self._background_models[p[1]].parameters[p[2]].update_from_dict(
+                self._nuisance_parameters_dicts[k]
+            )
+
     def get_log_like(self) -> float:
         """
         Return the value of the log-likelihood with the current values for the
@@ -104,12 +147,15 @@ class GammapyLike(PluginPrototype):
         """
         # TODO: find a way that this is onyl run once per eval
         self._likelihood_model_converted._update_parameters()
+        self._update_background_models()
         for d in self._datasets:
             d.models = [*self.gammapy_model]
         if GAMMAPY_VERSION_MAJOR > 1:
-            return -self._datasets._stat_sum_likelihood()
+            x = -self._datasets._stat_sum_likelihood()
         else:
-            return -self._datasets.stat_sum()
+            x = -self._datasets.stat_sum()
+        gc.collect()
+        return x
 
     def inner_fit(self):
         return self.get_log_like()
@@ -137,11 +183,14 @@ class GammapyLike(PluginPrototype):
         List of all the Gammapy SkyModels
         """
         # TODO: only assign sources listed in self._sources
-        return [
+        tmp = [
             x
             for x in self._likelihood_model_converted.gammapy_models
             if x.name in self._sources or self._sources is None
         ]
+        for m in self._background_models.values():
+            tmp.append(m)
+        return tmp
 
     @property
     def frame(self) -> str:

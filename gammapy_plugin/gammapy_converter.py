@@ -11,7 +11,7 @@ from gammapy.modeling.parameter import Parameter, Parameters
 from astromodels.core.model import Model
 from astromodels.sources import PointSource, ExtendedSource, Source
 from astromodels.functions.function import Function
-from gammapy_plugin.gammapy_source import GammapySource
+from gammapy_plugin.gammapy_source import GammapySource, parameter_to_gammapy_dict
 
 log = setup_logger(__name__)
 
@@ -169,19 +169,7 @@ class SourceConverter:
                     f"These are the astromodel paras {self._converter._astromodel_model.parameters.keys()}"
                 )
                 raise NotImplementedError
-            self._parameter_dict[name]["value"] = astromodel_para.value
-            self._parameter_dict[name]["unit"] = astromodel_para.unit
-            val = np.nan
-            if astromodel_para.min_value is not None:
-                val = astromodel_para.min_value
-            self._parameter_dict[name]["min"] = val
-            val = np.nan
-            if astromodel_para.max_value is not None:
-                val = astromodel_para.max_value
-            self._parameter_dict[name]["max"] = val
-            self._parameter_dict[name]["frozen"] = not astromodel_para.free
-            # no need for that, 3ML handles that
-            self._parameter_dict[name]["prior"] = ""
+            self._parameter_dict[name] = parameter_to_gammapy_dict(astromodel_para)
 
     def _update_parameter(self, name, val) -> None:
         """

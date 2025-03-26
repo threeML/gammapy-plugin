@@ -154,7 +154,6 @@ class GammapyLike(PluginPrototype):
             x = -self._datasets._stat_sum_likelihood()
         else:
             x = -self._datasets.stat_sum()
-        gc.collect()
         return x
 
     def inner_fit(self):

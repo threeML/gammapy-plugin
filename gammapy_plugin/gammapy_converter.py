@@ -330,7 +330,13 @@ class SpectralModelConverted(SpectralModel):
                 kwargs_new[self._mapping[k]] = kwargs[k]
             else:
                 kwargs_new[k] = kwargs[k]
-        return self._astromodel_function.evaluate(args[0], **kwargs_new)
+        print("Parameters in Spectral model")
+        print(kwargs_new)
+        print(args)
+        return self._astromodel_function.evaluate(*args, **kwargs_new)
+        
+    def evaluate_integral(self,emin,emax,**kwargs):
+        raise NotImplementedError
 
 
 class SpatialModelConverted(SpatialModel):
@@ -411,8 +417,10 @@ class SpatialModelConverted(SpatialModel):
                 kwargs_new[self._mapping[k]] = kwargs[k]
             else:
                 kwargs_new[k] = kwargs[k]
-
-        return self._astromodel_function.evaluate(args[0], args[1], **kwargs_new)
+        print("Parameters in Spatial model")
+        print(kwargs_new)
+        print(args)
+        return self._astromodel_function.evaluate(*args, **kwargs_new)
 
 
 class TemporalModelConverted(TemporalModel):

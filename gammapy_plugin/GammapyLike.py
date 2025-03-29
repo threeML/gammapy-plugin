@@ -183,13 +183,17 @@ class GammapyLike(PluginPrototype):
         List of all the Gammapy SkyModels
         """
         # TODO: only assign sources listed in self._sources
-        tmp = [
-            x
-            for x in self._likelihood_model_converted.gammapy_models
-            if x.name in self._sources or self._sources is None
-        ]
-        for m in self._background_models.values():
-            tmp.append(m)
+        if hasattr(self, "_likelihood_model_converted"):
+            tmp = [
+                x
+                for x in self._likelihood_model_converted.gammapy_models
+                if x.name in self._sources or self._sources is None
+            ]
+        else:
+            tmp = []
+        if hasattr(self, "_background_models"):
+            for m in self._background_models.values():
+                tmp.append(m)
         return tmp
 
     @property

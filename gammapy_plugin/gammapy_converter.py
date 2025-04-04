@@ -12,6 +12,7 @@ from astromodels.core.model import Model
 from astromodels.sources import PointSource, ExtendedSource, Source
 from astromodels.functions.function import Function
 from gammapy_plugin.gammapy_source import GammapySource, parameter_to_gammapy_dict
+from scipy.integrate import quad
 
 log = setup_logger(__name__)
 
@@ -334,9 +335,14 @@ class SpectralModelConverted(SpectralModel):
         print(kwargs_new)
         print(args)
         return self._astromodel_function.evaluate(*args, **kwargs_new)
-        
-    def evaluate_integral(self,emin,emax,**kwargs):
-        raise NotImplementedError
+
+    def evaluate_integral(self, emin, emax, **kwargs):
+        assert len(emin) == len(emax), "Energy edges length do not match"
+        vals = np.zeros_like(emin)
+        for i in range(len(emin)):
+            vals[i] = quad(self._astromodel_function, emin[i].value, emax[i].value)[0]
+        return vals
+        # TODO: check if parameters are updated correctly
 
 
 class SpatialModelConverted(SpatialModel):

@@ -1,4 +1,3 @@
-import gc
 from typing import Union
 from importlib.metadata import version
 import numpy as np

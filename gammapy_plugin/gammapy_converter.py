@@ -279,6 +279,9 @@ class SpectralModelConverted(SpectralModel):
         self._source_name = self._astromodel_function.name
         self._para_names = para_names
         self._setup_parameters()
+        self._x_unit = self._astromodel_function.x_unit
+        self._y_unit = self._astromodel_function.y_unit
+        self._integral_unit = self._y_unit * self._x_unit
 
     def _setup_parameters(self):
         """
@@ -334,12 +337,17 @@ class SpectralModelConverted(SpectralModel):
         return self._astromodel_function.evaluate(*args, **kwargs_new)
 
     def evaluate_integral(self, emin, emax, **kwargs):
+        """
+        Custom integral
+        """
         assert len(emin) == len(emax), "Energy edges length do not match"
-        vals = np.zeros_like(emin)
+        vals = np.zeros(len(emin))
+        emin = emin.to(self._x_unit).value
+        emax = emax.to(self._x_unit).value
         for i in range(len(emin)):
-            vals[i] = quad(self._astromodel_function, emin[i].value, emax[i].value)[0]
-        return vals
-        # TODO: check if parameters are updated correctly
+            x = np.linspace(emin[i], emax[i], num=100)
+            vals[i] = np.trapezoid(self._astromodel_function.fast_call(x))
+        return vals * self._integral_unit
 
 
 class SpatialModelConverted(SpatialModel):

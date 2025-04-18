@@ -1,5 +1,6 @@
 from typing import Optional
 import numpy as np
+import astropy.units as u
 from threeML.io.logging import setup_logger
 from gammapy.modeling.models import (
     SkyModel,
@@ -323,7 +324,6 @@ class SpectralModelConverted(SpectralModel):
             setattr(self, name, paras[-1])
         self.default_parameters = Parameters(paras)
 
-    # todo check return type - likely np.ndarray
     def evaluate(self, *args, **kwargs):
         """
         Evaluates the astromodels function instead of a gammapy one
@@ -336,7 +336,9 @@ class SpectralModelConverted(SpectralModel):
                 kwargs_new[k] = kwargs[k]
         return self._astromodel_function.evaluate(*args, **kwargs_new)
 
-    def evaluate_integral(self, emin, emax, **kwargs):
+    def evaluate_integral(
+        self, emin: u.Quantity, emax: u.Quantity, **kwargs
+    ) -> u.Quantity:
         """
         Custom integral
         """

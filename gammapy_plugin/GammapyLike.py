@@ -6,7 +6,7 @@ from threeML.io.logging import setup_logger
 from threeML.plugin_prototype import PluginPrototype
 from gammapy_plugin.gammapy_converter import AstromodelConverter
 from gammapy.datasets import Datasets, Dataset
-from gammapy.modeling.models import SkyModel, ModelBase
+from gammapy.modeling.models import SkyModel, ModelBase, Models, DatasetModels
 from gammapy_plugin.gammapy_source import parse_gammapy_model, parameter_to_gammapy_dict
 
 GAMMAPY_VERSION = version("gammapy")
@@ -112,7 +112,7 @@ class GammapyLike(PluginPrototype):
             bkg_model = [bkg_model]
         else:
             assert isinstance(
-                bkg_model, list[ModelBase]
+                bkg_model, (list, Models, DatasetModels)
             ), "either pass a singular gammapy model or a list of models"
         for b in bkg_model:
             self._background_models[b.name] = b
@@ -148,9 +148,9 @@ class GammapyLike(PluginPrototype):
         Return the value of the log-likelihood with the current values for the
         parameters stored in the model instance
         """
-        # TODO: find a way that this is onyl run once per eval
         self._likelihood_model_converted._update_parameters()
         self._update_background_models()
+        # TODO: maybe too costly
         if GAMMAPY_VERSION_MAJOR > 1:
             return -self._datasets._stat_sum_likelihood()
         else:
@@ -160,7 +160,11 @@ class GammapyLike(PluginPrototype):
         return self.get_log_like()
 
     def get_number_of_data_points(self) -> np.int64:
+        # TODO: check if this works for all allowed data types
         return np.sum([np.prod(d.counts.data.shape) for d in self._datasets])
+
+    def distribute_covariance(self):
+        raise NotImplementedError
 
     @property
     def datasets(self) -> Dataset:
@@ -201,3 +205,6 @@ class GammapyLike(PluginPrototype):
         Coordinate Frame of the plugin
         """
         return self._frame
+
+
+# TODO: setter method for frame --> change all the frames

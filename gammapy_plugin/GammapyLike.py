@@ -11,6 +11,7 @@ from gammapy_plugin.gammapy_source import parse_gammapy_model, parameter_to_gamm
 
 GAMMAPY_VERSION = version("gammapy")
 GAMMAPY_VERSION_MAJOR = int(GAMMAPY_VERSION.split(".")[0])
+
 log = setup_logger(__name__)
 
 __instrument_name = "Gammapy"

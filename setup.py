@@ -19,10 +19,9 @@ from setuptools import setup
 #     return paths
 
 
-#extra_files = find_data_files("gammapy_plugin/data")
+# extra_files = find_data_files("gammapy_plugin/data")
 
 setup(
-
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
     #        package_data={"": extra_files},

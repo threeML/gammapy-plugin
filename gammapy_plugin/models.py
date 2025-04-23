@@ -1,9 +1,7 @@
 from threeML.io.logging import setup_logger
 import numpy as np
 import astropy.units as u
-from astropy.coordinates import SkyCoord
 from gammapy.modeling.models import (
-    SkyModel,
     SpectralModel,
     SpatialModel,
     TemporalModel,
@@ -11,6 +9,7 @@ from gammapy.modeling.models import (
 )
 from gammapy.modeling.parameter import Parameter, Parameters
 from astromodels.functions.function import Function
+from astromodels.core.sky_direction import SkyDirection
 
 log = setup_logger(__name__)
 
@@ -30,7 +29,7 @@ class SpectralModelConverted(SpectralModel):
             type(function), Function
         ), "function must be astromodels function"
         self._astromodel_function = function
-        self._source_name = self._astromodel_function.name
+        # self._source_name = self._astromodel_function.name
         self._para_names = para_names
         self._setup_parameters()
         self._x_unit = self._astromodel_function.x_unit
@@ -105,52 +104,39 @@ class SpectralModelConverted(SpectralModel):
         return vals * self._integral_unit
 
 
-class PointSourceModelConverted(SpatialModel):
-    def __init__(self, position, name, frame):
-        self._name = name
-        self._position = position
+class PointSourceModelConverted(PointSpatialModel):
+    def __init__(self, sky_position: SkyDirection, frame: str, para_names: list[str]):
+        assert isinstance(
+            sky_position, SkyDirection
+        ), "sky_position must be SkyDirection"
+        self._sky_position = sky_position
+        self._name = self._sky_position.name
+        self._position = self._sky_position.sky_coord.transform_to(frame)
         self._frame = frame
+        setattr(self, "frame", self._frame)
+        self._para_names = para_names
+        self._setup_parameters()
 
     def _setup_parameters(self):
         """
         Setup the parameters by creating gammapy Parameters and setting
         them as attributes to this class
         """
-        paras = []
-        # needed later for correctly evaluating the function
         self._mapping = {}
-        for k, v in self._astromodel_function.parameters.items():
-            vmin = np.nan
-            vmax = np.nan
-            if v.min_value is not None:
-                vmin = v.min_value
-            if v.max_value is not None:
-                vmax = v.max_value
-            # find the correct name
-            # TODO this is fairly inefficient
-            i = 0
-            name = None
-            while True and i < len(self._para_names):
-                splitted = self._para_names[i].split(".")
-                if k == splitted[-1]:
-                    name = self._para_names[i]
-                    break
-                i += 1
-            if name is None:
-                raise ValueError(f"Parameter name {k} not found in {self._para_names}")
-            self._mapping[name] = k
-            paras.append(
-                Parameter(
-                    name=name,
-                    value=v.value,
-                    unit=v.unit,
-                    min=vmin,
-                    max=vmax,
-                    frozen=not bool(v.free),
-                )
-            )
-            setattr(self, name, paras[-1])
-        self.default_parameters = Parameters(paras)
+        if self._frame == "galactic":
+            lon = self._position.l
+            lat = self._position.b
+        elif self._frame == "icrs":
+            lon = self._position.ra
+            lat = self._position.dec
+        else:
+            raise NotImplementedError("Only galactic and icrs currently available")
+        lon_0 = Parameter(name="lon_0", value=lon.value, unit=lon.unit)
+        lat_0 = Parameter(name="lat_0", value=lat.value, unit=lat.unit)
+        setattr(self, "lon_0", lon_0)
+        setattr(self, "lat_0", lat_0)
+        self.default_parameters = Parameters([lon_0, lat_0])
+        log.debug(f"Set parameters to be {lon_0} and {lat_0}")
 
 
 class SpatialModelConverted(SpatialModel):
@@ -175,7 +161,7 @@ class SpatialModelConverted(SpatialModel):
             type(function), Function
         ), "function must be astromodels function"
         self._astromodel_function = function
-        self._source_name = self._astromodel_function.name
+        # self._source_name = self._astromodel_function.name
         if frame is None:
             log.warning("No frame passed - will use ICRS!")
             frame = "icrs"

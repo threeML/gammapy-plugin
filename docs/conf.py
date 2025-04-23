@@ -21,9 +21,9 @@ import sys
 from pathlib import Path
 
 
-project = u"Gammapy Plugin"
-copyright = u"2022, J. Michael Burgess"
-author = u"J. Michael Burgess"
+project = "Gammapy Plugin"
+copyright = "2022, J. Michael Burgess"
+author = "J. Michael Burgess"
 
 
 sys.path.insert(0, os.path.abspath("../"))
@@ -195,8 +195,8 @@ latex_documents = [
     (
         master_doc,
         "gammapy_plugin.tex",
-        u"Gammapy Plugin Documentation",
-        u"J. Michael Burgess",
+        "Gammapy Plugin Documentation",
+        "J. Michael Burgess",
         "manual",
     ),
 ]
@@ -209,7 +209,7 @@ man_pages = [
     (
         master_doc,
         "gammapy_plugin",
-        u"Gammapy Plugin Documentation",
+        "Gammapy Plugin Documentation",
         [author],
         1,
     )
@@ -224,7 +224,7 @@ texinfo_documents = [
     (
         master_doc,
         "gammapy_plugin",
-        u"Gammapy Plugin Documentation",
+        "Gammapy Plugin Documentation",
         author,
         "gammapy_plugin",
         "One line description of project.",

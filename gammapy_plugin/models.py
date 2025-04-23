@@ -20,17 +20,15 @@ class SpectralModelConverted(SpectralModel):
     an gammapy SpectralModel
     """
 
-    def __init__(self, function: Function, para_names: list) -> None:
+    def __init__(self, function: Function) -> None:
         """
         :param function: the spectral function, must be an astromodels Function
-        :param para_names: list of the parameter names for this component
         """
         assert issubclass(
             type(function), Function
         ), "function must be astromodels function"
         self._astromodel_function = function
         # self._source_name = self._astromodel_function.name
-        self._para_names = para_names
         self._setup_parameters()
         self._x_unit = self._astromodel_function.x_unit
         self._y_unit = self._astromodel_function.y_unit
@@ -51,21 +49,10 @@ class SpectralModelConverted(SpectralModel):
                 vmin = v.min_value
             if v.max_value is not None:
                 vmax = v.max_value
-            # find the correct name
-            i = 0
-            name = None
-            while True and i < len(self._para_names):
-                splitted = self._para_names[i].split(".")
-                if k == splitted[-1]:
-                    name = self._para_names[i]
-                    break
-                i += 1
-            if name is None:
-                raise ValueError(f"Parameter name {k} not found in {self._para_names}")
-            self._mapping[name] = k
+            self._mapping[v.path] = v.name
             paras.append(
                 Parameter(
-                    name=name,
+                    name=v.name,
                     value=v.value,
                     unit=v.unit,
                     min=vmin,
@@ -73,7 +60,7 @@ class SpectralModelConverted(SpectralModel):
                     frozen=not bool(v.free),
                 )
             )
-            setattr(self, name, paras[-1])
+            setattr(self, v.name, paras[-1])
         self.default_parameters = Parameters(paras)
 
     def evaluate(self, *args, **kwargs):

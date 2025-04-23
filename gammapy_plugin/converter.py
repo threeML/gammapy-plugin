@@ -174,7 +174,7 @@ class SourceConverter:
             for p in self._all_para_names:
                 if comp_name in p:
                     para_names.append(p)
-            spectral_models.append(SpectralModelConverted(comp.shape, para_names))
+            spectral_models.append(SpectralModelConverted(comp.shape))
         self._spectral_model = spectral_models[0]
         if len(spectral_models) > 1:
             for spectral_model in spectral_models:

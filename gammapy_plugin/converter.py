@@ -1,13 +1,15 @@
 from typing import Optional
 from threeML.io.logging import setup_logger
-from gammapy.modeling.models import (
-    SkyModel,
-    PointSpatialModel,
-)
+from gammapy.modeling.models import SkyModel
 from astromodels.core.model import Model
 from astromodels.sources import PointSource, ExtendedSource, Source
-from gammapy_plugin.gammapy_source import GammapySource, parameter_to_gammapy_dict
-from gammapy_plugin.models import Spectra
+from gammapy_plugin.gammapy_source import parameter_to_gammapy_dict
+from gammapy_plugin.models import (
+    SpectralModelConverted,
+    SpatialModelConverted,
+    TemporalModelConverted,
+    PointSourceModelConverted,
+)
 
 log = setup_logger(__name__)
 
@@ -45,14 +47,9 @@ class AstromodelConverter:
             source_name,
             source_instance,
         ) in self._astromodel_model.extended_sources.items():
-            if not isinstance(source_instance, GammapySource):
-                self._converted_sources[source_name] = SourceConverter(
-                    source_instance, frame=self._frame, converter=self
-                )
-            elif isinstance(source_instance, GammapySource):
-                self._converted_sources[source_name] = SourceConverter(
-                    source_instance, frame=self._frame, converter=self
-                )
+            self._converted_sources[source_name] = SourceConverter(
+                source_instance, frame=self._frame, converter=self
+            )
 
     def _convert_point_sources(self) -> None:
         """
@@ -114,31 +111,8 @@ class SourceConverter:
         self._source = source
         self._all_para_names = list(self._source.parameters.keys())
 
-        if isinstance(self._source, PointSource):
-            log.debug("Source is a PointSource")
-            self._convert_spectral_model()
-            self._convert_spatial_model()
-            if self._frame.lower() == "galactic":
-                lon = self._source._sky_position.sky_coord.transform_to("galactic").l
-                lat = self._source._sky_position.sky_coord.transform_to("galactic").b
-            elif self._frame.lower() == "icrs":
-                lon = self._source._sky_position.sky_coord.transform_to("icrs").ra
-                lat = self._source._sky_position.sky_coord.transform_to("icrs").dec
-
-            self._spatial_model = PointSpatialModel(
-                lon_0=lon, lat_0=lat, frame=self._frame
-            )
-
-        elif isinstance(self._source, ExtendedSource):
-            log.debug("Source is an ExtendedSource")
-            self._convert_spatial_model()
-            self._convert_spectral_model()
-        elif isinstance(self._source, GammapySource):
-            log.debug("Source is a GammapySource")
-            self._convert_gammapy_model()
-        else:
-            log.error("This astromodels source type is not yet supported.")
-            raise NotImplementedError
+        self._convert_spatial_model()
+        self._convert_spectral_model()
 
         self._create_skymodel()
 
@@ -149,6 +123,7 @@ class SourceConverter:
         """
 
         # TODO thats likely inefficient
+        # TODO use mapping from Models
         if self._parameter_dict is None:
             self._parameter_dict = {}
 
@@ -183,21 +158,10 @@ class SourceConverter:
         Update the skymodel parameters during the sampling process
         using the parameter dict
         """
-        if isinstance(self._source, GammapySource):
-            # in case of the GammapySource we need to currently remove the
-            # rest of the full astromodels path
-            # TODO find a way with less ambiguity
-            name = name.split(".")[-1]
         # update the parameter dict for this skymodel
         # update the skymodel itself
         self._parameter_dict[name]["value"] = val
         self._skymodel.parameters[name].update_from_dict(self._parameter_dict[name])
-
-    def _convert_gammapy_model(self) -> None:
-        """
-        Sets the gammapy model from a GammapySource as the gammapy model here
-        """
-        self._gammapy_model = self._source.gammapy_model
 
     def _convert_spectral_model(self) -> None:
         """
@@ -218,22 +182,24 @@ class SourceConverter:
 
     def _convert_spatial_model(self) -> None:
         """
-        Convert the spatial model of the source if it is an extended one
+        Convert the spatial model of the source
         """
         if isinstance(self._source, ExtendedSource):
             comp_name = self._source.spatial_shape.name
             ps = False
         elif isinstance(self._source, PointSource):
             comp_name = "position"
-            position = self._source._sky_position.sky_coord
+            position = self._source.position
             ps = True
         para_names = []
         for p in self._all_para_names:
             if comp_name in p:
                 para_names.append(p)
         if ps:
-            self._spatial_model = SpatialModelConverted(
-                None, para_names, frame=self._frame, point_source=position
+            self._spatial_model = PointSourceModelConverted(
+                sky_position=position,
+                frame=self._frame,
+                para_names=para_names,
             )
         else:
             self._spatial_model = SpatialModelConverted(

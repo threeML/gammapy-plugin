@@ -78,9 +78,7 @@ class AstromodelConverter:
         # TODO this is a very stupid way of checking if a parameter
         # belongs to a source
         for name, source in self._converted_sources.items():
-            for pn, p in self._astromodel_model.free_parameters.items():
-                if name in pn:
-                    source._update_parameter(pn, p.value)
+            source._update_parameters()
 
     @property
     def gammapy_models(self) -> list[SkyModel]:
@@ -88,6 +86,10 @@ class AstromodelConverter:
         Returns all the gammapy skymodels for that model
         """
         return self._gammapy_models
+
+    @property
+    def model(self) -> Model:
+        return self._astromodel_model
 
 
 class SourceConverter:
@@ -103,107 +105,68 @@ class SourceConverter:
     ) -> None:
         self._frame = kwargs.get("frame", "icrs")
         self._converter = converter
+        self._source = source
         self._spatial_model = None
         self._spectral_model = None
         self._temporal_model = None
         self._gammapy_model = None
         self._parameter_dict = None
-        self._source = source
-        self._all_para_names = list(self._source.parameters.keys())
 
         self._convert_spatial_model()
         self._convert_spectral_model()
 
         self._create_skymodel()
 
+    def _gather_mappings(self):
+        self._mapping = None
+        for comp in [self._spectral_model, self._spatial_model]:
+            if self._mapping is None:
+                self._mapping = comp.mapping
+            else:
+                self._mapping.update(comp.mapping)
+
     def _create_parameter_dict(self) -> None:
         """
         Initially creates the parameter dict for that source
         the SkyModel is updated using the update_from_dict function
         """
+        self._gather_mappings()
 
-        # TODO thats likely inefficient
-        # TODO use mapping from Models
-        if self._parameter_dict is None:
-            self._parameter_dict = {}
-
-        for name in self._skymodel.parameters.names:
-            self._parameter_dict[name] = {}
-            if name in self._converter._astromodel_model.parameters.keys():
-                astromodel_para = self._converter._astromodel_model.parameters[name]
-            elif (
-                self._source.name + "." + name
-                in self._converter._astromodel_model.parameters.keys()
-            ):
-                astromodel_para = self._converter._astromodel_model.parameters[
-                    self._source.name + "." + name
-                ]
-            elif (
-                self._source.name + "." + self._source.name + "." + name
-                in self._converter._astromodel_model.parameters.keys()
-            ):
-                astromodel_para = self._converter._astromodel_model.parameters[
-                    self._source.name + "." + self._source.name + "." + name
-                ]
-            else:
-                log.error(f"The skymodel parameter {name} is not known")
-                log.error(
-                    f"These are the astromodel paras {self._converter._astromodel_model.parameters.keys()}"
-                )
-                raise NotImplementedError
-            self._parameter_dict[name] = parameter_to_gammapy_dict(astromodel_para)
-
-    def _update_parameter(self, name, val) -> None:
+    def _update_parameters(self) -> None:
         """
         Update the skymodel parameters during the sampling process
         using the parameter dict
         """
         # update the parameter dict for this skymodel
-        # update the skymodel itself
-        self._parameter_dict[name]["value"] = val
-        self._skymodel.parameters[name].update_from_dict(self._parameter_dict[name])
+        for k, v in self._mapping.items():
+            self.skymodel.parameters[v].value = self._converter.model[k].value
 
     def _convert_spectral_model(self) -> None:
         """
         Convert the spectral model of the source
         """
-        log.warning("Multiple spectral components well be simply added!")
-        spectral_models = []
-        for comp_name, comp in self._source.components.items():
-            para_names = []
-            for p in self._all_para_names:
-                if comp_name in p:
-                    para_names.append(p)
-            spectral_models.append(SpectralModelConverted(comp.shape))
-        self._spectral_model = spectral_models[0]
-        if len(spectral_models) > 1:
-            for spectral_model in spectral_models:
-                self._spectral_model += spectral_model
+        log.warning("Only Single Spectral Component Models currently supported")
+        self._spectral_model = SpectralModelConverted(
+            self._source.spectrum._get_children()[0].shape
+        )
 
     def _convert_spatial_model(self) -> None:
         """
         Convert the spatial model of the source
         """
         if isinstance(self._source, ExtendedSource):
-            comp_name = self._source.spatial_shape.name
             ps = False
         elif isinstance(self._source, PointSource):
-            comp_name = "position"
             position = self._source.position
             ps = True
-        para_names = []
-        for p in self._all_para_names:
-            if comp_name in p:
-                para_names.append(p)
         if ps:
             self._spatial_model = PointSourceModelConverted(
                 sky_position=position,
                 frame=self._frame,
-                para_names=para_names,
             )
         else:
             self._spatial_model = SpatialModelConverted(
-                self._source.spatial_shape, para_names, frame=self._frame
+                self._source.spatial_shape, frame=self._frame
             )
 
     def _convert_temporal_model(self) -> None:

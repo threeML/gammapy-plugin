@@ -67,6 +67,7 @@ class SpectralModelConverted(SpectralModel):
         """
         Evaluates the astromodels function instead of a gammapy one
         """
+        # TODO check the kwarg stuff
         kwargs_new = {}
         for k in kwargs.keys():
             if k in self._mapping.keys():
@@ -90,9 +91,13 @@ class SpectralModelConverted(SpectralModel):
             vals[i] = np.trapezoid(self._astromodel_function.fast_call(x))
         return vals * self._integral_unit
 
+    @property
+    def mapping(self):
+        return self._mapping
+
 
 class PointSourceModelConverted(PointSpatialModel):
-    def __init__(self, sky_position: SkyDirection, frame: str, para_names: list[str]):
+    def __init__(self, sky_position: SkyDirection, frame: str):
         assert isinstance(
             sky_position, SkyDirection
         ), "sky_position must be SkyDirection"
@@ -101,7 +106,6 @@ class PointSourceModelConverted(PointSpatialModel):
         self._position = self._sky_position.sky_coord.transform_to(frame)
         self._frame = frame
         setattr(self, "frame", self._frame)
-        self._para_names = para_names
         self._setup_parameters()
 
     def _setup_parameters(self):
@@ -118,12 +122,22 @@ class PointSourceModelConverted(PointSpatialModel):
             lat = self._position.dec
         else:
             raise NotImplementedError("Only galactic and icrs currently available")
+        for k, v in self._sky_position.parameters.items():
+            if k == "ra" or k == "l":
+                para_name = "lon_0"
+            elif k == "dec" or k == "b":
+                para_name = "lat_0"
+            self._mapping[v.path] = para_name
         lon_0 = Parameter(name="lon_0", value=lon.value, unit=lon.unit)
         lat_0 = Parameter(name="lat_0", value=lat.value, unit=lat.unit)
         setattr(self, "lon_0", lon_0)
         setattr(self, "lat_0", lat_0)
         self.default_parameters = Parameters([lon_0, lat_0])
         log.debug(f"Set parameters to be {lon_0} and {lat_0}")
+
+    @property
+    def mapping(self):
+        return self._mapping
 
 
 class SpatialModelConverted(SpatialModel):
@@ -135,7 +149,6 @@ class SpatialModelConverted(SpatialModel):
     def __init__(
         self,
         function: Function,
-        para_names: list,
         frame: str = None,
     ) -> None:
         """
@@ -154,7 +167,6 @@ class SpatialModelConverted(SpatialModel):
             frame = "icrs"
         self._frame = frame
         setattr(self, "frame", self._frame)
-        self._para_names = para_names
         self._setup_parameters()
 
     def _setup_parameters(self):
@@ -172,22 +184,10 @@ class SpatialModelConverted(SpatialModel):
                 vmin = v.min_value
             if v.max_value is not None:
                 vmax = v.max_value
-            # find the correct name
-            # TODO this is fairly inefficient
-            i = 0
-            name = None
-            while True and i < len(self._para_names):
-                splitted = self._para_names[i].split(".")
-                if k == splitted[-1]:
-                    name = self._para_names[i]
-                    break
-                i += 1
-            if name is None:
-                raise ValueError(f"Parameter name {k} not found in {self._para_names}")
-            self._mapping[name] = k
+            self._mapping[v.path] = v.name
             paras.append(
                 Parameter(
-                    name=name,
+                    name=v.name,
                     value=v.value,
                     unit=v.unit,
                     min=vmin,
@@ -195,7 +195,7 @@ class SpatialModelConverted(SpatialModel):
                     frozen=not bool(v.free),
                 )
             )
-            setattr(self, name, paras[-1])
+            setattr(self, v.name, paras[-1])
         self.default_parameters = Parameters(paras)
 
     # todo check return type
@@ -210,6 +210,10 @@ class SpatialModelConverted(SpatialModel):
             else:
                 kwargs_new[k] = kwargs[k]
         return self._astromodel_function.evaluate(*args, **kwargs_new)
+
+    @property
+    def mapping(self):
+        return self._mapping
 
 
 class TemporalModelConverted(TemporalModel):
@@ -247,3 +251,7 @@ class TemporalModelConverted(TemporalModel):
 
     def evaluate(self, *paras, **kwargs):
         return self._astromodel_function.evaluate(*paras, **kwargs)
+
+    @property
+    def mapping(self):
+        return self._mapping

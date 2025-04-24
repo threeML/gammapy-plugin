@@ -4,7 +4,7 @@ import numpy as np
 from astromodels import Model
 from threeML.io.logging import setup_logger
 from threeML.plugin_prototype import PluginPrototype
-from gammapy_plugin.gammapy_converter import AstromodelConverter
+from gammapy_plugin.converter import AstromodelConverter
 from gammapy.datasets import Datasets, Dataset
 from gammapy.modeling.models import SkyModel, ModelBase, Models, DatasetModels
 from gammapy_plugin.gammapy_source import parse_gammapy_model, parameter_to_gammapy_dict

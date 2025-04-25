@@ -133,7 +133,9 @@ class SourceConverter:
         """
         # update the parameter dict for this skymodel
         for k, v in self._mapping.items():
-            self.skymodel.parameters[v].value = self._converter.model[k].value
+            self.skymodel.parameters[v].update_from_dict(
+                parameter_to_gammapy_dict(self._converter.model[k])
+            )
 
     def _convert_spectral_model(self) -> None:
         """
@@ -184,7 +186,7 @@ class SourceConverter:
             )
         else:
             self._skymodel = self._gammapy_model
-        self._create_parameter_dict()
+        self._gather_mappings()
 
     @property
     def skymodel(self) -> SkyModel:

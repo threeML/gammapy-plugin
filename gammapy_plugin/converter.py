@@ -120,17 +120,11 @@ class SourceConverter:
     def _gather_mappings(self):
         self._mapping = None
         for comp in [self._spectral_model, self._spatial_model]:
-            if self._mapping is None:
-                self._mapping = comp.mapping
-            else:
-                self._mapping.update(comp.mapping)
-
-    def _create_parameter_dict(self) -> None:
-        """
-        Initially creates the parameter dict for that source
-        the SkyModel is updated using the update_from_dict function
-        """
-        self._gather_mappings()
+            if comp is not None:
+                if self._mapping is None:
+                    self._mapping = comp.mapping
+                else:
+                    self._mapping.update(comp.mapping)
 
     def _update_parameters(self) -> None:
         """

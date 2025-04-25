@@ -28,11 +28,13 @@ class AstromodelConverter:
 
     """
 
-    def __init__(self, model: Model, frame: Optional[str] = None) -> None:
+    def __init__(
+        self, model: Model, frame: Optional[str] = None, convert_ps: bool = True
+    ) -> None:
         assert isinstance(model, Model), "Needs an astromodels Model"
         self._astromodel_model = model
         self._frame = frame
-
+        self._convert_ps = convert_ps
         self._converted_sources = {}
         self._gammapy_models = []
         self._convert_extendend_sources()
@@ -60,7 +62,7 @@ class AstromodelConverter:
             source_instance,
         ) in self._astromodel_model.point_sources.items():
             self._converted_sources[source_name] = SourceConverter(
-                source_instance, converter=self
+                source_instance, converter=self, convert_spatial=self._convert_ps
             )
 
     def _create_gammapy_models_list(self) -> None:
@@ -104,6 +106,7 @@ class SourceConverter:
         self, source: Source, converter: AstromodelConverter, **kwargs
     ) -> None:
         self._frame = kwargs.get("frame", "icrs")
+        self._conv_spatial = kwargs.get("convert_spatial", True)
         self._converter = converter
         self._source = source
         self._spatial_model = None
@@ -111,8 +114,8 @@ class SourceConverter:
         self._temporal_model = None
         self._gammapy_model = None
         self._parameter_dict = None
-
-        self._convert_spatial_model()
+        if self._conv_spatial:
+            self._convert_spatial_model()
         self._convert_spectral_model()
 
         self._create_skymodel()

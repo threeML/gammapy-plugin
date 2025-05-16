@@ -10,6 +10,7 @@ from gammapy.modeling.models import (
 from gammapy.modeling.parameter import Parameter, Parameters
 from astromodels.functions.function import Function
 from astromodels.core.sky_direction import SkyDirection
+from astromodels.core.parameter_transformation import LogarithmicTransformation
 
 log = setup_logger(__name__)
 
@@ -42,6 +43,7 @@ class SpectralModelConverted(SpectralModel):
         paras = []
         # needed later for correctly evaluating the function
         self._mapping = {}
+        self._mapping_free = {}
         for k, v in self._astromodel_function.parameters.items():
             vmin = np.nan
             vmax = np.nan
@@ -50,6 +52,11 @@ class SpectralModelConverted(SpectralModel):
             if v.max_value is not None:
                 vmax = v.max_value
             self._mapping[v.path] = v.name
+            if v.free:
+                self._mapping_free[v.path] = v.name
+            interp = "linear"
+            if isinstance(v.transformation, LogarithmicTransformation):
+                interp = "log"
             paras.append(
                 Parameter(
                     name=v.name,
@@ -58,6 +65,7 @@ class SpectralModelConverted(SpectralModel):
                     min=vmin,
                     max=vmax,
                     frozen=not bool(v.free),
+                    interp=interp,
                 )
             )
             setattr(self, v.name, paras[-1])
@@ -95,6 +103,10 @@ class SpectralModelConverted(SpectralModel):
     def mapping(self):
         return self._mapping
 
+    @property
+    def mapping_free(self):
+        return self._mapping_free
+
 
 class PointSourceModelConverted(PointSpatialModel):
     def __init__(self, sky_position: SkyDirection, frame: str):
@@ -114,6 +126,7 @@ class PointSourceModelConverted(PointSpatialModel):
         them as attributes to this class
         """
         self._mapping = {}
+        self._mapping_free = {}
         if self._frame == "galactic":
             lon = self._position.l
             lat = self._position.b
@@ -125,11 +138,19 @@ class PointSourceModelConverted(PointSpatialModel):
         for k, v in self._sky_position.parameters.items():
             if k == "ra" or k == "l":
                 para_name = "lon_0"
+                lon_free = v.free
             elif k == "dec" or k == "b":
                 para_name = "lat_0"
+                lat_free = v.free
             self._mapping[v.path] = para_name
-        lon_0 = Parameter(name="lon_0", value=lon.value, unit=lon.unit)
-        lat_0 = Parameter(name="lat_0", value=lat.value, unit=lat.unit)
+            if v.free:
+                self._mapping_free[v.path] = para_name
+        lon_0 = Parameter(
+            name="lon_0", value=lon.value, unit=lon.unit, frozen=not lon_free
+        )
+        lat_0 = Parameter(
+            name="lat_0", value=lat.value, unit=lat.unit, frozen=not lat_free
+        )
         setattr(self, "lon_0", lon_0)
         setattr(self, "lat_0", lat_0)
         self.default_parameters = Parameters([lon_0, lat_0])
@@ -138,6 +159,10 @@ class PointSourceModelConverted(PointSpatialModel):
     @property
     def mapping(self):
         return self._mapping
+
+    @property
+    def mapping_free(self):
+        return self._mapping_free
 
 
 class SpatialModelConverted(SpatialModel):
@@ -177,6 +202,7 @@ class SpatialModelConverted(SpatialModel):
         paras = []
         # needed later for correctly evaluating the function
         self._mapping = {}
+        self._mapping_free = {}
         for k, v in self._astromodel_function.parameters.items():
             vmin = np.nan
             vmax = np.nan
@@ -185,6 +211,11 @@ class SpatialModelConverted(SpatialModel):
             if v.max_value is not None:
                 vmax = v.max_value
             self._mapping[v.path] = v.name
+            if v.free:
+                self._mapping_free[v.path] = v.name
+            interp = "linear"
+            if isinstance(v.transformation, LogarithmicTransformation):
+                interp = "log"
             paras.append(
                 Parameter(
                     name=v.name,
@@ -193,6 +224,7 @@ class SpatialModelConverted(SpatialModel):
                     min=vmin,
                     max=vmax,
                     frozen=not bool(v.free),
+                    interp=interp,
                 )
             )
             setattr(self, v.name, paras[-1])
@@ -214,6 +246,10 @@ class SpatialModelConverted(SpatialModel):
     @property
     def mapping(self):
         return self._mapping
+
+    @property
+    def mapping_free(self):
+        return self._mapping_free
 
 
 class TemporalModelConverted(TemporalModel):

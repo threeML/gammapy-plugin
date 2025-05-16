@@ -122,12 +122,17 @@ class SourceConverter:
 
     def _gather_mappings(self):
         self._mapping = None
+        self._mapping_free = None
         for comp in [self._spectral_model, self._spatial_model]:
             if comp is not None:
                 if self._mapping is None:
                     self._mapping = comp.mapping
                 else:
                     self._mapping.update(comp.mapping)
+                if self._mapping_free is None:
+                    self._mapping_free = comp.mapping_free
+                else:
+                    self._mapping_free.update(comp.mapping_free)
 
     def _update_parameters(self) -> None:
         """
@@ -135,10 +140,16 @@ class SourceConverter:
         using the parameter dict
         """
         # update the parameter dict for this skymodel
-        for k, v in self._mapping.items():
+        for k, v in self._mapping_free.items():
+            # log.debug(
+            #    f"Parameter {v} before updating: {self.skymodel.parameters[v].value}"
+            # )
             self.skymodel.parameters[v].update_from_dict(
                 parameter_to_gammapy_dict(self._converter.model[k])
             )
+            # log.debug(
+            #    f"Parameter {v} after updating: {self.skymodel.parameters[v].value}"
+            # )
 
     def _convert_spectral_model(self) -> None:
         """

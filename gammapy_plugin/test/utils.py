@@ -17,7 +17,6 @@ def get_close(threeML_results, gammapy_result_dict):
             if gp["name"] == pn:
                 break
         if pn == "amplitude":
-            v = (bm[p].value * bm[p].unit).to("TeV-1 cm-2 s-1").value
             min_v = (
                 ((hdp.loc[p]["negative_error"] + bm[p].value) * bm[p].unit)
                 .to("TeV-1 cm-2 s-1")
@@ -29,11 +28,9 @@ def get_close(threeML_results, gammapy_result_dict):
                 .value
             )
         elif pn == "alpha":
-            v = -bm[p].value
             min_v = hdp.loc[p]["negative_error"] - bm[p].value
             max_v = hdp.loc[p]["positive_error"] - bm[p].value
         else:
-            v = bm[p].value
             min_v = hdp.loc[p]["negative_error"] + bm[p].value
             max_v = hdp.loc[p]["positive_error"] + bm[p].value
         return bool(gp["value"] <= max_v and min_v <= gp["value"])

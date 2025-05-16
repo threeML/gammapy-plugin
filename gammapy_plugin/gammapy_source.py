@@ -1,6 +1,9 @@
+from threeML.io.logging import setup_logger
 import numpy as np
 from astromodels.core.parameter import Parameter
 from gammapy.modeling.models.core import ModelBase
+
+log = setup_logger(__name__)
 
 
 def parameter_to_gammapy_dict(para: Parameter) -> dict:
@@ -51,4 +54,9 @@ def parse_gammapy_model(gp_model: ModelBase, dataset_name: str) -> dict:
                 desc=f"Gammapy Model Parameter {ttp['name']}",
             )
         )
+        log.debug("Created parameter")
+        log.debug(
+            parameters[dataset_name + "." + str(gp_model.name) + "." + ttp["name"]]
+        )
+
     return parameters

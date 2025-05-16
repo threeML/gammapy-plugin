@@ -1,7 +1,8 @@
 from typing import Union
 from importlib.metadata import version
 import numpy as np
-from astromodels import Model
+from astromodels.core.model import Model
+from astromodels.functions.priors import Truncated_gaussian, Uniform_prior
 from threeML.io.logging import setup_logger
 from threeML.plugin_prototype import PluginPrototype
 from gammapy_plugin.converter import AstromodelConverter
@@ -70,7 +71,8 @@ class GammapyLike(PluginPrototype):
             if mode == "stacked":
                 log.info("Only using a single dataset - can not stack that")
         else:
-            msg = "datasets has to be list of Dataset, a single Datasets or Dataset object"
+            msg = "datasets has to be list of Dataset,"
+            msg += " a single Datasets or Dataset object"
             raise TypeError(msg)
 
     def set_sources(self, sources: list = None) -> None:
@@ -124,18 +126,19 @@ class GammapyLike(PluginPrototype):
     def _parse_background_models(self):
         """ """
         for name, bkg in self._background_models.items():
-            log.debug(bkg)
             bkg_paras = parse_gammapy_model(bkg, self._name)
-            log.debug(bkg_paras)
             for k, v in bkg_paras.items():
-                log.debug(f"setting parameter {k} with {v}")
                 para_path = k.split(".")
-                log.debug(f"This is the para_path {para_path}")
                 self._nuisance_mapping[k] = para_path
                 self._nuisance_parameters[k] = v
+                if v.is_normalization and v.free:
+                    self._nuisance_parameters[k].prior = Truncated_gaussian(
+                        mu=1.0, sigma=0.1, lower_bound=0.2, upper_bound=1.8
+                    )
                 self._nuisance_parameters_dicts[k] = parameter_to_gammapy_dict(v)
 
     def _update_background_models(self):
+        # TODO rewrite this to directly update
         for k, v in self._nuisance_parameters.items():
             self._nuisance_parameters_dicts[k]["value"] = v.value
             p = self._nuisance_mapping[k]

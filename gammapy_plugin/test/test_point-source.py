@@ -19,13 +19,12 @@ from gammapy.modeling.models import LogParabolaSpectralModel
 
 # from threeML.bayesian.bayesian_analysis import BayesianAnalysis
 from gammapy_plugin.test.utils import get_close
+from gammapy_plugin.converter import AstromodelConverter
 from threeML.classicMLE.joint_likelihood import JointLikelihood
 from threeML.data_list import DataList
 from astromodels.core.model import Model
 from astromodels.sources import PointSource
 from astromodels.functions import Log_parabola, Log_uniform_prior, Uniform_prior
-
-# TODO: check if need of creating new gammapy datasets for comparing as models are stored
 
 
 def test_crab_spectrum():
@@ -35,7 +34,9 @@ def test_crab_spectrum():
     target_position = SkyCoord(ra=83.63, dec=22.01, unit="deg", frame="icrs")
 
     on_region_radius = Angle("0.11 deg")
-    on_region = CircleSkyRegion(center=target_position, radius=on_region_radius)
+    on_region = CircleSkyRegion(
+        center=target_position.galactic, radius=on_region_radius
+    )
     exclusion_region = CircleSkyRegion(
         center=SkyCoord(183.604, -8.708, unit="deg", frame="galactic"),
         radius=0.5 * u.deg,
@@ -43,7 +44,7 @@ def test_crab_spectrum():
 
     skydir = target_position.galactic
     geom = WcsGeom.create(
-        npix=(150, 150), binsz=0.05, skydir=skydir, proj="TAN", frame="icrs"
+        npix=(150, 150), binsz=0.05, skydir=skydir, proj="TAN", frame="galactic"
     )
 
     exclusion_mask = ~geom.region_mask([exclusion_region])
@@ -61,7 +62,7 @@ def test_crab_spectrum():
         containment_correction=True, selection=["counts", "exposure", "edisp"]
     )
     bkg_maker = ReflectedRegionsBackgroundMaker(exclusion_mask=exclusion_mask)
-    safe_mask_maker = SafeMaskMaker(methods=["aeff-max"], aeff_percent=15)
+    safe_mask_maker = SafeMaskMaker(methods=["aeff-max"], aeff_percent=10)
     datasets = Datasets()
 
     for obs_id, observation in zip(obs_ids, observations):
@@ -87,9 +88,10 @@ def test_crab_spectrum():
         spectral_shape=logp,
     )
     model = Model(ps)
+    conv = AstromodelConverter(model, frame="galactic")
     gl = GammapyLike("hess", sources="crab")
-    gl.set_datasets(datasets_copy)
-    gl.set_model(model)
+    gl.set_datasets(datasets.stack_reduce())
+    gl.set_model(model, converted_model=conv)
 
     # ba = BayesianAnalysis(likelihood_model=model, data_list=DataList(gl))
     # ba.set_sampler("multinest")
@@ -105,7 +107,7 @@ def test_crab_spectrum():
         amplitude=1e-12 * u.Unit("cm-2 s-1 TeV-1"), reference=1 * u.TeV
     )
     models = SkyModel(spectral_model=logp_gammapy, name="crab_gp")
-    dataset_stacked = Datasets(datasets).stack_reduce()
+    dataset_stacked = datasets_copy.stack_reduce()
     dataset_stacked.models = models
     fit_stacked = Fit()
     fit_stacked.run([dataset_stacked])

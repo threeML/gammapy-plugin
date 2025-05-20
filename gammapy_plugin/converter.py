@@ -33,7 +33,11 @@ class AstromodelConverter:
     ) -> None:
         assert isinstance(model, Model), "Needs an astromodels Model"
         self._astromodel_model = model
-        self._frame = frame
+        if frame is not None:
+            self._frame = frame
+        else:
+            log.warning("No frame passed - will use ICRS")
+            self._frame = "icrs"
         self._convert_ps = convert_ps
         self._converted_sources = {}
         self._gammapy_models = []
@@ -105,9 +109,9 @@ class SourceConverter:
     def __init__(
         self, source: Source, converter: AstromodelConverter, **kwargs
     ) -> None:
-        self._frame = kwargs.get("frame", "icrs")
         self._conv_spatial = kwargs.get("convert_spatial", True)
         self._converter = converter
+        self._frame = self._converter._frame
         self._source = source
         self._spatial_model = None
         self._spectral_model = None

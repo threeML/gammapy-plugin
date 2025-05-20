@@ -33,6 +33,7 @@ class SpectralModelConverted(SpectralModel):
         self._setup_parameters()
         self._x_unit = self._astromodel_function.x_unit
         self._y_unit = self._astromodel_function.y_unit
+        log.debug(f"These are the units: {self._x_unit}, {self._y_unit}")
         self._integral_unit = self._y_unit * self._x_unit
 
     def _setup_parameters(self):
@@ -57,6 +58,7 @@ class SpectralModelConverted(SpectralModel):
             interp = "linear"
             if isinstance(v.transformation, LogarithmicTransformation):
                 interp = "log"
+                log.debug(f"Set interpolatin of {v.name} to logarithmic")
             paras.append(
                 Parameter(
                     name=v.name,
@@ -66,6 +68,7 @@ class SpectralModelConverted(SpectralModel):
                     max=vmax,
                     frozen=not bool(v.free),
                     interp=interp,
+                    scale_transform=interp,
                 )
             )
             setattr(self, v.name, paras[-1])
@@ -91,13 +94,17 @@ class SpectralModelConverted(SpectralModel):
         Custom integral
         """
         assert len(emin) == len(emax), "Energy edges length do not match"
-        vals = np.zeros(len(emin))
+        vals = np.zeros(len(emin)) * self._integral_unit
         emin = emin.to(self._x_unit).value
         emax = emax.to(self._x_unit).value
         for i in range(len(emin)):
-            x = np.linspace(emin[i], emax[i], num=100)
-            vals[i] = np.trapezoid(self._astromodel_function.fast_call(x))
-        return vals * self._integral_unit
+            x = np.linspace(emin[i], emax[i], num=100) * self._x_unit
+            vals[i] = np.sum(
+                (self._astromodel_function(x[1:]) - self._astromodel_function(x[:-1]))
+                / 2
+                * (x[1:] - x[:-1])
+            )
+        return vals
 
     @property
     def mapping(self):
@@ -135,6 +142,11 @@ class PointSourceModelConverted(PointSpatialModel):
             lat = self._position.dec
         else:
             raise NotImplementedError("Only galactic and icrs currently available")
+        # TODO check if this is necessary
+        if lon.value > 180:
+            lon -= 360 * u.deg
+        elif lon.value <= -180:
+            lon += 360 * u.deg
         for k, v in self._sky_position.parameters.items():
             if k == "ra" or k == "l":
                 para_name = "lon_0"

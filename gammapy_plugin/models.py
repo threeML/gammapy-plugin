@@ -21,6 +21,8 @@ class SpectralModelConverted(SpectralModel):
     an gammapy SpectralModel
     """
 
+    tag = ["SpectralModelConverted", "spec_conv"]
+
     def __init__(self, function: Function) -> None:
         """
         :param function: the spectral function, must be an astromodels Function
@@ -116,6 +118,8 @@ class SpectralModelConverted(SpectralModel):
 
 
 class PointSourceModelConverted(PointSpatialModel):
+    tag = ["PointSourceModelConverted", "ps_conv"]
+
     def __init__(self, sky_position: SkyDirection, frame: str):
         assert isinstance(
             sky_position, SkyDirection
@@ -182,6 +186,8 @@ class SpatialModelConverted(SpatialModel):
     Class for converting a spatial astromodels function into
     an gammapy SpatialModel
     """
+
+    tag = ["SpatialModelConverted", "spat_conv"]
 
     def __init__(
         self,

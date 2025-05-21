@@ -8,6 +8,7 @@ from gammapy.modeling.models import (
     PointSpatialModel,
 )
 from gammapy.modeling.parameter import Parameter, Parameters
+from gammapy.modeling.covariance import Covariance
 from astromodels.functions.function import Function
 from astromodels.core.sky_direction import SkyDirection
 from astromodels.core.parameter_transformation import LogarithmicTransformation
@@ -35,6 +36,7 @@ class SpectralModelConverted(SpectralModel):
         self._y_unit = self._astromodel_function.y_unit
         log.debug(f"These are the units: {self._x_unit}, {self._y_unit}")
         self._integral_unit = self._y_unit * self._x_unit
+        super().__init__()
 
     def _setup_parameters(self):
         """
@@ -124,8 +126,10 @@ class PointSourceModelConverted(PointSpatialModel):
         self._name = self._sky_position.name
         self._position = self._sky_position.sky_coord.transform_to(frame)
         self._frame = frame
+        log.debug(f"PointSpatialMpdel got frame {self._frame}")
         setattr(self, "frame", self._frame)
         self._setup_parameters()
+        super().__init__()
 
     def _setup_parameters(self):
         """
@@ -205,6 +209,7 @@ class SpatialModelConverted(SpatialModel):
         self._frame = frame
         setattr(self, "frame", self._frame)
         self._setup_parameters()
+        super().__init__()
 
     def _setup_parameters(self):
         """

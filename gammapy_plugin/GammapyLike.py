@@ -108,7 +108,7 @@ class GammapyLike(PluginPrototype):
                 model=self._likelihood_model, frame=self._frame
             )
         for d in self._datasets:
-            d.models = [*self.gammapy_model]
+            d.models = self.gammapy_model
 
     def set_background_models(self, bkg_model):
         if isinstance(bkg_model, ModelBase):
@@ -121,7 +121,7 @@ class GammapyLike(PluginPrototype):
             self._background_models[b.name] = b
         self._parse_background_models()
         for d in self._datasets:
-            d.models = [*self.gammapy_model]
+            d.models = self.gammapy_model
 
     def _parse_background_models(self):
         """ """
@@ -201,7 +201,7 @@ class GammapyLike(PluginPrototype):
         if hasattr(self, "_background_models"):
             for m in self._background_models.values():
                 tmp.append(m)
-        return tmp
+        return Models(tmp)
 
     @property
     def frame(self) -> str:

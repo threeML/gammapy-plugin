@@ -65,6 +65,7 @@ class AstromodelConverter:
             source_name,
             source_instance,
         ) in self._astromodel_model.point_sources.items():
+            log.debug(f"Converting pointsource {source_name}")
             self._converted_sources[source_name] = SourceConverter(
                 source_instance, converter=self, convert_spatial=self._convert_ps
             )
@@ -119,7 +120,9 @@ class SourceConverter:
         self._gammapy_model = None
         self._parameter_dict = None
         if self._conv_spatial:
+            log.debug("Converting the spatial Model")
             self._convert_spatial_model()
+        log.debug("Converting the spectral Model")
         self._convert_spectral_model()
 
         self._create_skymodel()

@@ -30,8 +30,6 @@ class GammapyLike(PluginPrototype):
         return instance
 
     def __init__(self, name: str, **kwargs) -> None:
-        self._parameter_track = []
-        self._likelihood_track = []
         nuisance_parameters = kwargs.get("nuisance_parameters", {})
         super(GammapyLike, self).__init__(name, nuisance_parameters=nuisance_parameters)
         self._frame = kwargs.get("frame", "icrs")
@@ -46,7 +44,6 @@ class GammapyLike(PluginPrototype):
         self,
         datasets: Union[Dataset, Datasets, list[Dataset]],
         mode: str = "individual",
-        **kwargs,
     ) -> None:
         """
         Set the Gammapy Dataset
@@ -159,8 +156,6 @@ class GammapyLike(PluginPrototype):
         self._likelihood_model_converted._update_parameters()
         self._update_background_models()
         # TODO: maybe too costly
-        self._parameter_track.append([d.models.to_dict() for d in self._datasets])
-        self._likelihood_track.append(-self._datasets._stat_sum_likelihood())
         if GAMMAPY_VERSION_MAJOR > 1:
             return -self._datasets._stat_sum_likelihood()
         else:

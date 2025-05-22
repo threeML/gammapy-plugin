@@ -91,25 +91,6 @@ class SpectralModelConverted(SpectralModel):
                 kwargs_new[k] = kwargs[k]
         return self._astromodel_function.evaluate(*args, **kwargs_new)
 
-    def evaluate_integral(
-        self, emin: u.Quantity, emax: u.Quantity, **kwargs
-    ) -> u.Quantity:
-        """
-        Custom integral
-        """
-        assert len(emin) == len(emax), "Energy edges length do not match"
-        vals = np.zeros(len(emin)) * self._integral_unit
-        emin = emin.to(self._x_unit).value
-        emax = emax.to(self._x_unit).value
-        for i in range(len(emin)):
-            x = np.linspace(emin[i], emax[i], num=100) * self._x_unit
-            vals[i] = np.sum(
-                (self._astromodel_function(x[1:]) - self._astromodel_function(x[:-1]))
-                / 2
-                * (x[1:] - x[:-1])
-            )
-        return vals
-
     @property
     def mapping(self):
         return self._mapping

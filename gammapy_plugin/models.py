@@ -59,10 +59,10 @@ class SpectralModelConverted(SpectralModel):
             self._mapping[v.path] = v.name
             if v.free:
                 self._mapping_free[v.path] = v.name
-            interp = "linear"
-            if isinstance(v.transformation, LogarithmicTransformation):
-                interp = "log"
-                log.debug(f"Set interpolatin of {v.name} to logarithmic")
+            # interp = "linear"
+            # if isinstance(v.transformation, LogarithmicTransformation):
+            #    interp = "log"
+            #    log.debug(f"Set interpolatin of {v.name} to logarithmic")
             paras.append(
                 Parameter(
                     name=v.name,
@@ -71,8 +71,8 @@ class SpectralModelConverted(SpectralModel):
                     min=vmin,
                     max=vmax,
                     frozen=not bool(v.free),
-                    interp=interp,
-                    scale_transform=interp,
+                    # interp=interp,
+                    # scale_transform=interp,
                 )
             )
             setattr(self, v.name, paras[-1])

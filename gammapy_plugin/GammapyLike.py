@@ -162,9 +162,9 @@ class GammapyLike(PluginPrototype):
         self._update_background_models()
         # TODO: maybe too costly
         if GAMMAPY_VERSION_MAJOR > 1:
-            return -self._datasets._stat_sum_likelihood()
+            return -0.5 * self._datasets._stat_sum_likelihood()
         else:
-            return -self._datasets.stat_sum()
+            return -0.5 * self._datasets.stat_sum()
 
     def inner_fit(self):
         return self.get_log_like()

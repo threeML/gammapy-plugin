@@ -6,11 +6,7 @@ from rich.logging import RichHandler
 from rich.theme import Theme
 
 from .configuration import gammapy_plugin_config
-
-from .package_data import (
-    get_path_of_data_file,
-    get_path_of_log_file,
-)
+from .package_data import get_path_of_data_file, get_path_of_log_file
 
 _log_file_names = ["usr.log", "dev.log"]
 

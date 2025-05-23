@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import versioneer
 from setuptools import setup
+
+import versioneer
 
 # # Create list of data files
 # def find_data_files(directory):

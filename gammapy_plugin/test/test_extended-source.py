@@ -1,26 +1,20 @@
 import astropy.units as u
+from astromodels.core.model import Model
+from astromodels.functions import (Gaussian_on_sphere, Log_uniform_prior,
+                                   Powerlaw, Uniform_prior)
+from astromodels.sources.extended_source import ExtendedSource
 from astropy.coordinates import Angle, SkyCoord
-from regions import CircleSkyRegion
 from gammapy.data import DataStore
 from gammapy.datasets import Datasets, SpectrumDataset
-from gammapy.makers import (
-    ReflectedRegionsBackgroundMaker,
-    SafeMaskMaker,
-    SpectrumDatasetMaker,
-)
+from gammapy.makers import (ReflectedRegionsBackgroundMaker, SafeMaskMaker,
+                            SpectrumDatasetMaker)
 from gammapy.maps import MapAxis, RegionGeom
 from gammapy.modeling import Fit
 from gammapy.modeling.models import PowerLawSpectralModel, SkyModel
+from regions import CircleSkyRegion
+from threeML import DataList, JointLikelihood
+
 from gammapy_plugin.GammapyLike import GammapyLike
-from astromodels.functions import (
-    Powerlaw,
-    Uniform_prior,
-    Log_uniform_prior,
-    Disk_on_sphere,
-)
-from astromodels.core.model import Model
-from astromodels.sources.extended_source import ExtendedSource
-from threeML import JointLikelihood, DataList
 from gammapy_plugin.test.utils import get_close
 
 

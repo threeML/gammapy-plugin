@@ -1,17 +1,13 @@
-from threeML.io.logging import setup_logger
-import numpy as np
 import astropy.units as u
-from gammapy.modeling.models import (
-    SpectralModel,
-    SpatialModel,
-    TemporalModel,
-    PointSpatialModel,
-)
-from gammapy.modeling.parameter import Parameter, Parameters
-from gammapy.modeling.covariance import Covariance
-from astromodels.functions.function import Function
-from astromodels.core.sky_direction import SkyDirection
+import numpy as np
 from astromodels.core.parameter_transformation import LogarithmicTransformation
+from astromodels.core.sky_direction import SkyDirection
+from astromodels.functions.function import Function
+from gammapy.modeling.covariance import Covariance
+from gammapy.modeling.models import (PointSpatialModel, SpatialModel,
+                                     SpectralModel, TemporalModel)
+from gammapy.modeling.parameter import Parameter, Parameters
+from threeML.io.logging import setup_logger
 
 log = setup_logger(__name__)
 

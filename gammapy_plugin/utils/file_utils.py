@@ -1,10 +1,10 @@
+import logging
 import os
 import shutil
 import tempfile
 from builtins import str
 from contextlib import contextmanager
 from pathlib import Path
-import logging
 
 log = logging.getLogger(__name__)
 

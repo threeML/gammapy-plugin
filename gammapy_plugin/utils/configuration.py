@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
+
 from omegaconf import OmegaConf
 from omegaconf.dictconfig import DictConfig
 from rich.tree import Tree

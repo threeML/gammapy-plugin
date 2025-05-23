@@ -1,6 +1,6 @@
+import numpy as np
 from astromodels.functions.function import Function1D, FunctionMeta
 from threeML import u
-import numpy as np
 
 
 class Log_parabola_gammapy(Function1D, metaclass=FunctionMeta):

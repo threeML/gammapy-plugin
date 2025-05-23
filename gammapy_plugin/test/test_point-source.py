@@ -1,30 +1,23 @@
 import astropy.units as u
+from astromodels.core.model import Model
+from astromodels.functions import (Log_parabola, Log_uniform_prior,
+                                   Uniform_prior)
+from astromodels.sources import PointSource
 from astropy.coordinates import Angle, SkyCoord
-from regions import CircleSkyRegion
 from gammapy.data import DataStore
-from gammapy.datasets import (
-    Datasets,
-    SpectrumDataset,
-)
-from gammapy.makers import (
-    ReflectedRegionsBackgroundMaker,
-    SafeMaskMaker,
-    SpectrumDatasetMaker,
-)
+from gammapy.datasets import Datasets, SpectrumDataset
+from gammapy.makers import (ReflectedRegionsBackgroundMaker, SafeMaskMaker,
+                            SpectrumDatasetMaker)
 from gammapy.maps import MapAxis, RegionGeom, WcsGeom
 from gammapy.modeling import Fit
-from gammapy.modeling.models import SkyModel
-from gammapy_plugin.GammapyLike import GammapyLike
-from gammapy.modeling.models import LogParabolaSpectralModel
-
-# from threeML.bayesian.bayesian_analysis import BayesianAnalysis
-from gammapy_plugin.test.utils import get_close
-from gammapy_plugin.converter import AstromodelConverter
+from gammapy.modeling.models import LogParabolaSpectralModel, SkyModel
+from regions import CircleSkyRegion
 from threeML.classicMLE.joint_likelihood import JointLikelihood
 from threeML.data_list import DataList
-from astromodels.core.model import Model
-from astromodels.sources import PointSource
-from astromodels.functions import Log_parabola, Log_uniform_prior, Uniform_prior
+
+from gammapy_plugin.converter import AstromodelConverter
+from gammapy_plugin.GammapyLike import GammapyLike
+from gammapy_plugin.test.utils import get_close
 
 
 def test_crab_spectrum():

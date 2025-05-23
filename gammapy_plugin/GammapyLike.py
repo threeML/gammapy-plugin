@@ -1,14 +1,17 @@
-from typing import Union
 from importlib.metadata import version
+from typing import Union
+
 import numpy as np
 from astromodels.core.model import Model
-from astromodels.functions.priors import Truncated_gaussian, Uniform_prior
+from astromodels.functions.priors import Truncated_gaussian
+from gammapy.datasets import Dataset, Datasets
+from gammapy.modeling.models import DatasetModels, ModelBase, Models, SkyModel
 from threeML.io.logging import setup_logger
 from threeML.plugin_prototype import PluginPrototype
+
 from gammapy_plugin.converter import AstromodelConverter
-from gammapy.datasets import Datasets, Dataset
-from gammapy.modeling.models import SkyModel, ModelBase, Models, DatasetModels
-from gammapy_plugin.gammapy_source import parse_gammapy_model, parameter_to_gammapy_dict
+from gammapy_plugin.gammapy_source import (parameter_to_gammapy_dict,
+                                           parse_gammapy_model)
 
 GAMMAPY_VERSION = version("gammapy")
 GAMMAPY_VERSION_MAJOR = int(GAMMAPY_VERSION.split(".")[0])

@@ -1,7 +1,7 @@
-from threeML.io.logging import setup_logger
 import numpy as np
 from astromodels.core.parameter import Parameter
 from gammapy.modeling.models.core import ModelBase
+from threeML.io.logging import setup_logger
 
 log = setup_logger(__name__)
 

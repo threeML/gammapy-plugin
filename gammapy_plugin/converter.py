@@ -6,10 +6,12 @@ from gammapy.modeling.models import SkyModel
 from threeML.io.logging import setup_logger
 
 from gammapy_plugin.gammapy_source import parameter_to_gammapy_dict
-from gammapy_plugin.models import (PointSourceModelConverted,
-                                   SpatialModelConverted,
-                                   SpectralModelConverted,
-                                   TemporalModelConverted)
+from gammapy_plugin.models import (
+    PointSourceModelConverted,
+    SpatialModelConverted,
+    SpectralModelConverted,
+    TemporalModelConverted,
+)
 
 log = setup_logger(__name__)
 
@@ -148,15 +150,9 @@ class SourceConverter:
         """
         # update the parameter dict for this skymodel
         for k, v in self._mapping_free.items():
-            # log.debug(
-            #    f"Parameter {v} before updating: {self.skymodel.parameters[v].value}"
-            # )
             self.skymodel.parameters[v].update_from_dict(
                 parameter_to_gammapy_dict(self._converter.model[k])
             )
-            # log.debug(
-            #    f"Parameter {v} after updating: {self.skymodel.parameters[v].value}"
-            # )
 
     def _convert_spectral_model(self) -> None:
         """

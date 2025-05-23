@@ -20,7 +20,6 @@ import os
 import sys
 from pathlib import Path
 
-
 project = "Gammapy Plugin"
 copyright = "2022, J. Michael Burgess"
 author = "J. Michael Burgess"

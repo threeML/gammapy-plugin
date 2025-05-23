@@ -1,104 +1,161 @@
 import astropy.units as u
+import numpy as np
 from astromodels.core.model import Model
-from astromodels.functions import (Gaussian_on_sphere, Log_uniform_prior,
-                                   Powerlaw, Uniform_prior)
+from astromodels.core.units import get_units
+from astromodels.functions import (
+    Log_uniform_prior,
+    Powerlaw,
+    Uniform_prior,
+)
 from astromodels.sources.extended_source import ExtendedSource
-from astropy.coordinates import Angle, SkyCoord
+from astropy.coordinates import SkyCoord
 from gammapy.data import DataStore
-from gammapy.datasets import Datasets, SpectrumDataset
-from gammapy.makers import (ReflectedRegionsBackgroundMaker, SafeMaskMaker,
-                            SpectrumDatasetMaker)
-from gammapy.maps import MapAxis, RegionGeom
+from gammapy.datasets import MapDataset
+from gammapy.makers import (
+    FoVBackgroundMaker,
+    MapDatasetMaker,
+    SafeMaskMaker,
+)
+from gammapy.maps import MapAxis, WcsGeom
 from gammapy.modeling import Fit
-from gammapy.modeling.models import PowerLawSpectralModel, SkyModel
+from gammapy.modeling.models import (
+    PowerLawSpectralModel,
+    SkyModel,
+    GaussianSpatialModel,
+)
 from regions import CircleSkyRegion
 from threeML import DataList, JointLikelihood
 
+from gammapy_plugin.converter import AstromodelConverter
 from gammapy_plugin.GammapyLike import GammapyLike
-from gammapy_plugin.test.utils import get_close
+from gammapy_plugin.utils.astromodels_functions import Gaussian_on_sphere
+
+get_units().energy = u.TeV
 
 
-def test_extended_source_spectrum():
-    """
-    Here we only fit the spectrum of the extended source RX J1713
-    """
+def test_extened_source_no_fov_bkg():
     datastore = DataStore.from_dir("$GAMMAPY_DATA/hess-dl3-dr1/")
-    obs_ids = [20326, 20327, 20349, 20350, 20396, 20397]
-    # In case you want to use all RX J1713 data in the H.E.S.S. DR1
-    # other_ids=[20421, 20422, 20517, 20518, 20519, 20521, 20898, 20899, 20900]
+    target_position = SkyCoord.from_name("RX J1713.7-3946").galactic
 
-    observations = datastore.get_observations(obs_ids)
-    target_position = SkyCoord(347.3, -0.5, unit="deg", frame="galactic")
-    radius = Angle("0.5 deg")
-    on_region = CircleSkyRegion(target_position, radius)
-    # The binning of the final spectrum is defined here.
-    energy_axis = MapAxis.from_energy_bounds(0.1, 40.0, 10, unit="TeV")
+    selection = dict(
+        type="sky_circle",
+        frame="galactic",
+        lon=target_position.l,
+        lat=target_position.b,
+        radius="5deg",
+    )
+    select_obs_tab = datastore.obs_table.select_observations(selection)
 
-    # Reduced IRFs are defined in true energy (i.e. not measured energy).
+    obs = datastore.get_observations(select_obs_tab["OBS_ID"])
+
+    # Prepare the geometry
+    energy_axis = MapAxis.from_energy_bounds(0.3, 10.0, 15, unit="TeV")
     energy_axis_true = MapAxis.from_energy_bounds(
-        0.05, 100, 30, unit="TeV", name="energy_true"
+        0.1, 20, 10, per_decade=True, unit="TeV", name="energy_true"
     )
-
-    geom = RegionGeom(on_region, axes=[energy_axis])
-
-    dataset_empty = SpectrumDataset.create(
-        geom=geom,
-        energy_axis_true=energy_axis_true,
+    geom = WcsGeom.create(
+        skydir=target_position,
+        binsz=0.02,
+        width=(6 * u.deg, 6 * u.deg),
+        frame="galactic",
+        axes=[energy_axis],
     )
-    maker = SpectrumDatasetMaker(
-        selection=["counts", "exposure", "edisp"], use_region_center=False
+    stacked = MapDataset.create(
+        geom=geom, energy_axis_true=energy_axis_true, name="empty"
     )
-    bkg_maker = ReflectedRegionsBackgroundMaker()
-    safe_mask_maker = SafeMaskMaker(methods=["aeff-max"], aeff_percent=10)
-    datasets = Datasets()
-
-    for obs in observations:
-        # A SpectrumDataset is filled in this geometry
-        dataset = maker.run(dataset_empty.copy(name=f"obs-{obs.obs_id}"), obs)
-
-        # Define safe mask
-        dataset = safe_mask_maker.run(dataset, obs)
-
-        # Compute OFF
-        dataset = bkg_maker.run(dataset, obs)
-
-        # Append dataset to the list
-        datasets.append(dataset)
-
-    datasets_copy = datasets.copy()
-
-    spectral_model = PowerLawSpectralModel(
-        index=2, amplitude=2e-11 * u.Unit("cm-2 s-1 TeV-1"), reference=1 * u.TeV
+    circle = CircleSkyRegion(center=target_position, radius=1 * u.deg)
+    regions = [circle]
+    exclusion_mask = ~geom.region_mask(regions=regions)
+    maker = MapDatasetMaker(
+        selection=["counts", "background", "psf", "edisp", "exposure"],
     )
-    model = SkyModel(spectral_model=spectral_model, name="RXJ 1713")
+    safe_mask_maker = SafeMaskMaker(
+        methods=["offset-max", "aeff-max", "bkg-peak"], offset_max="2.3 deg"
+    )
+    fov_bkg_maker = FoVBackgroundMaker(method="fit", exclusion_mask=exclusion_mask)
+    for o in obs:
+        dataset = maker.run(stacked, o)
+        dataset = safe_mask_maker.run(dataset, o)
+        dataset = fov_bkg_maker.run(dataset)
+        stacked.stack(dataset)
 
-    datasets.models = [model]
-
-    fit_joint = Fit()
-    fit_joint.run(datasets=datasets)
-
-    gl = GammapyLike("hess")
-    gl.set_datasets(datasets_copy)
     pl = Powerlaw()
-    pl.index.prior = Uniform_prior(lower_bound=-4, upper_bound=-1)
-    pl.index.value = -3
-    pl.K.prior = Log_uniform_prior(lower_bound=1e-22, upper_bound=1e-19)
-    pl.K.value = 1e-21
-    pl.piv.value = 1e9
-    pl.piv.free = False
-    disk = Disk_on_sphere(
-        lon0=target_position.transform_to("icrs").ra.deg,
-        lat0=target_position.transform_to("icrs").dec.deg,
-        radius=radius.value,
+    spat = Gaussian_on_sphere(
+        lon0=target_position.transform_to("galactic").l.deg,
+        lat0=target_position.transform_to("galactic").b.deg,
+        sigma=0.25,
     )
-    disk.lon0.free = False
-    disk.lat0.free = False
-    disk.radius.free = False
-    es = ExtendedSource(source_name="rxj1713", spatial_shape=disk, spectral_shape=pl)
-    model_am = Model(es)
-    gl.set_model(model_am)
-    jl = JointLikelihood(model_am, DataList(gl))
+    es = ExtendedSource(source_name="rxj1713", spectral_shape=pl, spatial_shape=spat)
+    pl.index.value = -2
+    pl.index.prior = Uniform_prior(lower_bound=-3, upper_bound=-1)
+    pl.K = 2.3 * 1e-11
+    pl.K.prior = Log_uniform_prior(lower_bound=1e-18, upper_bound=1e-8)
+    pl.piv.value = 1
+    pl.piv.free = False
+    spat.lon0.free = False
+    spat.lat0.free = False
+    spat.sigma.free = True
+    spat.sigma.prior = Log_uniform_prior(lower_bound=0.1, upper_bound=1.0)
+    model = Model(es)
+    gl = GammapyLike("hess", frame="galactic")
+    gl.set_datasets(
+        stacked.copy(), mode="stacked"
+    )  # making a copy to not interfer with the gp fit
+    gl.set_sources(["rxj1713"])
+    conv = AstromodelConverter(model, frame="galactic")
+    gl.set_model(model, conv)
+    jl = JointLikelihood(model, DataList(gl))
     jl.fit()
     res = jl.results
 
-    assert get_close(res, model.spectral_model.to_dict()) is True
+    pl_gp = PowerLawSpectralModel(reference=1 * u.TeV)
+    gauss_gp = GaussianSpatialModel(
+        lon_0=347.269 * u.deg,
+        lat_0=-0.257 * u.deg,
+        frame="galactic",
+    )
+    gauss_gp.e.frozen = True
+    gauss_gp.phi.frozen = True
+    gauss_gp.lon_0.frozen = True
+    gauss_gp.lat_0.frozen = True
+
+    model_gp = SkyModel(name="rxj_gp", spatial_model=gauss_gp, spectral_model=pl_gp)
+    ds_gp = stacked.copy()
+    ds_gp.models = [model_gp]
+    fit = Fit()
+    resu = fit.run(datasets=ds_gp)
+
+    assert (
+        np.isclose(
+            res.optimized_model.free_parameters[
+                "rxj1713.Gaussian_on_sphere.sigma"
+            ].value,
+            resu.models.parameters["sigma"].value,
+            rtol=1e-3,
+        )
+        is np.True_
+    )
+    assert (
+        np.isclose(
+            -res.optimized_model.free_parameters[
+                "rxj1713.spectrum.main.Powerlaw.index"
+            ].value,
+            resu.models.parameters["index"].value,
+            rtol=1e-3,
+        )
+        is np.True_
+    )
+    assert (
+        np.isclose(
+            res.optimized_model.free_parameters[
+                "rxj1713.spectrum.main.Powerlaw.K"
+            ].value
+            * res.optimized_model.extended_sources[
+                "rxj1713"
+            ].spatial_shape.get_total_spatial_integral(1),
+            resu.models.parameters["amplitude"].value,
+            rtol=1e-3,
+            atol=1e-20,
+        )
+        is np.True_
+    )

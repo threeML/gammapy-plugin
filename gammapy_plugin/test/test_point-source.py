@@ -1,13 +1,16 @@
 import astropy.units as u
+from astromodels.core.units import get_units
 from astromodels.core.model import Model
-from astromodels.functions import (Log_parabola, Log_uniform_prior,
-                                   Uniform_prior)
+from astromodels.functions import Log_parabola, Log_uniform_prior, Uniform_prior
 from astromodels.sources import PointSource
 from astropy.coordinates import Angle, SkyCoord
 from gammapy.data import DataStore
 from gammapy.datasets import Datasets, SpectrumDataset
-from gammapy.makers import (ReflectedRegionsBackgroundMaker, SafeMaskMaker,
-                            SpectrumDatasetMaker)
+from gammapy.makers import (
+    ReflectedRegionsBackgroundMaker,
+    SafeMaskMaker,
+    SpectrumDatasetMaker,
+)
 from gammapy.maps import MapAxis, RegionGeom, WcsGeom
 from gammapy.modeling import Fit
 from gammapy.modeling.models import LogParabolaSpectralModel, SkyModel
@@ -18,6 +21,8 @@ from threeML.data_list import DataList
 from gammapy_plugin.converter import AstromodelConverter
 from gammapy_plugin.GammapyLike import GammapyLike
 from gammapy_plugin.test.utils import get_close
+
+get_units().energy = u.TeV
 
 
 def test_crab_spectrum():
@@ -67,8 +72,8 @@ def test_crab_spectrum():
 
     logp = Log_parabola()
     logp.K.prior = Log_uniform_prior(lower_bound=1e-22, upper_bound=1e-19)
-    logp.K.value = 1e-21
-    logp.piv.value = 1e9
+    logp.K.value = 1e-12
+    logp.piv.value = 1
     logp.piv.free = False
     logp.alpha.prior = Uniform_prior(lower_bound=-3, upper_bound=-1)
     logp.alpha.value = -2
@@ -85,12 +90,6 @@ def test_crab_spectrum():
     gl = GammapyLike("hess", sources="crab")
     gl.set_datasets(datasets.stack_reduce())
     gl.set_model(model, converted_model=conv)
-
-    # ba = BayesianAnalysis(likelihood_model=model, data_list=DataList(gl))
-    # ba.set_sampler("multinest")
-    # ba.sampler.setup()
-    # ba.sample()
-    # res = ba.results
 
     jl = JointLikelihood(model, DataList(gl))
     jl.fit()

@@ -111,6 +111,7 @@ class GammapyLike(PluginPrototype):
             self._likelihood_model_converted = AstromodelConverter(
                 model=self._likelihood_model, frame=self._frame
             )
+        self._set_gammapy_model()
         for d in self._datasets:
             d.models = self.gammapy_model
 
@@ -124,6 +125,7 @@ class GammapyLike(PluginPrototype):
         for b in bkg_model:
             self._background_models[b.name] = b
         self._parse_background_models()
+        self._set_gammapy_model()
         for d in self._datasets:
             d.models = self.gammapy_model
 
@@ -188,24 +190,32 @@ class GammapyLike(PluginPrototype):
         """
         return self._likelihood_model
 
-    @property
-    def gammapy_model(self) -> list[SkyModel]:
+    def _set_gammapy_model(self) -> Models:
         """
         List of all the Gammapy SkyModels
         """
-        # TODO: only assign sources listed in self._sources
+        # TODO do not do that in the property
         if hasattr(self, "_likelihood_model_converted"):
-            tmp = [
-                x
-                for x in self._likelihood_model_converted.gammapy_models
-                if x.name in self._sources or self._sources is None
-            ]
+            if self._sources is not None:
+                tmp = [
+                    x
+                    for x in self._likelihood_model_converted.gammapy_models
+                    if x.name in self._sources
+                ]
+            else:
+                tmp = [x for x in self._likelihood_model_converted.gammapy_models]
         else:
             tmp = []
         if hasattr(self, "_background_models"):
             for m in self._background_models.values():
                 tmp.append(m)
-        return Models(tmp)
+        self._gammapy_model = Models(tmp)
+
+    @property
+    def gammapy_model(self):
+        if not hasattr(self, "_gammapy_model"):
+            self._set_gammapy_model()
+        return self._gammapy_model
 
     @property
     def frame(self) -> str:
@@ -216,3 +226,4 @@ class GammapyLike(PluginPrototype):
 
 
 # TODO: setter method for frame --> change all the frames
+# --> may also needs to be done for astromodels!

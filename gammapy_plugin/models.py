@@ -4,8 +4,12 @@ from astromodels.core.parameter_transformation import LogarithmicTransformation
 from astromodels.core.sky_direction import SkyDirection
 from astromodels.functions.function import Function
 from gammapy.modeling.covariance import Covariance
-from gammapy.modeling.models import (PointSpatialModel, SpatialModel,
-                                     SpectralModel, TemporalModel)
+from gammapy.modeling.models import (
+    PointSpatialModel,
+    SpatialModel,
+    SpectralModel,
+    TemporalModel,
+)
 from gammapy.modeling.parameter import Parameter, Parameters
 from threeML.io.logging import setup_logger
 

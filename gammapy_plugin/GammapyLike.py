@@ -24,8 +24,6 @@ __instrument_name = "Gammapy"
 class GammapyLike(PluginPrototype):
     """
     A plugin for including instruments supported by Gammapy
-    After initiating you need to set_datasets() to add Gammapy dataset(s) to the
-    Plugin
     """
 
     def __new__(cls, *args, **kwargs) -> PluginPrototype:
@@ -33,6 +31,10 @@ class GammapyLike(PluginPrototype):
         return instance
 
     def __init__(self, name: str, **kwargs) -> None:
+        """
+        :param name: Name of the plugin
+        :type name: str
+        """
         nuisance_parameters = kwargs.get("nuisance_parameters", {})
         super(GammapyLike, self).__init__(name, nuisance_parameters=nuisance_parameters)
         self._frame = kwargs.get("frame", "icrs")
@@ -51,7 +53,9 @@ class GammapyLike(PluginPrototype):
         """
         Set the Gammapy Dataset
         :param datasets: list of Gammapy datasets or a single Dataset object
-        :param mode: individual or stacked - defaults to individual
+        :param mode: individual or stacked - defaults to individual, stacked
+            stacks the passed datasets
+        :param stacked_name: name of the stacked datasset if mode is stacked
         """
         assert mode in [
             "individual",
@@ -80,9 +84,9 @@ class GammapyLike(PluginPrototype):
     def set_sources(self, sources: list = None) -> None:
         """
         Set the sources to be used by this plugin
-        Needed e.g. for assigning different background models to individual plugins
+        :param sources: Source(s) to be used in the analysis defaults to all
+        :type sources: list of str or str
         """
-        # todo assert source is in model
         assert isinstance(sources, list) or sources is None, "Wrong source type"
         self._sources = sources
 
@@ -93,7 +97,10 @@ class GammapyLike(PluginPrototype):
     ) -> None:
         """
         Set the model to be used in the joint minimization.
-        Must be a Astromodels Model instance.
+        :param likelihood_model: astromodels model
+        :param converted_model: converted astromodels
+        :type likelihood_model: Model
+        :type converted_model: AstromodelConverter
         """
 
         if self._sources is None:
@@ -116,6 +123,9 @@ class GammapyLike(PluginPrototype):
             d.models = self.gammapy_model
 
     def set_background_models(self, bkg_model):
+        """
+        Update the list of gammapy models
+        """
         if isinstance(bkg_model, ModelBase):
             bkg_model = [bkg_model]
         else:
@@ -130,7 +140,11 @@ class GammapyLike(PluginPrototype):
             d.models = self.gammapy_model
 
     def _parse_background_models(self):
-        """ """
+        """
+        Parse the background models and link the gammapy parameters to nuissance
+        parameters of this plugin and set the prior
+        """
+        # TODO way of manually specifying the priors
         for name, bkg in self._background_models.items():
             bkg_paras = parse_gammapy_model(bkg, self._name)
             for k, v in bkg_paras.items():
@@ -160,7 +174,7 @@ class GammapyLike(PluginPrototype):
         """
         self._likelihood_model_converted._update_parameters()
         self._update_background_models()
-        # TODO: maybe too costly
+        # TODO: maybe too costly and not necessary
         if GAMMAPY_VERSION_MAJOR > 1:
             return -0.5 * self._datasets._stat_sum_likelihood()
         else:
@@ -174,12 +188,15 @@ class GammapyLike(PluginPrototype):
         return np.sum([np.prod(d.counts.data.shape) for d in self._datasets])
 
     def distribute_covariance(self):
+        """
+        Distributed the covariance matrix from 3ML result to gammapy models
+        """
         raise NotImplementedError
 
     @property
     def datasets(self) -> Dataset:
         """
-        Gammapy dataset of the plugin
+        Gammapy datasets of the plugin
         """
         return self._datasets
 
@@ -192,7 +209,7 @@ class GammapyLike(PluginPrototype):
 
     def _set_gammapy_model(self) -> Models:
         """
-        List of all the Gammapy SkyModels
+        AstromodelConverter object used for this plugin
         """
         # TODO do not do that in the property
         if hasattr(self, "_likelihood_model_converted"):
@@ -213,6 +230,9 @@ class GammapyLike(PluginPrototype):
 
     @property
     def gammapy_model(self):
+        """
+        List of all the Gammapy SkyModels
+        """
         if not hasattr(self, "_gammapy_model"):
             self._set_gammapy_model()
         return self._gammapy_model

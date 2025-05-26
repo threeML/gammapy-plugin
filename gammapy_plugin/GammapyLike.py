@@ -1,22 +1,20 @@
 from importlib.metadata import version
-from typing import Union
-
 import numpy as np
 from astromodels.core.model import Model
 from astromodels.functions.priors import Truncated_gaussian
 from gammapy.datasets import Dataset, Datasets
-from gammapy.modeling.models import DatasetModels, ModelBase, Models, SkyModel
+from gammapy.modeling.models import DatasetModels, ModelBase, Models
 from threeML.io.logging import setup_logger
 from threeML.plugin_prototype import PluginPrototype
 
 from gammapy_plugin.converter import AstromodelConverter
-from gammapy_plugin.gammapy_source import (parameter_to_gammapy_dict,
-                                           parse_gammapy_model)
+from gammapy_plugin.gammapy_source import parameter_to_gammapy_dict, parse_gammapy_model
+
+log = setup_logger(__name__)
 
 GAMMAPY_VERSION = version("gammapy")
 GAMMAPY_VERSION_MAJOR = int(GAMMAPY_VERSION.split(".")[0])
 
-log = setup_logger(__name__)
 
 __instrument_name = "Gammapy"
 
@@ -47,8 +45,9 @@ class GammapyLike(PluginPrototype):
 
     def set_datasets(
         self,
-        datasets: Union[Dataset, Datasets, list[Dataset]],
+        datasets: Dataset | Datasets | list[Dataset],
         mode: str = "individual",
+        stacked_name: str = "stacked",
     ) -> None:
         """
         Set the Gammapy Dataset
@@ -66,12 +65,16 @@ class GammapyLike(PluginPrototype):
             for d in datasets:
                 self._datasets.append(d)
             if mode == "stacked":
-                self._datasets = Datasets(self._datasets.stack_reduce(name="stacked"))
+                self._datasets = Datasets(
+                    self._datasets.stack_reduce(name=stacked_name)
+                )
 
         elif isinstance(datasets, Datasets):
             self._datasets = datasets
             if mode == "stacked":
-                self._datasets = Datasets(self._datasets.stack_reduce(name="stacked"))
+                self._datasets = Datasets(
+                    self._datasets.stack_reduce(name=stacked_name)
+                )
         elif isinstance(datasets, Dataset):
             self._datasets = Datasets(datasets)
             if mode == "stacked":
@@ -81,18 +84,24 @@ class GammapyLike(PluginPrototype):
             msg += " a single Datasets or Dataset object"
             raise TypeError(msg)
 
-    def set_sources(self, sources: list = None) -> None:
+    def set_sources(self, sources: list | str = None) -> None:
         """
         Set the sources to be used by this plugin
         :param sources: Source(s) to be used in the analysis defaults to all
         :type sources: list of str or str
         """
-        assert isinstance(sources, list) or sources is None, "Wrong source type"
-        self._sources = sources
+        if isinstance(sources, list):
+            self._sources = sources
+        elif isinstance(sources, str):
+            self._sources = [sources]
+        elif sources is None:
+            self._sources = None
+        else:
+            raise ValueError("")
 
     def set_model(
         self,
-        likelihood_model_instance: Model,
+        likelihood_model: Model,
         converted_model: AstromodelConverter = None,
     ) -> None:
         """
@@ -108,23 +117,47 @@ class GammapyLike(PluginPrototype):
                 "If you want to specify sources for this Plugin you MUST do so before"
             )
         else:
-            log.info(f"Will use {self._sources} for this plugin")
-        self._likelihood_model: Model = likelihood_model_instance
+            log.debug(f"Will use {self._sources} for this plugin")
+        self._likelihood_model: Model = likelihood_model
         if converted_model is not None:
-            self._likelihood_model_converted = converted_model
+            self._likelihood_model_converted: AstromodelConverter = converted_model
         elif hasattr(self, "_likelihood_model_converted"):
             pass
         else:
-            self._likelihood_model_converted = AstromodelConverter(
+            self._likelihood_model_converted: AstromodelConverter = AstromodelConverter(
                 model=self._likelihood_model, frame=self._frame
             )
-        self._set_gammapy_model()
+        self.update_gammapy_model_list()
         for d in self._datasets:
             d.models = self.gammapy_model
 
-    def set_background_models(self, bkg_model):
+    def _update_gammapy_model_list(self) -> Models:
         """
         Update the list of gammapy models
+        """
+        if hasattr(self, "_likelihood_model_converted"):
+            if self._sources is not None:
+                tmp = [
+                    x
+                    for x in self._likelihood_model_converted.gammapy_models
+                    if x.name in self._sources
+                ]
+            else:
+                tmp = [x for x in self._likelihood_model_converted.gammapy_models]
+        else:
+            tmp = []
+        if hasattr(self, "_background_models"):
+            for m in self._background_models.values():
+                tmp.append(m)
+        self._gammapy_model = Models(tmp)
+
+    def set_background_models(
+        self, bkg_model: ModelBase | list | Models | DatasetModels
+    ) -> None:
+        """
+        Set the gammapy background models (e.g. FoVBackgroundModel)
+        :param bkg_model: Background model(s)
+        :type bkg_model: ModelBase or list of ModelBase or Models or DatasetModels
         """
         if isinstance(bkg_model, ModelBase):
             bkg_model = [bkg_model]
@@ -135,7 +168,7 @@ class GammapyLike(PluginPrototype):
         for b in bkg_model:
             self._background_models[b.name] = b
         self._parse_background_models()
-        self._set_gammapy_model()
+        self.update_gammapy_model_list()
         for d in self._datasets:
             d.models = self.gammapy_model
 
@@ -194,7 +227,7 @@ class GammapyLike(PluginPrototype):
         raise NotImplementedError
 
     @property
-    def datasets(self) -> Dataset:
+    def datasets(self) -> Datasets:
         """
         Gammapy datasets of the plugin
         """
@@ -207,34 +240,21 @@ class GammapyLike(PluginPrototype):
         """
         return self._likelihood_model
 
-    def _set_gammapy_model(self) -> Models:
+    @property
+    def astromodel_converter(self) -> AstromodelConverter:
         """
         AstromodelConverter object used for this plugin
         """
-        # TODO do not do that in the property
-        if hasattr(self, "_likelihood_model_converted"):
-            if self._sources is not None:
-                tmp = [
-                    x
-                    for x in self._likelihood_model_converted.gammapy_models
-                    if x.name in self._sources
-                ]
-            else:
-                tmp = [x for x in self._likelihood_model_converted.gammapy_models]
-        else:
-            tmp = []
-        if hasattr(self, "_background_models"):
-            for m in self._background_models.values():
-                tmp.append(m)
-        self._gammapy_model = Models(tmp)
+        return self._likelihood_model_converted
 
     @property
     def gammapy_model(self):
         """
         List of all the Gammapy SkyModels
         """
+
         if not hasattr(self, "_gammapy_model"):
-            self._set_gammapy_model()
+            self.update_gammapy_model_list()
         return self._gammapy_model
 
     @property

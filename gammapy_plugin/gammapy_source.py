@@ -48,7 +48,7 @@ def parse_gammapy_model(gp_model: ModelBase, dataset_name: str = "empty") -> dic
     for i in range(len(tp)):
         ttp = tp[i]
         norm = False
-        if ttp["name"] == "norm":
+        if ttp["name"] in ["norm", "amplitude"]:
             # TODO check if this covers all cases
             norm = True
         min_v = ttp["min"]

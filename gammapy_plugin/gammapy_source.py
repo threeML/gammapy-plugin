@@ -7,6 +7,15 @@ log = setup_logger(__name__)
 
 
 def parameter_to_gammapy_dict(para: Parameter) -> dict:
+    """
+    Converts a astromodel parameter to a dict able to be read
+    in as a gammapy parameter
+
+    :param para: astromodel paramter
+    :type para: Parameter
+
+    :return: dict
+    """
     para_dict = {}
     para_dict["value"] = para.value
     para_dict["unit"] = para.unit
@@ -23,10 +32,16 @@ def parameter_to_gammapy_dict(para: Parameter) -> dict:
     return para_dict
 
 
-def parse_gammapy_model(gp_model: ModelBase, dataset_name: str) -> dict:
+def parse_gammapy_model(gp_model: ModelBase, dataset_name: str = "empty") -> dict:
     """
-    Returns astromodels dict with all parameters from the
+    Returns dict of astromodels parameters with all parameters from the
     passed gammapy model
+
+    :param gp_model: gammapy model
+    :param dataset_name: name of the dataset the model is associated to
+        defaults to empty
+    :type gp_model: ModelBase
+    :type dataset_name: str
     """
     tp = gp_model.parameters.to_dict()
     parameters = {}

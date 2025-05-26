@@ -127,7 +127,7 @@ class GammapyLike(PluginPrototype):
             self._likelihood_model_converted: AstromodelConverter = AstromodelConverter(
                 model=self._likelihood_model, frame=self._frame
             )
-        self.update_gammapy_model_list()
+        self._update_gammapy_model_list()
         for d in self._datasets:
             d.models = self.gammapy_model
 
@@ -168,7 +168,7 @@ class GammapyLike(PluginPrototype):
         for b in bkg_model:
             self._background_models[b.name] = b
         self._parse_background_models()
-        self.update_gammapy_model_list()
+        self._update_gammapy_model_list()
         for d in self._datasets:
             d.models = self.gammapy_model
 
@@ -254,7 +254,7 @@ class GammapyLike(PluginPrototype):
         """
 
         if not hasattr(self, "_gammapy_model"):
-            self.update_gammapy_model_list()
+            self._update_gammapy_model_list()
         return self._gammapy_model
 
     @property

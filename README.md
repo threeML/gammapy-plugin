@@ -54,4 +54,4 @@ for o in obs:
     gls.append(gl)
 ```
 
-For this [PR #5747](https://github.com/gammapy/gammapy/pull/5747) is needed additionally to `gammapy 1.3`
+For this [PR #5747](https://github.com/gammapy/gammapy/pull/5747) is needed additionally to `gammapy>=1.3`

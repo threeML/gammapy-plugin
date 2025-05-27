@@ -223,5 +223,5 @@ def test_fov_bkg_model_setting():
             bkg_norms[gl.name],
             gl.nuisance_parameters[
                 gl.name + "." + gl.name.strip("HESS_") + "_bkg.norm"
-            ],
+            ].value,
         )

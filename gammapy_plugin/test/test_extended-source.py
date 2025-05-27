@@ -10,7 +10,7 @@ from astromodels.functions import (
 from astromodels.sources.extended_source import ExtendedSource
 from astropy.coordinates import SkyCoord
 from gammapy.data import DataStore
-from gammapy.datasets import MapDataset
+from gammapy.datasets import MapDataset, Datasets
 from gammapy.makers import (
     FoVBackgroundMaker,
     MapDatasetMaker,
@@ -22,6 +22,7 @@ from gammapy.modeling.models import (
     PowerLawSpectralModel,
     SkyModel,
     GaussianSpatialModel,
+    FoVBackgroundModel,
 )
 from regions import CircleSkyRegion
 from threeML import DataList, JointLikelihood
@@ -32,34 +33,35 @@ from gammapy_plugin.utils.astromodels_functions import Gaussian_on_sphere
 
 get_units().energy = u.TeV
 
+datastore = DataStore.from_dir("$GAMMAPY_DATA/hess-dl3-dr1/")
+target_position = SkyCoord.from_name("RX J1713.7-3946").galactic
+
+selection = dict(
+    type="sky_circle",
+    frame="galactic",
+    lon=target_position.l,
+    lat=target_position.b,
+    radius="5deg",
+)
+select_obs_tab = datastore.obs_table.select_observations(selection)
+
+obs = datastore.get_observations(select_obs_tab["OBS_ID"])
+
+# Prepare the geometry
+energy_axis = MapAxis.from_energy_bounds(0.3, 10.0, 15, unit="TeV")
+energy_axis_true = MapAxis.from_energy_bounds(
+    0.1, 20, 10, per_decade=True, unit="TeV", name="energy_true"
+)
+geom = WcsGeom.create(
+    skydir=target_position,
+    binsz=0.02,
+    width=(6 * u.deg, 6 * u.deg),
+    frame="galactic",
+    axes=[energy_axis],
+)
+
 
 def test_extened_source_no_fov_bkg():
-    datastore = DataStore.from_dir("$GAMMAPY_DATA/hess-dl3-dr1/")
-    target_position = SkyCoord.from_name("RX J1713.7-3946").galactic
-
-    selection = dict(
-        type="sky_circle",
-        frame="galactic",
-        lon=target_position.l,
-        lat=target_position.b,
-        radius="5deg",
-    )
-    select_obs_tab = datastore.obs_table.select_observations(selection)
-
-    obs = datastore.get_observations(select_obs_tab["OBS_ID"])
-
-    # Prepare the geometry
-    energy_axis = MapAxis.from_energy_bounds(0.3, 10.0, 15, unit="TeV")
-    energy_axis_true = MapAxis.from_energy_bounds(
-        0.1, 20, 10, per_decade=True, unit="TeV", name="energy_true"
-    )
-    geom = WcsGeom.create(
-        skydir=target_position,
-        binsz=0.02,
-        width=(6 * u.deg, 6 * u.deg),
-        frame="galactic",
-        axes=[energy_axis],
-    )
     stacked = MapDataset.create(
         geom=geom, energy_axis_true=energy_axis_true, name="empty"
     )
@@ -100,8 +102,8 @@ def test_extened_source_no_fov_bkg():
     gl = GammapyLike("hess", frame="galactic")
     gl.set_datasets(
         stacked.copy(), mode="stacked"
-    )  # making a copy to not interfer with the gp fit
-    gl.set_sources(["rxj1713"])
+    )  # making a copy to not interfer with the gammpy fit later
+    gl.set_sources("rxj1713")
     conv = AstromodelConverter(model, frame="galactic")
     gl.set_model(model, conv)
     jl = JointLikelihood(model, DataList(gl))
@@ -159,3 +161,67 @@ def test_extened_source_no_fov_bkg():
         )
         is np.True_
     )
+
+
+def test_fov_bkg_model_setting():
+    circle = CircleSkyRegion(center=target_position, radius=1 * u.deg)
+    regions = [circle]
+    exclusion_mask = ~geom.region_mask(regions=regions)
+    maker = MapDatasetMaker(
+        selection=["counts", "background", "psf", "edisp", "exposure"],
+    )
+    safe_mask_maker = SafeMaskMaker(
+        methods=["offset-max", "aeff-max", "bkg-peak"], offset_max="2.3 deg"
+    )
+    fov_bkg_maker = FoVBackgroundMaker(method="fit", exclusion_mask=exclusion_mask)
+
+    datasets = Datasets()
+    gls = []
+    bkg_norms = {}
+    for o in obs:
+        dataset = MapDataset.create(
+            geom=geom, energy_axis_true=energy_axis_true, name=f"HESS_{o.obs_id}"
+        )
+        dataset = maker.run(dataset, o)
+        dataset = safe_mask_maker.run(dataset, o)
+        bkg_model = FoVBackgroundModel(
+            name=f"{o.obs_id}_bkg", dataset_name=dataset.name
+        )
+        dataset.models = [bkg_model]
+        dataset = fov_bkg_maker.run(dataset)
+        bkg_norms[dataset.name] = bkg_model.parameters["norm"].value
+        datasets.append(dataset)
+        gl = GammapyLike(dataset.name, frame="galactic")
+        gl.set_datasets(dataset)
+        gl.set_background_models(bkg_model)
+        gls.append(gl)
+
+    pl = Powerlaw()
+    spat = Gaussian_on_sphere(
+        lon0=target_position.transform_to("galactic").l.deg,
+        lat0=target_position.transform_to("galactic").b.deg,
+        sigma=0.25,
+    )
+    es = ExtendedSource(source_name="rxj1713", spectral_shape=pl, spatial_shape=spat)
+    pl.index.value = -2
+    pl.index.prior = Uniform_prior(lower_bound=-3, upper_bound=-1)
+    pl.K = 2.3 * 1e-11
+    pl.K.prior = Log_uniform_prior(lower_bound=1e-18, upper_bound=1e-8)
+    pl.piv.value = 1
+    pl.piv.free = False
+    spat.lon0.free = False
+    spat.lat0.free = False
+    spat.sigma.free = True
+    spat.sigma.prior = Log_uniform_prior(lower_bound=0.1, upper_bound=1.0)
+    model = Model(es)
+    conv = AstromodelConverter(model, frame="galactic")
+    for gl in gls:
+        gl.set_model(model, conv)
+        print(bkg_norms.keys())
+        print(gl.nuisance_parameters.keys())
+        assert np.isclose(
+            bkg_norms[gl.name],
+            gl.nuisance_parameters[
+                gl.name + "." + gl.name.strip("HESS_") + "_bkg.norm"
+            ],
+        )

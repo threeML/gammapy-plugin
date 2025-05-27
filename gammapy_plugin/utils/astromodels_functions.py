@@ -1,15 +1,18 @@
 import numpy as np
 from astromodels.functions.function import Function1D, Function2D, FunctionMeta
 from astromodels.utils.angular_distance import angular_distance
-from threeML import u
+import astropy.units as u
+from threeML.io.logging import setup_logger
 from past.utils import old_div
+
+log = setup_logger(__name__)
 
 
 class Log_parabola_gammapy(Function1D, metaclass=FunctionMeta):
     r"""
     description :
 
-        A log-parabolic function.
+        A log-parabolic function, same parametrization as Gammapy
     latex :
         $K\left(\frac{x}{piv}\right)^{-\alpha-\beta\log{\left(\frac{x}{piv}\right)}}$
 
@@ -35,7 +38,7 @@ class Log_parabola_gammapy(Function1D, metaclass=FunctionMeta):
 
         beta :
 
-            desc : curvature (positive is concave, negative is convex)
+            desc : curvature
             initial value : 1.0
 
     """
@@ -60,14 +63,13 @@ class Log_parabola_gammapy(Function1D, metaclass=FunctionMeta):
         return K * np.power(xx, (-alpha - beta * np.log(xx)))
 
 
-# TODO latex
 class Exp_cutoff_powerlaw_gammapy(Function1D, metaclass=FunctionMeta):
     r"""
     description :
 
         A exp cutoff  function.
     latex :
-        $K\left(\frac{x}{piv}\right)^{-\alpha-\beta\log{\left(\frac{x}{piv}\right)}}$
+        $K\left(\frac{x}{piv}\right)^{-index}\exp{-(\lambda x)^\alpha}$
 
     parameters :
 
@@ -89,7 +91,7 @@ class Exp_cutoff_powerlaw_gammapy(Function1D, metaclass=FunctionMeta):
             initial value : 2.0
 
         lambda_ :
-            desc : cur
+            desc : curvature (= 1/xc)
             initial value : 0.1
 
         alpha :
@@ -179,11 +181,11 @@ class Gaussian_on_sphere(Function2D, metaclass=FunctionMeta):
             * np.exp(-0.5 * angsep**2 / s2)
         )
 
-    def get_boundaries(self):
+    def get_boundaries(self, max_sigma=None):
 
         # Truncate the gaussian at 2 times the max of sigma allowed
-
-        max_sigma = self.sigma.max_value
+        if max_sigma is None:
+            max_sigma = self.sigma.max_value
 
         min_lat = max(-90.0, self.lat0.value - 2 * max_sigma)
         max_lat = min(90.0, self.lat0.value + 2 * max_sigma)
@@ -217,10 +219,22 @@ class Gaussian_on_sphere(Function2D, metaclass=FunctionMeta):
 
         return (min_lon, max_lon), (min_lat, max_lat)
 
-    def get_total_spatial_integral(self, z=None, binsz=(0.05, 0.1)):
-        (min_l, max_l), (min_b, max_b) = self.get_boundaries()
+    def get_total_spatial_integral(self, z=None, binsz=(None, None)):
+        # TODO this is an unprecise and very slow solution
+        if self.sigma.value < 1e-1:
+            msg = f"Your sigma value {self.sigma.value} is fairly small. "
+            msg += "This may lead to a really high memory usage"
+            log.warning(msg)
+        if binsz == (None, None):
+            binsz = (0.1 * self.sigma.value, 0.1 * self.sigma.value)
+        if self.sigma.value * 20 < self.sigma.max_value:
+            (min_l, max_l), (min_b, max_b) = self.get_boundaries(
+                max_sigma=self.sigma.value * 20
+            )
+        else:
+            (min_l, max_l), (min_b, max_b) = self.get_boundaries()
         if min_l > max_l:
-            max_l += 360
+            min_l -= 360
         lons = np.linspace(
             min_l, max_l, np.ceil((max_l - min_l) / binsz[0]).astype(int)
         )
@@ -242,9 +256,6 @@ class Gaussian_on_sphere(Function2D, metaclass=FunctionMeta):
                 self.lon0.value,
                 self.lat0.value,
                 self.sigma.value,
-                # np.ones_like(lon_flat) * self.lon0.value,
-                # np.ones_like(lon_flat) * self.lat0.value,
-                # np.ones_like(lon_flat) * self.sigma.value,
             )
         )
 

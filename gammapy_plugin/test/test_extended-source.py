@@ -61,7 +61,7 @@ geom = WcsGeom.create(
 )
 
 
-def test_extened_source_no_fov_bkg():
+def test_extended_source_no_fov_bkg():
     stacked = MapDataset.create(
         geom=geom, energy_axis_true=energy_axis_true, name="empty"
     )

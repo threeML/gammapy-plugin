@@ -29,7 +29,7 @@ jobs:
         # needed for bug_fix py3.12.x install
         pip install --upgrade git+https://github.com/threeml/astromodels.git 
         pip install --upgrade git+https://github.com/threeml/threeML.git
-        export PLUGIN_DIR = $PWD
+        export PLUGIN_DIR=$PWD
         git clone https://github.com/gammapy/gammapy.git $HOME/gammapy
         cd $HOME/gammapy
         pip install .

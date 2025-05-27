@@ -29,8 +29,12 @@ jobs:
         # needed for bug_fix py3.12.x install
         pip install --upgrade git+https://github.com/threeml/astromodels.git 
         pip install --upgrade git+https://github.com/threeml/threeML.git
-        pip install --upgrade gammapy --use-pep517
-        python setup.py install
+        export PLUGIN_DIR = $PWD
+        git clone https://github.com/gammapy/gammapy.git $HOME/gammapy
+        cd $HOME/gammapy
+        pip install .
+        cd $PLUGIN_DIR
+        pip install .
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names

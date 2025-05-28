@@ -9,7 +9,6 @@ on:
 
 jobs:
   build:
-
     env:
       GAMMAPY_DATA: /home/runner/work/gammapy_data
     runs-on: ${{ matrix.os }}
@@ -36,21 +35,20 @@ jobs:
         pip install .
         cd $PLUGIN_DIR
         pip install .
+
     - name: Lint with flake8
       run: |
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics
-    - name: Check and create testdata
-      run: | 
-        mkdir -p $GAMMAPY_DATA
-        git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
-        python gammapy_plugin/data/datasets/create_test_datasets.py
 
     - name: Test with pytest
       run: | 
+        git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
+        python gammapy_plugin/data/datasets/create_test_datasets.py
         python -m pytest -vv --cov=gammapy_plugin/ --cov-report=xml
       env:
         NUMBA_DISABLE_JIT: 0
+
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v5
       with:
@@ -87,7 +85,7 @@ jobs:
     - uses: actions/checkout@v4
     - uses: actions/setup-python@v5
       with:
-        python-version: 3.11
+        python-version: 3.12
     - name: Install twine
       run: python -m pip install twine
     - name: Build package

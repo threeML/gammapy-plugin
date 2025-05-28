@@ -1,18 +1,18 @@
-import numpy as np
 import astropy.units as u
+import numpy as np
 from astromodels.core.units import get_units
 from astromodels.sources import PointSource
-from gammapy_plugin.utils.astromodels_functions import (
-    Log_parabola_gammapy,
-    Exp_cutoff_powerlaw_gammapy,
-    Gaussian_on_sphere,
-)
 from gammapy.modeling.models import (
     ExpCutoffPowerLawSpectralModel,
     LogParabolaSpectralModel,
-    GaussianSpatialModel,
 )
 from scipy.integrate import dblquad
+
+from gammapy_plugin.utils.astromodels_functions import (
+    Exp_cutoff_powerlaw_gammapy,
+    Gaussian_on_sphere,
+    Log_parabola_gammapy,
+)
 
 get_units().energy = u.TeV
 

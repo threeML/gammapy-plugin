@@ -1,14 +1,15 @@
-from gammapy_plugin.GammapyLike import GammapyLike
-from gammapy.data.data_store import DataStore
-from gammapy.maps.wcs.geom import WcsGeom
-from gammapy.maps import MapAxis
-from astropy.coordinates import SkyCoord
 import astropy.units as u
-from gammapy.datasets import Datasets, MapDataset
-from gammapy.modeling.models import FoVBackgroundModel
-from gammapy.makers import FoVBackgroundMaker, MapDatasetMaker, SafeMaskMaker
-from regions import CircleSkyRegion
 import pytest
+from astropy.coordinates import SkyCoord
+from gammapy.data.data_store import DataStore
+from gammapy.datasets import Datasets, MapDataset
+from gammapy.makers import FoVBackgroundMaker, MapDatasetMaker, SafeMaskMaker
+from gammapy.maps import MapAxis
+from gammapy.maps.wcs.geom import WcsGeom
+from gammapy.modeling.models import FoVBackgroundModel
+from regions import CircleSkyRegion
+
+from gammapy_plugin.GammapyLike import GammapyLike
 
 datastore = DataStore.from_dir("$GAMMAPY_DATA/hess-dl3-dr1/")
 target_position = SkyCoord.from_name("RX J1713.7-3946").galactic

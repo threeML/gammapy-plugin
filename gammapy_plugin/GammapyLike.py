@@ -1,5 +1,5 @@
-from importlib.metadata import version
 import logging
+from importlib.metadata import version
 
 import numpy as np
 from astromodels.core.model import Model

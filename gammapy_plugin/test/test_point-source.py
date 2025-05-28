@@ -1,6 +1,6 @@
 import astropy.units as u
-from astromodels.core.units import get_units
 from astromodels.core.model import Model
+from astromodels.core.units import get_units
 from astromodels.functions import Log_parabola, Log_uniform_prior, Uniform_prior
 from astromodels.sources import PointSource
 from astropy.coordinates import Angle, SkyCoord

@@ -2,6 +2,7 @@ import astropy.units as u
 import numpy as np
 from astromodels.core.parameter import Parameter
 from gammapy.modeling.models import PowerLawSpectralModel, SkyModel
+
 from gammapy_plugin.gammapy_source import parameter_to_gammapy_dict, parse_gammapy_model
 
 

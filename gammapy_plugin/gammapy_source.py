@@ -1,4 +1,5 @@
 import logging
+
 import numpy as np
 from astromodels.core.parameter import Parameter
 from gammapy.modeling.models.core import ModelBase

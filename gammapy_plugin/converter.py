@@ -1,5 +1,5 @@
-from typing import Optional
 import logging
+from typing import Optional
 
 from astromodels.core.model import Model
 from astromodels.sources import ExtendedSource, PointSource, Source

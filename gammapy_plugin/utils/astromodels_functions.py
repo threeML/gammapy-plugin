@@ -1,4 +1,5 @@
 import logging
+
 import astropy.units as u
 import numpy as np
 from astromodels.functions.function import Function1D, Function2D, FunctionMeta

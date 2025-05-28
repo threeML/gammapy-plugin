@@ -5,7 +5,6 @@ from rich.console import Console
 from rich.logging import RichHandler
 from rich.theme import Theme
 
-from .configuration import gammapy_plugin_config
 from .package_data import get_path_of_data_file, get_path_of_log_file
 
 _log_file_names = ["usr.log", "dev.log"]
@@ -59,7 +58,7 @@ _console_formatter = logging.Formatter(
 
 
 gammapy_plugin_console_log_handler = RichHandler(
-    level=gammapy_plugin_config.logging.level,
+    level=logging.INFO,
     rich_tracebacks=True,
     markup=True,
     console=console,

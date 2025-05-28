@@ -1,9 +1,9 @@
 from typing import Optional
+import logging
 
 from astromodels.core.model import Model
 from astromodels.sources import ExtendedSource, PointSource, Source
 from gammapy.modeling.models import SkyModel
-from threeML.io.logging import setup_logger
 
 from gammapy_plugin.gammapy_source import parameter_to_gammapy_dict
 from gammapy_plugin.models import (
@@ -13,7 +13,7 @@ from gammapy_plugin.models import (
     TemporalModelConverted,
 )
 
-log = setup_logger(__name__)
+log = logging.getLogger(__name__)
 
 
 class AstromodelConverter:

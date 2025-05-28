@@ -1,16 +1,17 @@
 from importlib.metadata import version
+import logging
+
 import numpy as np
 from astromodels.core.model import Model
 from astromodels.functions.priors import Truncated_gaussian
 from gammapy.datasets import Dataset, Datasets
 from gammapy.modeling.models import DatasetModels, ModelBase, Models
-from threeML.io.logging import setup_logger
 from threeML.plugin_prototype import PluginPrototype
 
 from gammapy_plugin.converter import AstromodelConverter
 from gammapy_plugin.gammapy_source import parameter_to_gammapy_dict, parse_gammapy_model
 
-log = setup_logger(__name__)
+log = logging.getLogger(__name__)
 
 GAMMAPY_VERSION = version("gammapy")
 GAMMAPY_VERSION_MAJOR = int(GAMMAPY_VERSION.split(".")[0])

@@ -1,11 +1,11 @@
+import logging
+import astropy.units as u
 import numpy as np
 from astromodels.functions.function import Function1D, Function2D, FunctionMeta
 from astromodels.utils.angular_distance import angular_distance
-import astropy.units as u
-from threeML.io.logging import setup_logger
 from past.utils import old_div
 
-log = setup_logger(__name__)
+log = logging.getLogger(__name__)
 
 
 class Log_parabola_gammapy(Function1D, metaclass=FunctionMeta):

@@ -58,11 +58,11 @@ for o in obs:
     dataset = maker.run(dataset, o)
     dataset = safe_mask_maker.run(dataset, o)
     datasets.append(dataset)
-base_dir = os.path.join(get_path_of_data_file("datasets/test/rxj1737_3946"))
+base_dir = os.path.join(get_path_of_data_file("datasets/test/rxj17137_3946"))
 if not os.path.exists(base_dir):
     os.makedirs(base_dir)
 for d in datasets:
-    fn = str(get_path_of_data_file(f"datasets/test/rxj1737_3946/{d.name}.fits"))
+    fn = str(get_path_of_data_file(f"datasets/test/rxj17137_3946/{d.name}.fits"))
     log.warning(f"Saving to {fn}")
     d.write(
         filename=fn,

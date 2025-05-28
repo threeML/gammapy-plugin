@@ -1,13 +1,4 @@
-import astropy.units as u
 import pytest
-from astropy.coordinates import SkyCoord
-from gammapy.data.data_store import DataStore
-from gammapy.datasets import Datasets, MapDataset
-from gammapy.makers import FoVBackgroundMaker, MapDatasetMaker, SafeMaskMaker
-from gammapy.maps import MapAxis
-from gammapy.maps.wcs.geom import WcsGeom
-from gammapy.modeling.models import FoVBackgroundModel
-from regions import CircleSkyRegion
 
 from gammapy_plugin.GammapyLike import GammapyLike
 from gammapy_plugin.test.utils import read_in_gammapy_datasets

@@ -10,6 +10,8 @@ on:
 jobs:
   build:
 
+    env:
+      GAMMAPY_DATA: /home/runner/work/gammapy_data
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -26,7 +28,6 @@ jobs:
     - name: Install dependencies
       run: |
         pip install --upgrade pip setuptools flake8 ipython h5py coverage pytest pytest-cov cython codecov
-        # needed for bug_fix py3.12.x install
         pip install --upgrade git+https://github.com/threeml/astromodels.git 
         pip install --upgrade git+https://github.com/threeml/threeML.git
         export PLUGIN_DIR=$PWD
@@ -37,15 +38,16 @@ jobs:
         pip install .
     - name: Lint with flake8
       run: |
-        # stop the build if there are Python syntax errors or undefined names
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics
+    - name: Check and create testdata
+      run: | 
+        mkdir -p $GAMMAPY_DATA
+        git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
+        python gammapy_plugin/data/datasets/create_test_datasets.py
 
     - name: Test with pytest
       run: | 
-        export GAMMAPY_DATA=$HOME/data
-        mkdir -p $GAMMAPY_DATA
-        git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
         python -m pytest -vv --cov=gammapy_plugin/ --cov-report=xml
       env:
         NUMBA_DISABLE_JIT: 0

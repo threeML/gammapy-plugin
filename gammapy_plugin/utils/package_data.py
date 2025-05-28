@@ -1,7 +1,6 @@
+import importlib
 from pathlib import Path
 from shutil import copyfile
-
-import pkg_resources
 
 
 def get_path_of_data_dir() -> Path:
@@ -11,14 +10,14 @@ def get_path_of_data_dir() -> Path:
     :returns:
 
     """
-    file_path: str = pkg_resources.resource_filename("gammapy_plugin", "data")
+    file_path = importlib.resources.files("gammapy_plugin.data")
 
-    return Path(file_path)
+    return file_path
 
 
 def get_path_of_data_file(data_file: str) -> Path:
     """
-    get the path of a dat file
+    get the path of a data file
 
     :param data_file: name of the data file
     :type data_file: str

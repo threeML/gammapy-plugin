@@ -1,14 +1,29 @@
 [![CI](https://github.com/threeML/gammapy-plugin/actions/workflows/build_test.yml/badge.svg)](https://github.com/threeML/gammapy-plugin/actions/workflows/build_test.yml)
 
-# Gammapy Plugin `threeML` plugin to use `gammapy` datasets in your `threeML` analysis.
+# Gammapy Plugin
+
+`threeML` plugin to use `gammapy` datasets in your `threeML` analysis.
 
 This version is based on previous work by [J. Michael Burgess](https://github.com/grburgess), [Sajan
 Kumar](https://github.com/skumarudel) and [AnjanaTel](https://github.com/AnjanaTel).
 
-## Installation
+## CAVEATS
+- this plugin is under development
+- the current development version of `gammapy` is needed:
+```bash
+git clone https://github.com/gammapy/gammapy.git
+cd gammapy
+pip install .
+```
+- there are issues with `numba` and the way `astromodels` functions get wrapped in this plugin, you may need to create your own functions that do not use `numba` for evaluating or evaluating the integral
 
-The following should be sufficient and install all the relevant dependencies. ```bash git clone
-https://github.com/threeML/gammapy-plugin.git cd gammapy-plugin pip install . ```
+## Installation
+The following should be sufficient and install all the relevant dependencies.
+```bash
+git clone https://github.com/threeML/gammapy-plugin.git
+cd gammapy-plugin
+pip install .
+```
 
 Take a look at [the `gammapy` installation
 instructions](https://docs.gammapy.org/1.3/getting-started/index.html#getting-started),
@@ -17,6 +32,8 @@ especially the `gammapy download datasets` to download the datasets used in the
 
 ### Requirements
 Python 3.11 and 3.12 together with ideally the current development version of [`gammapy`](https://github.com/gammapy/gammapy).
+
+You might get it to work with `gammapy==1.3` and [PR #5747](https://github.com/gammapy/gammapy/pull/5747).
 
 ## Usage and Examples
 For an example check out e.g. [the example notebook for an extended source](./examples/example_extended_source_fov_bkg.ipynb).
@@ -53,5 +70,3 @@ for o in obs:
     gl.set_background_models(bkg_model)
     gls.append(gl)
 ```
-
-For this [PR #5747](https://github.com/gammapy/gammapy/pull/5747) is needed additionally to `gammapy>=1.3`

@@ -30,7 +30,7 @@ target_position = SkyCoord.from_name("RX J1713.7-3946").galactic
 
 def test_extended_source_no_fov_bkg():
     datasets = read_in_gammapy_datasets(
-        os.path.join(get_path_of_data_dir(), "datasets/test/rx_j17137_3946/")
+        os.path.join(get_path_of_data_dir(), "datasets/test/rxj17137_3946/")
     )
 
     geom = datasets[0].geoms["geom"]
@@ -125,9 +125,9 @@ def test_extended_source_no_fov_bkg():
 
 def test_fov_bkg_model_setting():
     datasets = read_in_gammapy_datasets(
-        os.path.join(get_path_of_data_dir(), "datasets/test/rx_j17137_3946/")
+        os.path.join(get_path_of_data_dir(), "datasets/test/rxj17137_3946/")
     )
-    geom = datasets[0].geom["geom"]
+    geom = datasets[0].geoms["geom"]
     circle = CircleSkyRegion(center=target_position, radius=1 * u.deg)
     regions = [circle]
     exclusion_mask = ~geom.region_mask(regions=regions)
@@ -145,6 +145,7 @@ def test_fov_bkg_model_setting():
         gl = GammapyLike(dataset.name, frame="galactic")
         gl.set_datasets(dataset)
         gl.set_background_models(bkg_model)
+        gl.set_sources("rxj1713")
         gls.append(gl)
 
     pl = Powerlaw()
@@ -168,11 +169,7 @@ def test_fov_bkg_model_setting():
     conv = AstromodelConverter(model, frame="galactic")
     for gl in gls:
         gl.set_model(model, conv)
-        print(bkg_norms.keys())
-        print(gl.nuisance_parameters.keys())
         assert np.isclose(
             bkg_norms[gl.name],
-            gl.nuisance_parameters[
-                gl.name + "." + gl.name.strip("HESS_") + "_bkg.norm"
-            ].value,
+            gl.nuisance_parameters[gl.name + "." + gl.name + "_bkg.norm"].value,
         )

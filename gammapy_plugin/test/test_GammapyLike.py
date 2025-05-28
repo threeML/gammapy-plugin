@@ -10,55 +10,12 @@ from gammapy.modeling.models import FoVBackgroundModel
 from regions import CircleSkyRegion
 
 from gammapy_plugin.GammapyLike import GammapyLike
+from gammapy_plugin.test.utils import read_in_gammapy_datasets
+from gammapy_plugin.utils.package_data import get_path_of_data_file
 
-datastore = DataStore.from_dir("$GAMMAPY_DATA/hess-dl3-dr1/")
-target_position = SkyCoord.from_name("RX J1713.7-3946").galactic
-
-selection = dict(
-    type="sky_circle",
-    frame="galactic",
-    lon=target_position.l,
-    lat=target_position.b,
-    radius="5deg",
+datasets = read_in_gammapy_datasets(
+    get_path_of_data_file("datasets/test/rxj17137_3946/")
 )
-select_obs_tab = datastore.obs_table.select_observations(selection)
-
-obs = datastore.get_observations(select_obs_tab["OBS_ID"])
-
-# Prepare the geometry
-energy_axis = MapAxis.from_energy_bounds(0.3, 10.0, 15, unit="TeV")
-energy_axis_true = MapAxis.from_energy_bounds(
-    0.1, 20, 10, per_decade=True, unit="TeV", name="energy_true"
-)
-geom = WcsGeom.create(
-    skydir=target_position,
-    binsz=0.02,
-    width=(6 * u.deg, 6 * u.deg),
-    frame="galactic",
-    axes=[energy_axis],
-)
-circle = CircleSkyRegion(center=target_position, radius=1 * u.deg)
-regions = [circle]
-exclusion_mask = ~geom.region_mask(regions=regions)
-maker = MapDatasetMaker(
-    selection=["counts", "background", "psf", "edisp", "exposure"],
-)
-safe_mask_maker = SafeMaskMaker(
-    methods=["offset-max", "aeff-max", "bkg-peak"], offset_max="2.3 deg"
-)
-fov_bkg_maker = FoVBackgroundMaker(method="fit", exclusion_mask=exclusion_mask)
-
-datasets = Datasets()
-for o in obs:
-    dataset = MapDataset.create(
-        geom=geom, energy_axis_true=energy_axis_true, name=f"HESS_{o.obs_id}"
-    )
-    dataset = maker.run(dataset, o)
-    dataset = safe_mask_maker.run(dataset, o)
-    bkg_model = FoVBackgroundModel(name=f"{o.obs_id}_bkg", dataset_name=dataset.name)
-    dataset.models = [bkg_model]
-    dataset = fov_bkg_maker.run(dataset)
-    datasets.append(dataset)
 
 
 def test_set_datasets_stacked():

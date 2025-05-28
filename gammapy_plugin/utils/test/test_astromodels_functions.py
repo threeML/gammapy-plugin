@@ -35,6 +35,7 @@ def test_log_parabola_gammapy():
     ref = np.geomspace(0.1, 100, 200) * u.TeV
     # assert this is also close when using no units in astromodels
     assert np.allclose(logp_ref(ref).value, logp(ref.value))
+    assert np.isclose(ps.spectrum.main.Log_parabola_gammapy.K.value, 1e-11, atol=1e-20)
 
 
 def test_exp_cutoff_powerlaw_gammapy():
@@ -55,6 +56,9 @@ def test_exp_cutoff_powerlaw_gammapy():
     ref = np.geomspace(0.1, 100, 200) * u.TeV
     # assert this is also close when using no units in astromodels
     assert np.allclose(expc_ref(ref).value, expc(ref.value))
+    assert np.isclose(
+        ps.spectrum.main.Exp_cutoff_powerlaw_gammapy.K.value, 1e-11, atol=1e-20
+    )
 
 
 def test_gaussian_on_sphere():

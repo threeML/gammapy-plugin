@@ -1,4 +1,18 @@
+import os
+
+from gammapy.datasets import Datasets, MapDataset
 from threeML.analysis_results import BayesianResults, MLEResults
+
+
+def read_in_gammapy_datasets(base_dir):
+    assert os.path.exists(
+        base_dir
+    ), f"You must provide the path to the directory containing the datasets, provided {base_dir}"
+    datasets = Datasets()
+    for f in os.listdir(base_dir):
+        ds = MapDataset.read(os.path.join(base_dir, f))
+        datasets.append(ds)
+    return datasets
 
 
 def get_close(threeML_results, gammapy_result_dict):

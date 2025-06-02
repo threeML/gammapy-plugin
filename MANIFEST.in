@@ -1,2 +1,3 @@
 include versioneer.py
 include gammapy_plugin/_version.py
+recursive-include gammapy_plugin/data *

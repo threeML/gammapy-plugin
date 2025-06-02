@@ -44,7 +44,7 @@ jobs:
     - name: Test with pytest
       run: | 
         git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
-        python gammapy_plugin/data/datasets/create_test_datasets.py
+        python -m gammapy_plugin.data.datasets.create_test_datasets
         python -m pytest -vv --cov=gammapy_plugin/ --cov-report=xml
       env:
         NUMBA_DISABLE_JIT: 0

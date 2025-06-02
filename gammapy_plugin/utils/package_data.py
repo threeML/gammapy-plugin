@@ -25,7 +25,6 @@ def get_path_of_data_file(data_file: str) -> Path:
 
     """
     file_path: Path = get_path_of_data_dir() / data_file
-
     return file_path
 
 

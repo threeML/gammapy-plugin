@@ -1,28 +1,30 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
-from setuptools import setup
+import os
+from setuptools import setup, find_packages
 
 import versioneer
 
+
 # # Create list of data files
-# def find_data_files(directory):
+def find_data_files(directory):
 
-#     paths = []
+    paths = []
 
-#     for (path, directories, filenames) in os.walk(directory):
+    for path, directories, filenames in os.walk(directory):
 
-#         for filename in filenames:
+        for filename in filenames:
 
-#             paths.append(os.path.join("..", path, filename))
+            paths.append(os.path.join("..", path, filename))
 
-#     return paths
+    return paths
 
 
-# extra_files = find_data_files("gammapy_plugin/data")
+extra_files = find_data_files("gammapy_plugin/data")
 
 setup(
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
-    #        package_data={"": extra_files},
+    packages=find_packages(),
+    package_data={"": extra_files},
 )

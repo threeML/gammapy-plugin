@@ -9,7 +9,7 @@ from gammapy.makers import FoVBackgroundMaker, MapDatasetMaker, SafeMaskMaker
 from gammapy.maps import MapAxis, WcsGeom
 from regions import CircleSkyRegion
 
-from gammapy_plugin.utils.package_data import get_path_of_data_file
+from gammapy_plugin.utils.package_data import get_path_of_data_dir
 
 log = logging.getLogger(__name__)
 
@@ -58,11 +58,11 @@ for o in obs:
     dataset = maker.run(dataset, o)
     dataset = safe_mask_maker.run(dataset, o)
     datasets.append(dataset)
-base_dir = os.path.join(get_path_of_data_file("datasets/test/rxj17137_3946"))
+base_dir = get_path_of_data_dir().joinpath("datasets/test/rxj17137_3946/")
 if not os.path.exists(base_dir):
     os.makedirs(base_dir)
 for d in datasets:
-    fn = str(get_path_of_data_file(f"datasets/test/rxj17137_3946/{d.name}.fits"))
+    fn = str(base_dir.joinpath(f"{d.name}.fits"))
     log.warning(f"Saving to {fn}")
     d.write(
         filename=fn,

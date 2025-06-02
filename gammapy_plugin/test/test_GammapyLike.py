@@ -2,14 +2,13 @@ import pytest
 
 from gammapy_plugin.GammapyLike import GammapyLike
 from gammapy_plugin.test.utils import read_in_gammapy_datasets
-from gammapy_plugin.utils.package_data import get_path_of_data_file
-
-datasets = read_in_gammapy_datasets(
-    get_path_of_data_file("datasets/test/rxj17137_3946/")
-)
+from gammapy_plugin.utils.package_data import get_path_of_data_dir
 
 
 def test_set_datasets_stacked():
+    datasets = read_in_gammapy_datasets(
+        get_path_of_data_dir().joinpath("datasets/test/rxj17137_3946/")
+    )
     gl_stacked = GammapyLike(name="stacked")
     gl_stacked.set_datasets(datasets.stack_reduce(name="stacked"), mode="stacked")
     gl_stacked.set_datasets(datasets.stack_reduce(name="stacked"), mode="individual")
@@ -17,6 +16,9 @@ def test_set_datasets_stacked():
 
 
 def test_set_datasets_individual():
+    datasets = read_in_gammapy_datasets(
+        get_path_of_data_dir().joinpath("datasets/test/rxj17137_3946/")
+    )
     gl_individual = GammapyLike(name="individual")
     gl_individual.set_datasets(datasets)
     gl_individual.set_datasets(datasets[0])

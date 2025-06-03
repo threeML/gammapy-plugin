@@ -30,8 +30,8 @@ jobs:
     if: ${{ github.event_name == 'push' }} || matrix.quick == true
 
     env:
-      GAMMAPY_DATA: ${{ github.workspace }}/gammapy_data
-      GAMMAPY_PATH: ${{ github.workspace }}/gammapy
+      GAMMAPY_DATA: /tmp/gammapy_data
+      GAMMAPY_PATH: /tmp/gammapy
 
     steps:
     - uses: actions/checkout@v4

@@ -9,14 +9,29 @@ on:
 
 jobs:
   build:
-    env:
-      GAMMAPY_DATA: /home/runner/work/gammapy_data
+    name: Build and Test (${{ matrix.os}}, Python ${{ matrix.python-version}})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
-        python-version: ["3.11","3.12"] # these are requirements from astropy und gammapy
+        include:
+          - os: ubuntu-latest
+            python-version: "3.12"
+            quick: true
+          - os: ubuntu-latest
+            python-version: "3.11"
+            quick: false
+          - os: macos-latest
+            python-version: "3.12"
+            quick: false
+          - os: macos-latest
+            python-version: "3.11"
+            quick: false
+    if: ${{ github.event_name == 'push' }} || matrix.quick == true
+
+    env:
+      GAMMAPY_DATA: ${{ github.workspace }}/gammapy_data
+      GAMMAPY_PATH: ${{ github.workspace }}/gammapy
 
     steps:
     - uses: actions/checkout@v4
@@ -24,16 +39,14 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
+        cache: pip
     - name: Install dependencies
       run: |
         pip install --upgrade pip setuptools flake8 ipython h5py coverage pytest pytest-cov cython codecov
         pip install --upgrade git+https://github.com/threeml/astromodels.git 
         pip install --upgrade git+https://github.com/threeml/threeML.git
-        export PLUGIN_DIR=$PWD
-        git clone https://github.com/gammapy/gammapy.git $HOME/gammapy
-        cd $HOME/gammapy
-        pip install .
-        cd $PLUGIN_DIR
+        git clone https://github.com/gammapy/gammapy.git $GAMMAPY_PATH
+        pip install $GAMMAPY_PATH
         pip install .
 
     - name: Lint with flake8
@@ -50,6 +63,7 @@ jobs:
         NUMBA_DISABLE_JIT: 0
 
     - name: Upload coverage to Codecov
+      if: matrix.quick == false
       uses: codecov/codecov-action@v5
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
@@ -63,6 +77,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: 3.11
+          cache: pip
 
       - name: Install twine
         run: python -m pip install twine

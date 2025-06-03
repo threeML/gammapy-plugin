@@ -78,7 +78,7 @@ class SpectralModelConverted(SpectralModel):
             setattr(self, v.name, paras[-1])
         self.default_parameters = Parameters(paras)
 
-    def evaluate(self, *args, **kwargs):
+    def evaluate(self, energy, **kwargs):
         """
         Evaluates the astromodels function instead of a gammapy one
         """
@@ -89,7 +89,16 @@ class SpectralModelConverted(SpectralModel):
                 kwargs_new[self._mapping[k]] = kwargs[k]
             else:
                 kwargs_new[k] = kwargs[k]
-        return self._astromodel_function.evaluate(*args, **kwargs_new)
+        shape = None
+        if len(energy.shape) > 1:
+            shape = energy.shape
+            energy = energy.flatten()
+        if shape is None:
+            return self._astromodel_function.evaluate(energy, **kwargs_new)
+        else:
+            return self._astromodel_function.evaluate(energy, **kwargs_new).reshape(
+                shape
+            )
 
     @property
     def mapping(self):

@@ -9,13 +9,12 @@ Kumar](https://github.com/skumarudel) and [AnjanaTel](https://github.com/AnjanaT
 
 ## CAVEATS
 - this plugin is under development
-- the current development version of `gammapy` is needed:
+- the current development version of `gammapy` is a requirement:
 ```bash
 git clone https://github.com/gammapy/gammapy.git
 cd gammapy
 pip install .
 ```
-- there are issues with `numba` and the way `astromodels` functions get wrapped in this plugin, you may need to create your own functions that do not use `numba` for evaluating or evaluating the integral
 
 ## Installation
 The following should be sufficient and install all the relevant dependencies.
@@ -25,15 +24,33 @@ cd gammapy-plugin
 pip install .
 ```
 
-Take a look at [the `gammapy` installation
-instructions](https://docs.gammapy.org/1.3/getting-started/index.html#getting-started),
-especially the `gammapy download datasets` to download the datasets used in the
+You can test your installation by installing `pytest` and running the tests
+after downloading and creating some test datasets:
+
+```bash
+# install pytest
+pip install pytest
+
+# equivalent to gammapy download datasets
+export GAMMAPY_DATA=/path/to/gammapy_datasets/
+git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
+
+# create some gammapy MapDatasets to reduce pytest runtime
+python -m gammapy_plugin.data.datasets.create_test_datasets
+
+# run pytests
+python -m pytest
+```
+
+The first part is equivalent to running `gammapy download datasets` [(see the `gammapy` installation
+instructions)](https://docs.gammapy.org/1.3/getting-started/index.html#getting-started).
 [examples](./examples) as well as by `pytest`.
 
 ### Requirements
 Python 3.11 and 3.12 together with ideally the current development version of [`gammapy`](https://github.com/gammapy/gammapy).
 
-You might get it to work with `gammapy==1.3` and [PR #5747](https://github.com/gammapy/gammapy/pull/5747).
+You might make it work with `gammapy==1.3` and [PR #5747](https://github.com/gammapy/gammapy/pull/5747).
+
 
 ## Usage and Examples
 For an example check out e.g. [the example notebook for an extended source](./examples/example_extended_source_fov_bkg.ipynb).

@@ -63,6 +63,6 @@ def test_exp_cutoff_powerlaw_gammapy():
 
 def test_gaussian_on_sphere():
     gauss = Gaussian_on_sphere(lon0=0, lat0=0, sigma=1)
-    tot_int = gauss.get_total_spatial_integral(binsz=(1e-2, 1e-2))
+    tot_int = gauss.get_total_spatial_integral(binsz=(1e-1, 1e-1))
     tot_int_ref, _ = dblquad(gauss, -20, 20, -20, 20, args={"sigma": 1})
     assert np.isclose(tot_int, tot_int_ref, rtol=1e-3)

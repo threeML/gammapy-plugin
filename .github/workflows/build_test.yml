@@ -18,20 +18,31 @@ jobs:
           - os: ubuntu-latest
             python-version: "3.12"
             quick: true
+            gammapy_data: /home/runner/work/gammapy_data
+            gammapy_path: /home/runner/work/gammapy
           - os: ubuntu-latest
             python-version: "3.11"
             quick: false
+            gammapy_data: /home/runner/work/gammapy_data
+            gammapy_path: /home/runner/work/gammapy
+
           - os: macos-latest
             python-version: "3.12"
             quick: false
+            gammapy_data: /home/runner/work/gammapy_data
+            gammapy_path: /home/runner/work/gammapy
           - os: macos-latest
             python-version: "3.11"
             quick: false
-    if: ${{ github.event_name == 'push' }} || matrix.quick == true
+            env:
+            gammapy_data: /tmp/gammapy_data
+            gammapy_path: /tmp/gammapy
 
+    if: ${{ github.event_name == 'push' }} || matrix.quick == true
+    
     env:
-      GAMMAPY_DATA: /tmp/gammapy_data
-      GAMMAPY_PATH: /tmp/gammapy
+      GAMMAPY_DATA: ${{ matrix.gammapy_data }}
+      GAMMAPY_PATH: ${{ matrix.gammapy_path }}
 
     steps:
     - uses: actions/checkout@v4

@@ -90,8 +90,11 @@ class AstromodelConverter:
 
 class SourceConverter:
     """Takes a astromodels source and converts it to a SkyModel :param source:
-    The astromodels source :param converter: The used AstromodelConverter
-    instance :param kwargs: frame."""
+
+    The astromodels source
+    :param converter: The used AstromodelConverter instance
+    :param kwargs: frame.
+    """
 
     def __init__(
         self, source: Source, converter: AstromodelConverter, **kwargs

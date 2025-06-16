@@ -9,7 +9,7 @@ from astromodels.functions import (
 from astromodels.sources.extended_source import ExtendedSource
 from astropy.coordinates import SkyCoord
 from gammapy.data import DataStore
-from gammapy.datasets import MapDataset, Datasets
+from gammapy.datasets import Datasets, MapDataset
 from gammapy.makers import (
     FoVBackgroundMaker,
     MapDatasetMaker,
@@ -17,13 +17,13 @@ from gammapy.makers import (
 )
 from gammapy.maps import MapAxis, WcsGeom
 from gammapy.modeling.models import FoVBackgroundModel
+from mpi4py.MPI import COMM_WORLD
 from regions import CircleSkyRegion
-from threeML import DataList, BayesianAnalysis
+from threeML import BayesianAnalysis, DataList
 
 from gammapy_plugin.converter import AstromodelConverter
 from gammapy_plugin.GammapyLike import GammapyLike
 from gammapy_plugin.utils.astromodels_functions import Gaussian_on_sphere
-from mpi4py.MPI import COMM_WORLD
 
 comm = COMM_WORLD
 rank = comm.Get_rank()

@@ -43,7 +43,6 @@ def get_path_of_log_dir() -> Path:
     p: Path = Path("~/.log/gammapy_plugin").expanduser()
 
     if not p.exists():
-
         p.mkdir(parents=True)
 
     return p
@@ -67,7 +66,6 @@ def get_path_of_user_config() -> Path:
     config_path: Path = Path().home() / ".config" / "gammapy_plugin"
 
     if not config_path.exists():
-
         config_path.mkdir(parents=True)
 
     return config_path

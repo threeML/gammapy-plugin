@@ -84,12 +84,10 @@ def activate_warnings():
 
 
 def update_logging_level(level):
-
     gammapy_plugin_console_log_handler.setLevel(level)
 
 
 def setup_logger(name):
-
     # A logger with name name will be created
     # and then add it to the print stream
     log = logging.getLogger(name)

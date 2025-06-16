@@ -8,8 +8,10 @@ This version is based on previous work by [J. Michael Burgess](https://github.co
 Kumar](https://github.com/skumarudel) and [AnjanaTel](https://github.com/AnjanaTel).
 
 ## CAVEATS
+
 - this plugin is under development
 - the current development version of `gammapy` is a requirement:
+
 ```bash
 git clone https://github.com/gammapy/gammapy.git
 cd gammapy
@@ -17,7 +19,9 @@ pip install .
 ```
 
 ## Installation
+
 The following should be sufficient and install all the relevant dependencies.
+
 ```bash
 git clone https://github.com/threeML/gammapy-plugin.git
 cd gammapy-plugin
@@ -47,12 +51,13 @@ instructions)](https://docs.gammapy.org/1.3/getting-started/index.html#getting-s
 [examples](./examples) as well as by `pytest`.
 
 ### Requirements
+
 Python 3.11 and 3.12 together with ideally the current development version of [`gammapy`](https://github.com/gammapy/gammapy).
 
 You might make it work with `gammapy==1.3` and [PR #5747](https://github.com/gammapy/gammapy/pull/5747).
 
-
 ## Usage and Examples
+
 For an example check out e.g. [the example notebook for an extended source](./examples/example_extended_source_fov_bkg.ipynb).
 
 The basic procedure after creating a `gammapy` dataset is
@@ -64,7 +69,7 @@ gl.set_sources("name_of_the_source")            # setting the source
 gl.set_model(model)                             # setting the astromodels model
 ```
 
-When using `MapDataset` with  `FoVBackgroundModel` you can also include them in a fit.
+When using `MapDataset` with `FoVBackgroundModel` you can also include them in a fit.
 The parameters of the background models are currently treated as nuisance parameters during the fitting.
 
 This might then look like this for example:

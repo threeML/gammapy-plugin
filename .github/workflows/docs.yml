@@ -28,7 +28,7 @@ jobs:
           pip install ipython jupyter cython astropy 
           conda install jupytext jupyterthemes emcee pymultinest ultranest nbconvert ipykernel astropy regions threeML astromodels gammapy
           pip install .
-          
+
       - name: Execute the notebooks
         shell: bash -l {0}
         run: |
@@ -39,12 +39,11 @@ jobs:
           jupytext --to ipynb --pipe black --execute docs/md/*.md
           mkdir -p docs/notebooks
           mv docs/md/*.ipynb docs/notebooks
-          
+
       - uses: actions/upload-artifact@v4
         with:
           name: notebooks-for-${{ github.sha }}
           path: docs/notebooks
-
 
   api_doc:
     name: "Create the API stubs"
@@ -58,7 +57,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.11        
+          python-version: 3.11
 
       - name: Build the API doc
         run: |
@@ -72,32 +71,28 @@ jobs:
           pip3 install --upgrade scipy numba astropy 
           pip3 install matplotlib==3.8.4
           pip3 install .
-          
+
           brew install sphinx-doc pandoc
 
           pip3 install wheel
           pip3 install mock recommonmark
           pip3 install sphinx_rtd_theme
           pip3 install -U sphinx nbsphinx sphinx-gallery
-  
-          
-          
-          sphinx-apidoc -f -o docs/api/ gammapy_plugin 
 
+
+
+          sphinx-apidoc -f -o docs/api/ gammapy_plugin
 
       - uses: actions/upload-artifact@v4
         with:
           name: api-stubs-for-${{ github.sha }}
           path: docs/api
 
-          
   build_docs:
     name: "Build the Documentation"
     runs-on: macos-latest
     needs: [notebooks, api_doc]
     steps:
-
-
       - uses: actions/checkout@v4
         with:
           persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal token
@@ -129,33 +124,29 @@ jobs:
           pip3 install -e . 
 
           rm -rf docs/md/*
-        env: 
+        env:
           ISDEV: ${{contains(github.rev,'dev') || contains(github.base_ref, 'dev')}}
-          
+
       - uses: actions/download-artifact@master
         with:
           name: notebooks-for-${{ github.sha }}
           path: docs/notebooks
-
 
       - uses: actions/download-artifact@master
         with:
           name: api-stubs-for-${{ github.sha }}
           path: docs/notebooks/api
 
-      
       - name: Build and Commit
         uses: sphinx-notes/pages@master
         with:
           documentation_path: docs
           sphinx_version: 5.1.1
           requirements_path: docs/requirements.txt
-        
+
       - name: Push changes
         if: github.event_name == 'push'
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: gh-pages
-
-

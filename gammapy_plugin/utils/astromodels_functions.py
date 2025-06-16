@@ -57,7 +57,6 @@ class Log_parabola_gammapy(Function1D, metaclass=FunctionMeta):
         self.beta.unit = u.dimensionless_unscaled
 
     def evaluate(self, x, K, piv, alpha, beta):
-
         # print("Receiving %s" % ([K, piv, alpha, beta]))
 
         xx = np.divide(x, piv)
@@ -116,7 +115,6 @@ class Exp_cutoff_powerlaw_gammapy(Function1D, metaclass=FunctionMeta):
         self.index.unit = u.dimensionless_unscaled
 
     def evaluate(self, x, K, piv, index, lambda_, alpha):
-
         # print("Receiving %s" % ([K, piv, alpha, beta]))
 
         xx = np.divide(x, piv)
@@ -165,7 +163,6 @@ class Gaussian_on_sphere(Function2D, metaclass=FunctionMeta):
     """
 
     def _set_units(self, x_unit, y_unit, z_unit):
-
         # lon0 and lat0 and rdiff have most probably all units of degrees. However,
         # let's set them up here just to save for the possibility of using the
         # formula with other units (although it is probably never going to happen)
@@ -175,7 +172,6 @@ class Gaussian_on_sphere(Function2D, metaclass=FunctionMeta):
         self.sigma.unit = x_unit
 
     def evaluate(self, x, y, lon0, lat0, sigma):
-
         lon, lat = x, y
 
         angsep = angular_distance(lon0, lat0, lon, lat)
@@ -190,7 +186,6 @@ class Gaussian_on_sphere(Function2D, metaclass=FunctionMeta):
         )
 
     def get_boundaries(self, max_sigma=None):
-
         # Truncate the gaussian at 2 times the max of sigma allowed
         if max_sigma is None:
             max_sigma = self.sigma.max_value
@@ -204,12 +199,10 @@ class Gaussian_on_sphere(Function2D, metaclass=FunctionMeta):
             max_abs_lat > 89.0
             or 2 * max_sigma / np.cos(max_abs_lat * np.pi / 180.0) >= 180.0
         ):
-
             min_lon = 0.0
             max_lon = 360.0
 
         else:
-
             min_lon = self.lon0.value - 2 * max_sigma / np.cos(
                 max_abs_lat * np.pi / 180.0
             )
@@ -218,11 +211,9 @@ class Gaussian_on_sphere(Function2D, metaclass=FunctionMeta):
             )
 
             if min_lon < 0.0:
-
                 min_lon = min_lon + 360.0
 
             elif max_lon > 360.0:
-
                 max_lon = max_lon - 360.0
 
         return (min_lon, max_lon), (min_lat, max_lat)

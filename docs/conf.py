@@ -32,7 +32,7 @@ DOCS = Path(__file__).parent
 
 # -- Generate API documentation ------------------------------------------------
 def run_apidoc(app):
-    """Generage API documentation"""
+    """Generage API documentation."""
     import better_apidoc
 
     better_apidoc.APP = app

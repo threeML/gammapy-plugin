@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 """Top-level package for Gammapy Plugin."""
 
 # please replace my name as this is boiler plate from

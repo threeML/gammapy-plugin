@@ -32,11 +32,7 @@ def file_existing_and_readable(filename) -> bool:
 
 
 def fits_file_existing_and_readable(filename) -> bool:
-    """
-    checks if a FITS file exists ignoring extension ({})
-    info
-
-    """
+    """Checks if a FITS file exists ignoring extension ({}) info."""
     base_filename = str(filename).split("{")[0]
 
     return file_existing_and_readable(base_filename)
@@ -50,8 +46,7 @@ def path_exists_and_is_directory(path) -> bool:
 
 
 def if_directory_not_existing_then_make(directory) -> None:
-    """
-    If the given directory does not exists, then make it
+    """If the given directory does not exists, then make it.
 
     :param directory: directory to check or make
     :return: None
@@ -72,14 +67,14 @@ def if_directory_not_existing_then_make(directory) -> None:
 
 @contextmanager
 def temporary_directory(prefix="", within_directory=None):
-    """
-    This context manager creates a temporary directory in the most secure possible way
-    (with no race condition), and
-    removes it at the end.
+    """This context manager creates a temporary directory in the most secure
+    possible way (with no race condition), and removes it at the end.
 
-    :param prefix: the directory name will start with this prefix, if specified
-    :param within_directory: create within a specific directory (assumed to exist).
-    Otherwise, it will be created in the default system temp directory (/tmp in unix)
+    :param prefix: the directory name will start with this prefix, if
+        specified
+    :param within_directory: create within a specific directory (assumed
+        to exist). Otherwise, it will be created in the default system
+        temp directory (/tmp in unix)
     :return: the absolute pathname of the provided directory
     """
 

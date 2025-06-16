@@ -70,18 +70,14 @@ warning_filter = LogFilter(logging.WARNING)
 
 
 def silence_warnings():
-    """
-    supress warning messages in console and file usr logs
-    """
+    """Supress warning messages in console and file usr logs."""
 
     gammapy_plugin_usr_log_handler.addFilter(warning_filter)
     gammapy_plugin_console_log_handler.addFilter(warning_filter)
 
 
 def activate_warnings():
-    """
-    supress warning messages in console and file usr logs
-    """
+    """Supress warning messages in console and file usr logs."""
 
     gammapy_plugin_usr_log_handler.removeFilter(warning_filter)
     gammapy_plugin_console_log_handler.removeFilter(warning_filter)

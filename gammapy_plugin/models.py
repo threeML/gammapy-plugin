@@ -17,10 +17,8 @@ log = logging.getLogger(__name__)
 
 
 class SpectralModelConverted(SpectralModel):
-    """
-    Class for converting a spectral astromodel function into
-    an gammapy SpectralModel
-    """
+    """Class for converting a spectral astromodel function into an gammapy
+    SpectralModel."""
 
     tag = ["SpectralModelConverted", "spec_conv"]
 
@@ -41,10 +39,8 @@ class SpectralModelConverted(SpectralModel):
         super().__init__()
 
     def _setup_parameters(self):
-        """
-        Setup the parameters by creating gammapy Parameters and setting
-        them as attributes to this class
-        """
+        """Setup the parameters by creating gammapy Parameters and setting them
+        as attributes to this class."""
         paras = []
         # needed later for correctly evaluating the function
         self._mapping = {}
@@ -79,9 +75,7 @@ class SpectralModelConverted(SpectralModel):
         self.default_parameters = Parameters(paras)
 
     def evaluate(self, energy, **kwargs):
-        """
-        Evaluates the astromodels function instead of a gammapy one
-        """
+        """Evaluates the astromodels function instead of a gammapy one."""
         # TODO check the kwarg stuff
         kwargs_new = {}
         for k in kwargs.keys():
@@ -126,10 +120,8 @@ class PointSourceModelConverted(PointSpatialModel):
         super().__init__()
 
     def _setup_parameters(self):
-        """
-        Setup the parameters by creating gammapy Parameters and setting
-        them as attributes to this class
-        """
+        """Setup the parameters by creating gammapy Parameters and setting them
+        as attributes to this class."""
         self._mapping = {}
         self._mapping_free = {}
         if self._frame == "galactic":
@@ -176,10 +168,8 @@ class PointSourceModelConverted(PointSpatialModel):
 
 
 class SpatialModelConverted(SpatialModel):
-    """
-    Class for converting a spatial astromodels function into
-    an gammapy SpatialModel
-    """
+    """Class for converting a spatial astromodels function into an gammapy
+    SpatialModel."""
 
     tag = ["SpatialModelConverted", "spat_conv"]
 
@@ -208,10 +198,8 @@ class SpatialModelConverted(SpatialModel):
         super().__init__()
 
     def _setup_parameters(self):
-        """
-        Setup the parameters by creating gammapy Parameters and setting
-        them as attributes to this class
-        """
+        """Setup the parameters by creating gammapy Parameters and setting them
+        as attributes to this class."""
         paras = []
         # needed later for correctly evaluating the function
         self._mapping = {}
@@ -245,9 +233,7 @@ class SpatialModelConverted(SpatialModel):
 
     # todo check return type
     def evaluate(self, *args, **kwargs):
-        """
-        Evaluates astromodels function instead of gammapy one
-        """
+        """Evaluates astromodels function instead of gammapy one."""
         kwargs_new = {}
         for k in kwargs.keys():
             if k in self._mapping.keys():

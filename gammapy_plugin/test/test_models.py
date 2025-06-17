@@ -1,5 +1,8 @@
-import pytest
 import astropy.units as u
+import pytest
+from astromodels.core.sky_direction import SkyDirection
+from astromodels.functions import Powerlaw
+
 from gammapy_plugin.models import (
     PointSourceModelConverted,
     SpatialModelConverted,
@@ -7,9 +10,6 @@ from gammapy_plugin.models import (
     TemporalModelConverted,
 )
 from gammapy_plugin.utils.astromodels_functions import Gaussian_on_sphere
-from gammapy_plugin.gammapy_source import parameter_to_gammapy_dict
-from astromodels.functions import Powerlaw
-from astromodels.core.sky_direction import SkyDirection
 
 
 def test_spectral_model_converted():
@@ -27,7 +27,7 @@ def test_spatial_model_converted():
     from astromodels.core.parameter_transformation import LogarithmicTransformation
 
     gauss.sigma._transformation = LogarithmicTransformation()
-    spat = SpatialModelConverted(gauss)
+    SpatialModelConverted(gauss)
 
 
 def test_point_spatial_model_converted():

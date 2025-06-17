@@ -1,5 +1,4 @@
 import logging
-from importlib.metadata import version
 
 import numpy as np
 from astromodels.core.model import Model
@@ -12,10 +11,6 @@ from gammapy_plugin.converter import AstromodelConverter
 from gammapy_plugin.gammapy_source import parameter_to_gammapy_dict, parse_gammapy_model
 
 log = logging.getLogger(__name__)
-
-GAMMAPY_VERSION = version("gammapy")
-GAMMAPY_VERSION_MAJOR = int(GAMMAPY_VERSION.split(".")[0])
-
 
 __instrument_name = "Gammapy"
 
@@ -220,11 +215,7 @@ class GammapyLike(PluginPrototype):
         the parameters stored in the model instance."""
         self._likelihood_model_converted._update_parameters()
         self._update_background_models()
-        # TODO: maybe too costly and not necessary
-        if GAMMAPY_VERSION_MAJOR > 1:
-            return -0.5 * self._datasets._stat_sum_likelihood()
-        else:
-            return -0.5 * self._datasets.stat_sum()
+        return -0.5 * self._datasets._stat_sum_likelihood()
 
     def inner_fit(self):
         return self.get_log_like()

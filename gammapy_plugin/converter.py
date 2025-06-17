@@ -10,7 +10,6 @@ from gammapy_plugin.models import (
     PointSourceModelConverted,
     SpatialModelConverted,
     SpectralModelConverted,
-    TemporalModelConverted,
 )
 
 log = logging.getLogger(__name__)
@@ -163,23 +162,14 @@ class SourceConverter:
                 self._source.spatial_shape, frame=self._frame
             )
 
-    def _convert_temporal_model(self) -> None:
-        """Convert the temporal evolution of the source if available."""
-        raise NotImplementedError("Not yet implemented")
-        # need to adapt same style as spectral
-        self._temporal_model = TemporalModelConverted(self._source.temporal_shape)
-
     def _create_skymodel(self) -> None:
         """Create the skymodel instance out of the individual components."""
-        if self._gammapy_model is None:
-            self._skymodel = SkyModel(
-                name=self._source.name,
-                spectral_model=self._spectral_model,
-                spatial_model=self._spatial_model,
-                temporal_model=self._temporal_model,
-            )
-        else:
-            self._skymodel = self._gammapy_model
+        self._skymodel = SkyModel(
+            name=self._source.name,
+            spectral_model=self._spectral_model,
+            spatial_model=self._spatial_model,
+            temporal_model=self._temporal_model,
+        )
         self._gather_mappings()
 
     @property
@@ -188,6 +178,6 @@ class SourceConverter:
         return self._skymodel
 
     @property
-    def astromdodels_source(self) -> Source:
+    def astromodels_source(self) -> Source:
         """Returns the original astromodel source."""
         return self._source

@@ -78,20 +78,14 @@ class SpectralModelConverted(SpectralModel):
 
     def evaluate(self, energy, **kwargs):
         """Evaluates the astromodels function instead of a gammapy one."""
-        # TODO check the kwarg stuff
-        kwargs_new = {}
-        for k in kwargs.keys():
-            kwargs_new[k] = kwargs[k]
         shape = None
         if len(energy.shape) > 1:
             shape = energy.shape
             energy = energy.flatten()
         if shape is None:
-            return self._astromodel_function.evaluate(energy, **kwargs_new)
+            return self._astromodel_function.evaluate(energy, **kwargs)
         else:
-            return self._astromodel_function.evaluate(energy, **kwargs_new).reshape(
-                shape
-            )
+            return self._astromodel_function.evaluate(energy, **kwargs).reshape(shape)
 
     @property
     def mapping(self):
@@ -230,13 +224,7 @@ class SpatialModelConverted(SpatialModel):
     # todo check return type
     def evaluate(self, *args, **kwargs):
         """Evaluates astromodels function instead of gammapy one."""
-        kwargs_new = {}
-        for k in kwargs.keys():
-            if k in self._mapping.keys():
-                kwargs_new[self._mapping[k]] = kwargs[k]
-            else:
-                kwargs_new[k] = kwargs[k]
-        return self._astromodel_function.evaluate(*args, **kwargs_new)
+        return self._astromodel_function.evaluate(*args, **kwargs)
 
     @property
     def mapping(self):

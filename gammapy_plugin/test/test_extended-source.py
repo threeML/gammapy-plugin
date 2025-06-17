@@ -140,6 +140,7 @@ def test_fov_bkg_model_setting():
         dataset.models = [bkg_model]
         dataset = fov_bkg_maker.run(dataset)
         bkg_norms[dataset.name] = bkg_model.parameters["norm"].value
+        dataset.models = []
         gl = GammapyLike(dataset.name, frame="galactic")
         gl.set_datasets(dataset)
         gl.set_background_models(bkg_model)

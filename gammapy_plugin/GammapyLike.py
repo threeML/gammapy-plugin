@@ -38,6 +38,7 @@ class GammapyLike(PluginPrototype):
         self._sources = kwargs.get("sources", None)
         self._nuisance_mapping = {}
         self._background_models = kwargs.get("background_models", {})
+        self._background_models_mapper = {}
         self._nuisance_parameters_dicts = {}
         if len(self._background_models.keys()) > 0:
             self._parse_background_models()
@@ -55,10 +56,12 @@ class GammapyLike(PluginPrototype):
             stacks the passed datasets
         :param stacked_name: name of the stacked datasset if mode is stacked
         """
-        assert mode in [
+        if mode not in [
             "individual",
             "stacked",
-        ], "mode needs to be individual or stacked"
+        ]:
+            raise ValueError("mode needs to be individual or stacked")
+
         if isinstance(datasets, list):
             self._datasets = Datasets()
             for d in datasets:
@@ -86,6 +89,7 @@ class GammapyLike(PluginPrototype):
     def set_sources(self, sources: list | str = None) -> None:
         """
         Set the sources to be used by this plugin - No need to specify bkg models
+
         :param sources: Source(s) to be used in the analysis defaults to all
         :type sources: list of str or str
         """
@@ -104,6 +108,7 @@ class GammapyLike(PluginPrototype):
         converted_model: AstromodelConverter = None,
     ) -> None:
         """Set the model to be used in the joint minimization.
+
         :param likelihood_model: astromodels model
         :param converted_model: converted astromodels
         :type likelihood_model: Model
@@ -126,22 +131,26 @@ class GammapyLike(PluginPrototype):
                 model=self._likelihood_model, frame=self._frame
             )
         self._update_gammapy_model_list()
-        for d in self._datasets:
-            d.models = self.gammapy_model
+        self._assign_models()
 
     def _update_gammapy_model_list(self) -> Models:
         """Update the list of gammapy models."""
         if hasattr(self, "_likelihood_model_converted"):
             if self._sources is not None:
-                tmp = [
+                tmp2 = [
                     x
                     for x in self._likelihood_model_converted.gammapy_models
                     if x.name in self._sources
                 ]
+
+                tmp = [*tmp2]
             else:
-                tmp = [x for x in self._likelihood_model_converted.gammapy_models]
+                tmp2 = [x for x in self._likelihood_model_converted.gammapy_models]
+                tmp = [*tmp2]
         else:
             tmp = []
+            tmp2 = []
+        self._global_models = Models(tmp2)
         if hasattr(self, "_background_models"):
             for m in self._background_models.values():
                 tmp.append(m)
@@ -156,15 +165,16 @@ class GammapyLike(PluginPrototype):
         if isinstance(bkg_model, ModelBase):
             bkg_model = [bkg_model]
         else:
-            assert isinstance(
-                bkg_model, (list, Models, DatasetModels)
-            ), "either pass a singular gammapy model or a list of models"
+            if not isinstance(bkg_model, (list, Models, DatasetModels)):
+                raise TypeError(
+                    "either pass a singular gammapy model or a list of models"
+                )
         for b in bkg_model:
             self._background_models[b.name] = b
+            self._background_models_mapper[b.datasets_names[0]] = b.name
         self._parse_background_models()
         self._update_gammapy_model_list()
-        for d in self._datasets:
-            d.models = self.gammapy_model
+        self._assign_models()
 
     def _parse_background_models(self):
         """Parse the background models and link the gammapy parameters to
@@ -191,6 +201,19 @@ class GammapyLike(PluginPrototype):
             self._background_models[p[1]].parameters[p[2]].update_from_dict(
                 self._nuisance_parameters_dicts[k]
             )
+
+    def _assign_models(self):
+        """"""
+        for d in self._datasets:
+            d.models = []
+            tmp = []
+            for g in self._global_models:
+                tmp.append(g)
+            if d.name in self._background_models_mapper.keys():
+                tmp.append(
+                    self._background_models[self._background_models_mapper[d.name]]
+                )
+            d.models = Models(tmp)
 
     def get_log_like(self) -> float:
         """Return the value of the log-likelihood with the current values for

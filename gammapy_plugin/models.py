@@ -34,6 +34,8 @@ class SpectralModelConverted(SpectralModel):
         self._setup_parameters()
         self._x_unit = self._astromodel_function.x_unit
         self._y_unit = self._astromodel_function.y_unit
+        if self._x_unit is None or self._y_unit is None:
+            raise ValueError("You need to specify units for your spectral component")
         log.debug(f"These are the units: {self._x_unit}, {self._y_unit}")
         self._integral_unit = self._y_unit * self._x_unit
         super().__init__()
@@ -79,10 +81,7 @@ class SpectralModelConverted(SpectralModel):
         # TODO check the kwarg stuff
         kwargs_new = {}
         for k in kwargs.keys():
-            if k in self._mapping.keys():
-                kwargs_new[self._mapping[k]] = kwargs[k]
-            else:
-                kwargs_new[k] = kwargs[k]
+            kwargs_new[k] = kwargs[k]
         shape = None
         if len(energy.shape) > 1:
             shape = energy.shape
@@ -132,11 +131,8 @@ class PointSourceModelConverted(PointSpatialModel):
             lat = self._position.dec
         else:
             raise NotImplementedError("Only galactic and icrs currently available")
-        # TODO check if this is necessary
         if lon.value > 180:
             lon -= 360 * u.deg
-        elif lon.value <= -180:
-            lon += 360 * u.deg
         for k, v in self._sky_position.parameters.items():
             if k == "ra" or k == "l":
                 para_name = "lon_0"
@@ -254,39 +250,3 @@ class SpatialModelConverted(SpatialModel):
 class TemporalModelConverted(TemporalModel):
     def __init__(self, function: Function) -> None:
         raise NotImplementedError("Check how this is handled in gammapy")
-        log.debug("type of temporal function: " + str(type(function)))
-        assert issubclass(
-            type(function), Function
-        ), "function must be astromodels function"
-        self._astromodel_function = function
-        self._setup_parameters()
-
-    def _setup_parameters(self):
-        paras = []
-        for k, v in self._astromodel_function.parameters.items():
-            vmin = np.nan
-            vmax = np.nan
-            if v.min_value is not None:
-                vmin = v.min_value
-            if v.max_value is not None:
-                vmax = v.max_value
-
-            paras.append(
-                Parameter(
-                    name=k,
-                    value=v.value,
-                    unit=v.unit,
-                    min=vmin,
-                    max=vmax,
-                    frozen=not bool(v.free),
-                )
-            )
-            setattr(self, k, paras[-1])
-        self.default_parameters = Parameters(paras)
-
-    def evaluate(self, *paras, **kwargs):
-        return self._astromodel_function.evaluate(*paras, **kwargs)
-
-    @property
-    def mapping(self):
-        return self._mapping

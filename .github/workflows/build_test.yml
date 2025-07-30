@@ -47,8 +47,8 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip setuptools flake8 ipython h5py coverage pytest pytest-cov cython codecov
-          pip install --upgrade git+https://github.com/threeml/astromodels.git@dev
-          pip install --upgrade git+https://github.com/threeml/threeML.git@dev
+          pip install --upgrade git+https://github.com/PreisTo/astromodels.git@dev
+          pip install --upgrade git+https://github.com/PreisTo/threeML.git@dev
           pip install --upgrade git+https://github.com/gammapy/gammapy.git@main
 
       - name: Lint with flake8

@@ -1,5 +1,6 @@
 import logging
 import os
+from pathlib import Path
 
 import astropy.units as u
 from astropy.coordinates import SkyCoord
@@ -58,7 +59,7 @@ for o in obs:
     dataset = maker.run(dataset, o)
     dataset = safe_mask_maker.run(dataset, o)
     datasets.append(dataset)
-base_dir = get_path_of_data_dir().joinpath("datasets/test/rxj17137_3946/")
+base_dir = Path.cwd().joinpath("test/rxj17137_3946/")
 if not os.path.exists(base_dir):
     os.makedirs(base_dir)
 for d in datasets:

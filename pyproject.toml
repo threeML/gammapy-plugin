@@ -1,0 +1,75 @@
+[build-system]
+requires = ["setuptools","versioneer[toml]"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gammapy_plugin"
+description = "The gammapy plugin for 3ML"
+readme = "README.md"
+authors = [
+	{name="J. Michael Burgess",email="jburgess@mpe.mpg.de"},
+	{name="Tobias Preis",email="tobias.preis@uibk.ac.at"}
+]
+maintainers = [ 
+	{name="Tobias Preis",email="tobias.preis@uibk.ac.at"}
+]
+license = "GPL-2.0-or-later"
+license-files = ["LICENSE"]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Science/Research",
+    "Operating System :: POSIX",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Physics",
+]
+dynamic = ["version"]
+dependencies = [
+    "numpy",
+    "matplotlib",
+    "astromodels",
+    "threeml",
+    "gammapy",
+]
+
+[project.urls]
+Homepage = "https://github.com/threeML/gammapy-plugin"
+Issues = "https://github.com/threeML/gammapy-plugin/issues"
+
+[project.optional-dependencies]
+tests = ["pytest","pytest-coverage","coverage"]
+flake = ["flake8","Flake8-pyproject","flake8-bugbear"]
+
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.package-data]
+"gammapy_plugin.data.datasets" =  ["*.py","*.fits"]
+
+
+[tool.versioneer]
+VCS = "git"
+style = "pep440"
+versionfile_source = "gammapy_plugin/_version.py"
+versionfile_build = "gammapy_plugin/_version.py"
+tag_prefix = "v"
+parentdir_prefix = "gammapy_plugin-"
+
+
+[tool.pytest]
+addopts = "--color=yes --cov=gammapy_plugin --cov-report=term -ra --ignore=gammapy_plugin/test --ignore=gammapy_plugin/_version.py"
+log_cli = 1
+log_cli_level = "INFO"
+testpaths = "gammapy_plugin/test"
+norecursedirs = "gammapy_plugin/test"
+
+[tool.flake8]
+max-line-length = 80
+extend-select = "B950"
+extend-ignore = ["E203","E501","E701"]
+per-file-ignores = [
+    'tests: S101',
+]
+

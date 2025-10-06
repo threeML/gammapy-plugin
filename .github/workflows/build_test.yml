@@ -85,7 +85,9 @@ jobs:
       - name: Install twine
         run: python -m pip install twine
       - name: Build package
-        run: python setup.py sdist
+        run: |
+              pip install --upgrade setuptools
+              python setup.py sdist
       - name: List result
         run: ls -l dist
       - name: Check long_description
@@ -104,7 +106,9 @@ jobs:
       - name: Install twine
         run: python -m pip install twine
       - name: Build package
-        run: python setup.py sdist
+        run: |
+              pip install --upgrade setuptools
+              python setup.py sdist
       - uses: pypa/gh-action-pypi-publish@master
         with:
           user: __token__

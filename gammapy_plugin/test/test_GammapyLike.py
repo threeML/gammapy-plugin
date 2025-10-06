@@ -12,7 +12,7 @@ from gammapy_plugin.utils.package_data import get_path_of_data_dir
 
 def test_set_datasets_stacked():
     datasets = read_in_gammapy_datasets(
-        get_path_of_data_dir().joinpath("datasets/test/rxj17137_3946/")
+        get_path_of_data_dir().joinpath("test/rxj17137_3946/")
     )
     gl_stacked = GammapyLike(name="stacked")
     gl_stacked.set_datasets(datasets.stack_reduce(name="stacked"), mode="stacked")
@@ -22,7 +22,7 @@ def test_set_datasets_stacked():
 
 def test_set_datasets_individual():
     datasets = read_in_gammapy_datasets(
-        get_path_of_data_dir().joinpath("datasets/test/rxj17137_3946/")
+        get_path_of_data_dir().joinpath("test/rxj17137_3946/")
     )
     gl_individual = GammapyLike(name="individual")
     gl_individual.set_datasets(datasets)
@@ -30,7 +30,7 @@ def test_set_datasets_individual():
 
 def test_set_datasets_list():
     datasets = read_in_gammapy_datasets(
-        get_path_of_data_dir().joinpath("datasets/test/rxj17137_3946/")
+        get_path_of_data_dir().joinpath("test/rxj17137_3946/")
     )
     gl_list = GammapyLike(name="list")
     datasets_list = [d for d in datasets]
@@ -39,7 +39,7 @@ def test_set_datasets_list():
 
 def test_set_multiple_datasets():
     datasets = read_in_gammapy_datasets(
-        get_path_of_data_dir().joinpath("datasets/test/rxj17137_3946/")
+        get_path_of_data_dir().joinpath("test/rxj17137_3946/")
     )
     gl_multi_individual = GammapyLike(name="individual")
     gl_multi_individual.set_datasets(datasets)
@@ -64,7 +64,7 @@ def test_set_datasets_error():
 
 def test_set_datasets_wrong_mode():
     datasets = read_in_gammapy_datasets(
-        get_path_of_data_dir().joinpath("datasets/test/rxj17137_3946/")
+        get_path_of_data_dir().joinpath("test/rxj17137_3946/")
     )
     gl_wrong_mode = GammapyLike("test")
     with pytest.raises(ValueError):
@@ -82,7 +82,7 @@ def test_set_sources():
 
 def test_set_background_models_init():
     datasets = read_in_gammapy_datasets(
-        get_path_of_data_dir().joinpath("datasets/test/rxj17137_3946/")
+        get_path_of_data_dir().joinpath("test/rxj17137_3946/")
     )
     bkg_models = {}
     for d in datasets:
@@ -100,7 +100,7 @@ def test_wrong_bkg_model():
 
 def test_properties():
     datasets = read_in_gammapy_datasets(
-        get_path_of_data_dir().joinpath("datasets/test/rxj17137_3946/")
+        get_path_of_data_dir().joinpath("test/rxj17137_3946/")
     )
     bkg_models = {}
     for d in datasets:

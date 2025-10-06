@@ -28,7 +28,7 @@ target_position = SkyCoord.from_name("RX J1713.7-3946").galactic
 
 def test_extended_source_no_fov_bkg():
     datasets = read_in_gammapy_datasets(
-        get_path_of_data_dir().joinpath("datasets/test/rxj17137_3946/")
+        get_path_of_data_dir().joinpath("test/rxj17137_3946/")
     )
 
     geom = datasets[0].geoms["geom"]
@@ -123,7 +123,7 @@ def test_extended_source_no_fov_bkg():
 
 def test_fov_bkg_model_setting():
     datasets = read_in_gammapy_datasets(
-        get_path_of_data_dir().joinpath("datasets/test/rxj17137_3946/")
+        get_path_of_data_dir().joinpath("test/rxj17137_3946/")
     )
     geom = datasets[0].geoms["geom"]
     circle = CircleSkyRegion(center=target_position, radius=1 * u.deg)

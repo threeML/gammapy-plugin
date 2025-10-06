@@ -12,7 +12,7 @@ from gammapy_plugin.utils.package_data import get_path_of_data_dir
 
 def test_astromodels_numba_function():
     datasets = read_in_gammapy_datasets(
-        get_path_of_data_dir().joinpath("datasets/test/rxj17137_3946/")
+        get_path_of_data_dir().joinpath("test/rxj17137_3946/")
     )
     gl = GammapyLike("test")
     gl.set_datasets(datasets[0])

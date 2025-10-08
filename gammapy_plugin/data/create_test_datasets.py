@@ -1,7 +1,5 @@
 import logging
 import os
-from pathlib import Path
-
 import astropy.units as u
 from astropy.coordinates import SkyCoord
 from gammapy.data import DataStore

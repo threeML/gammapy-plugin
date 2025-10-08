@@ -39,7 +39,7 @@ Issues = "https://github.com/threeML/gammapy-plugin/issues"
 
 [project.optional-dependencies]
 tests = ["pytest","pytest-coverage","coverage"]
-flake = ["flake8","Flake8-pyproject","flake8-bugbear"]
+flake = ["flake8"]
 
 
 [tool.setuptools]
@@ -64,12 +64,3 @@ log_cli = 1
 log_cli_level = "INFO"
 testpaths = "gammapy_plugin/test"
 norecursedirs = "gammapy_plugin/test"
-
-[tool.flake8]
-max-line-length = 80
-extend-select = "B950"
-extend-ignore = ["E203","E501","E701"]
-per-file-ignores = [
-    'tests: S101',
-]
-

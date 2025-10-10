@@ -107,6 +107,7 @@ class SourceConverter:
         self._temporal_model = None
         self._gammapy_model = None
         self._parameter_dict = None
+        self._spatial_correction = False
         if self._conv_spatial:
             log.debug("Converting the spatial Model")
             self._convert_spatial_model()
@@ -142,13 +143,15 @@ class SourceConverter:
         """Convert the spectral model of the source."""
         log.warning("Only Single Spectral Component Models currently supported")
         self._spectral_model = SpectralModelConverted(
-            self._source.spectrum._get_children()[0].shape
+            self._source.spectrum._get_children()[0].shape,
+            spatial_correction=self._spatial_correction,
         )
 
     def _convert_spatial_model(self) -> None:
         """Convert the spatial model of the source."""
         if isinstance(self._source, ExtendedSource):
             ps = False
+            self._spatial_correction = True
         elif isinstance(self._source, PointSource):
             position = self._source.position
             ps = True

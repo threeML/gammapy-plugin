@@ -22,7 +22,7 @@ class SpectralModelConverted(SpectralModel):
 
     tag = ["SpectralModelConverted", "spec_conv"]
 
-    def __init__(self, function: Function) -> None:
+    def __init__(self, function: Function, **kwargs) -> None:
         """
         :param function: the spectral function, must be an astromodels Function
         """
@@ -30,6 +30,10 @@ class SpectralModelConverted(SpectralModel):
             type(function), Function
         ), "function must be astromodels function"
         self._astromodel_function = function
+        spat_corr = kwargs.get("spatial_correction", False)
+        self._spatial_correction_factor = 1
+        if spat_corr:
+            self._spatial_correction_factor = np.power(180 / np.pi, -2)
         # self._source_name = self._astromodel_function.name
         self._setup_parameters()
         self._x_unit = self._astromodel_function.x_unit
@@ -83,9 +87,15 @@ class SpectralModelConverted(SpectralModel):
             shape = energy.shape
             energy = energy.flatten()
         if shape is None:
-            return self._astromodel_function.evaluate(energy, **kwargs)
+            return (
+                self._astromodel_function.evaluate(energy, **kwargs)
+                * self._spatial_correction_factor
+            )
         else:
-            return self._astromodel_function.evaluate(energy, **kwargs).reshape(shape)
+            return (
+                self._astromodel_function.evaluate(energy, **kwargs).reshape(shape)
+                * self._spatial_correction_factor
+            )
 
     @property
     def mapping(self):

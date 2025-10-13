@@ -5,7 +5,16 @@ on:
     branches:
       - master
       - dev
+    paths-ignore:
+      - "README.md"
+      - "**/docs/**"
+      - ".github/workflows/docs.yml"
   pull_request:
+    branches:
+      - master
+      - dev
+  schedule:
+    - cron: "0 11 * * *"
 
 jobs:
   build:

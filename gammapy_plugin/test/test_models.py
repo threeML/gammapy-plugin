@@ -1,7 +1,7 @@
 import astropy.units as u
 import pytest
 from astromodels.core.sky_direction import SkyDirection
-from astromodels.functions import Powerlaw
+from astromodels.functions import Powerlaw, Gaussian_on_sphere
 
 from gammapy_plugin.models import (
     PointSourceModelConverted,
@@ -9,7 +9,6 @@ from gammapy_plugin.models import (
     SpectralModelConverted,
     TemporalModelConverted,
 )
-from gammapy_plugin.utils.astromodels_functions import Gaussian_on_sphere
 
 
 def test_spectral_model_converted():

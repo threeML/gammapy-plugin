@@ -2,7 +2,12 @@ import astropy.units as u
 import numpy as np
 from astromodels.core.model import Model
 from astromodels.core.units import get_units
-from astromodels.functions import Log_uniform_prior, Powerlaw, Uniform_prior
+from astromodels.functions import (
+    Log_uniform_prior,
+    Powerlaw,
+    Uniform_prior,
+    Gaussian_on_sphere,
+)
 from astromodels.sources.extended_source import ExtendedSource
 from astropy.coordinates import SkyCoord
 from gammapy.makers import FoVBackgroundMaker
@@ -19,7 +24,6 @@ from threeML import DataList, JointLikelihood
 from gammapy_plugin.converter import AstromodelConverter
 from gammapy_plugin.GammapyLike import GammapyLike
 from gammapy_plugin.test.utils import read_in_gammapy_datasets
-from gammapy_plugin.utils.astromodels_functions import Gaussian_on_sphere
 from gammapy_plugin.utils.package_data import get_path_of_data_dir
 
 get_units().energy = u.TeV

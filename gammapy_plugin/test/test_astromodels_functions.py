@@ -6,11 +6,9 @@ from gammapy.modeling.models import (
     ExpCutoffPowerLawSpectralModel,
     LogParabolaSpectralModel,
 )
-from scipy.integrate import dblquad
 
 from gammapy_plugin.utils.astromodels_functions import (
     Exp_cutoff_powerlaw_gammapy,
-    Gaussian_on_sphere,
     Log_parabola_gammapy,
 )
 
@@ -59,10 +57,3 @@ def test_exp_cutoff_powerlaw_gammapy():
     assert np.isclose(
         ps.spectrum.main.Exp_cutoff_powerlaw_gammapy.K.value, 1e-11, atol=1e-20
     )
-
-
-def test_gaussian_on_sphere():
-    gauss = Gaussian_on_sphere(lon0=0, lat0=0, sigma=1)
-    tot_int = gauss.get_total_spatial_integral(binsz=(1e-1, 1e-1))
-    tot_int_ref, _ = dblquad(gauss, -20, 20, -20, 20, args={"sigma": 1})
-    assert np.isclose(tot_int, tot_int_ref, rtol=1e-3)

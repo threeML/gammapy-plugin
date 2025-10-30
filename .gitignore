@@ -1,5 +1,7 @@
 examples/*_run
 gammapy_plugin/data/test/
+examples/chain*
+examples/*.fits
 *.prof
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -1,9 +1,10 @@
 import logging
+import operator
 from typing import Optional
 
 from astromodels.core.model import Model
 from astromodels.sources import ExtendedSource, PointSource, Source
-from gammapy.modeling.models import SkyModel
+from gammapy.modeling.models import SkyModel, CompoundSpectralModel
 
 from gammapy_plugin.gammapy_source import parameter_to_gammapy_dict
 from gammapy_plugin.models import (
@@ -22,13 +23,15 @@ class AstromodelConverter:
     Every Source in the Model will get its own Gammapy skymodel. The
     evaluation happens via the astromodel definition.
 
-    :param model: the astromodel model
-    :param frame: geometry frame for gammapy, defaults to ICRS
     """
 
     def __init__(
         self, model: Model, frame: Optional[str] = None, convert_ps: bool = True
     ) -> None:
+        """
+        :param model: the astromodel model
+        :param frame: geometry frame for gammapy, defaults to ICRS
+        """
         assert isinstance(model, Model), "Needs an astromodels Model"
         self._astromodel_model = model
         if frame is not None:
@@ -72,8 +75,6 @@ class AstromodelConverter:
     def _update_parameters(self) -> None:
         """Update all the parameters in the SkyModels with the values from the
         astromodels model."""
-        # TODO this is a very stupid way of checking if a parameter
-        # belongs to a source
         for name, source in self._converted_sources.items():
             source._update_parameters()
 
@@ -85,6 +86,10 @@ class AstromodelConverter:
     @property
     def model(self) -> Model:
         return self._astromodel_model
+
+    @property
+    def converted_sources(self):
+        return self._converted_sources
 
 
 class SourceConverter:
@@ -142,10 +147,22 @@ class SourceConverter:
     def _convert_spectral_model(self) -> None:
         """Convert the spectral model of the source."""
         log.warning("Only Single Spectral Component Models currently supported")
-        self._spectral_model = SpectralModelConverted(
-            self._source.spectrum._get_children()[0].shape,
-            spatial_correction=self._spatial_correction,
-        )
+
+        if len(self._source.components.keys()) > 1:
+            self._spectral_model_components = []
+            for k, v in self._source.components.items():
+                self._spectral_model_components.append(
+                    SpectralModelConverted(
+                        v.shape,
+                        spatial_correction=self._spatial_correction,
+                    )
+                )
+            for m in self._spectral_model_components:
+        else:
+            self._spectral_model = SpectralModelConverted(
+                self._source.components[list(self._source.components.keys())[0]].shape,
+                spatial_correction=self._spatial_correction,
+            )
 
     def _convert_spatial_model(self) -> None:
         """Convert the spatial model of the source."""

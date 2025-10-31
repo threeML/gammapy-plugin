@@ -1,4 +1,5 @@
 import logging
+from typing import Union
 
 import astropy.units as u
 import numpy as np
@@ -17,25 +18,31 @@ log = logging.getLogger(__name__)
 
 
 class SpectralModelConverted(SpectralModel):
-    """Class for converting a spectral astromodel function into an gammapy
-    SpectralModel."""
+    """
+    Class for converting a spectral astromodel function into an gammapy
+    SpectralModel.
+    """
 
     tag = ["SpectralModelConverted", "spec_conv"]
 
-    def __init__(self, function: Function, **kwargs) -> None:
-        """
-        :param function: the spectral function, must be an astromodels Function
-        """
-        assert issubclass(
-            type(function), Function
-        ), "function must be astromodels function"
-        self._astromodel_function = function
+    def __init__(self, function: Union[Function, list], **kwargs) -> None:
+        if isinstance(function, Function):
+            self._astromodel_function = function
+            self._components = None
+        elif isinstance(function, list):
+            self._astromodel_function = function
+            self._components = len(function)
+        else:
+            raise NotImplementedError("")
+
         spat_corr = kwargs.get("spatial_correction", False)
         self._spatial_correction_factor = 1
         if spat_corr:
             self._spatial_correction_factor = np.power(180 / np.pi, -2)
+
         # self._source_name = self._astromodel_function.name
         self._setup_parameters()
+
         self._x_unit = self._astromodel_function.x_unit
         self._y_unit = self._astromodel_function.y_unit
         if self._x_unit is None or self._y_unit is None:
@@ -86,16 +93,35 @@ class SpectralModelConverted(SpectralModel):
         if len(energy.shape) > 1:
             shape = energy.shape
             energy = energy.flatten()
-        if shape is None:
-            return (
-                self._astromodel_function.evaluate(energy, **kwargs)
-                * self._spatial_correction_factor
-            )
+        if self._components is not None:
+            if shape is None:
+                return sum(
+                    [
+                        self._astromodel_function[i](energy, **kwargs)
+                        * self._spatial_correction_factor
+                        for i in range(self._components)
+                    ]
+                )
+            else:
+                return sum(
+                    [
+                        self._astromodel_function[i](energy, **kwargs).reshape(shape)
+                        * self._spatial_correction_factor
+                        for i in range(self._components)
+                    ]
+                )
+
         else:
-            return (
-                self._astromodel_function.evaluate(energy, **kwargs).reshape(shape)
-                * self._spatial_correction_factor
-            )
+            if shape is None:
+                return (
+                    self._astromodel_function.evaluate(energy, **kwargs)
+                    * self._spatial_correction_factor
+                )
+            else:
+                return (
+                    self._astromodel_function.evaluate(energy, **kwargs).reshape(shape)
+                    * self._spatial_correction_factor
+                )
 
     @property
     def mapping(self):

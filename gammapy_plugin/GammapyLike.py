@@ -6,6 +6,7 @@ from astromodels.functions.priors import Truncated_gaussian
 from gammapy.datasets import Dataset, Datasets
 from gammapy.modeling.models import DatasetModels, ModelBase, Models
 from threeML.plugin_prototype import PluginPrototype
+from threeML.analysis_results import _AnalysisResults
 
 from gammapy_plugin.converter import AstromodelConverter
 from gammapy_plugin.gammapy_source import parameter_to_gammapy_dict, parse_gammapy_model
@@ -224,10 +225,14 @@ class GammapyLike(PluginPrototype):
         # TODO: check if this works for all allowed data types
         return np.sum([np.prod(d.counts.data.shape) for d in self._datasets])
 
-    def distribute_covariance(self):
-        """Distributed the covariance matrix from 3ML result to gammapy
-        models."""
-        raise NotImplementedError
+    def distribute_covariance(self, result: _AnalysisResults) -> None:
+        """Function to pass the (estimated) Covariance Matrix to the gammapy parameters
+        so that the gammapy plotting functions can display the correct uncertainty
+
+        :param result: the analysis result
+        :type result: BayesianResults or MLEResults
+        """
+        pass
 
     @property
     def datasets(self) -> Datasets:
@@ -256,7 +261,3 @@ class GammapyLike(PluginPrototype):
     def frame(self) -> str:
         """Coordinate Frame of the plugin."""
         return self._frame
-
-
-# TODO: setter method for frame --> change all the frames
-# --> may also needs to be done for astromodels!

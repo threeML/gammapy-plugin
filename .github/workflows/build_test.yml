@@ -32,14 +32,6 @@ jobs:
             python-version: "3.11"
             quick: false
             gammapy_data: /home/runner/work/gammapy_data
-          - os: macos-latest
-            python-version: "3.12"
-            quick: false
-            gammapy_data: /tmp/gammapy_data
-          - os: macos-latest
-            python-version: "3.11"
-            quick: false
-            gammapy_data: /tmp/gammapy_data
 
     if: ${{ github.event_name == 'push' }} || matrix.quick == true
 

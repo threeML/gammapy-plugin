@@ -11,14 +11,7 @@ Kumar](https://github.com/skumarudel) and [AnjanaTel](https://github.com/AnjanaT
 
 ## CAVEATS
 
-- this plugin is under development
-- the current development version of `gammapy` is a requirement:
-
-```bash
-git clone https://github.com/gammapy/gammapy.git
-cd gammapy
-pip install .
-```
+This plugin is still under heavy development
 
 ## Installation
 
@@ -41,8 +34,8 @@ pip install pytest
 export GAMMAPY_DATA=/path/to/gammapy_datasets/
 git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
 
-# create some gammapy MapDatasets to reduce pytest runtime
-python -m gammapy_plugin.data.datasets.create_test_datasets
+# create some gammapy MapDatasets used for testing
+python -m gammapy_plugin.data.create_test_datasets
 
 # run pytests
 python -m pytest

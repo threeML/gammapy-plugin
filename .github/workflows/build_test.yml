@@ -154,7 +154,7 @@ jobs:
         run: python -m twine check dist/*
 
   publish:
-    needs: build
+    needs: build-main
     runs-on: ubuntu-latest
     name: Publish package
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')

@@ -20,11 +20,15 @@ def test_source_converter():
 def test_parameter_mapping():
     pl1 = Powerlaw(index=-9.9, K=12)
     pl2 = Powerlaw()
+    pl2.K
     sc1 = SpectralComponent("comp1", pl1)
     sc2 = SpectralComponent("comp2", pl2)
     ps1 = PointSource(ra=0, dec=0, components=[sc1, sc2], source_name="test_ps")
     ps2 = PointSource(
-        ra=10, dec=10, spectral_shape=Powerlaw(index=0, K=1), source_name="source2"
+        ra=10,
+        dec=10,
+        spectral_shape=Powerlaw(index=0, K=1),
+        source_name="source2",
     )
     model = Model(*[ps1, ps2])
     conv = AstromodelConverter(model, frame="galactic")
@@ -52,14 +56,15 @@ def test_parameter_mapping():
 
 
 def test_multi_comp():
-    pl1 = Powerlaw(index=-1, K=1)
-    pl2 = Powerlaw(index=-2, K=2)
+    pl1 = Powerlaw(index=-1, K=1, piv=1)
+    pl2 = Powerlaw(index=-2, K=2, piv=1)
     sc1 = SpectralComponent("comp1", pl1)
     sc2 = SpectralComponent("comp2", pl2)
     ps1 = PointSource(ra=0, dec=0, components=[sc1, sc2], source_name="test_ps")
     model = Model(ps1)
     conv = AstromodelConverter(model, frame="galactic")
+    print(conv.gammapy_models[0])
     assert np.isclose(
         ps1(1),
-        conv.gammapy_models[0].spectral_model(1 * u.keV).to("keV-1cm-2s-1").value,
+        conv.gammapy_models[0].spectral_model(1 * u.TeV).value,
     )

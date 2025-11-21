@@ -74,11 +74,11 @@ class SpectralModelConverted(SpectralModel):
         log.debug(f"These are the units: {self._x_unit}, {self._y_unit}")
 
         spat_corr = kwargs.get("spatial_correction", False)
+
         self._spatial_correction_factor = 1
         if spat_corr:
             self._spatial_correction_factor = np.power(180 / np.pi, -2)
 
-        # self._source_name = self._astromodel_function.name
         self._setup_parameters()
 
         self._integral_unit = self._y_unit * self._x_unit

@@ -12,6 +12,8 @@ from gammapy_plugin.models import (
     SpectralModelConverted,
 )
 
+__all__ = ["AstromodelConverter", "SourceConverter"]
+
 log = logging.getLogger(__name__)
 
 

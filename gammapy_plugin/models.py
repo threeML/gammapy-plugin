@@ -14,6 +14,12 @@ from gammapy.modeling.models import (
 )
 from gammapy.modeling.parameter import Parameter, Parameters
 
+__all__ = [
+    "SpectralModelConverted",
+    "PointSourceModelConverted",
+    "SpatialModelConverted",
+]
+
 log = logging.getLogger(__name__)
 
 

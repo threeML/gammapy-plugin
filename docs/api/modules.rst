@@ -1,4 +1,4 @@
-astromodels
+gammapy_plugin
 ===========
 
 .. toctree::

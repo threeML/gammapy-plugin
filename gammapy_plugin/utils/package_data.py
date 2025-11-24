@@ -1,6 +1,10 @@
 import importlib
 from pathlib import Path
-from shutil import copyfile
+
+__all__ = [
+    "get_path_of_data_file",
+    "get_path_of_data_dir",
+]
 
 
 def get_path_of_data_dir() -> Path:
@@ -22,57 +26,3 @@ def get_path_of_data_file(data_file: str) -> Path:
     """
     file_path: Path = get_path_of_data_dir() / data_file
     return file_path
-
-
-def copy_package_data(data_file: str) -> None:
-    """Copy file from the package data directory to the current directory.
-
-    :param data_file: the name of the file
-    :type data_file: str
-    :returns:
-    """
-    data_file_path: Path = get_path_of_data_file(data_file)
-    copyfile(data_file_path, f"./{data_file}")
-
-
-def get_path_of_log_dir() -> Path:
-    """Return the path of the logging directory.
-
-    :returns:
-    """
-    p: Path = Path("~/.log/gammapy_plugin").expanduser()
-
-    if not p.exists():
-        p.mkdir(parents=True)
-
-    return p
-
-
-def get_path_of_log_file(log_file: str) -> Path:
-    """Returns the path of a log file.
-
-    :param log_file: the name of the log file
-    :type log_file: str
-    :returns:
-    """
-    return get_path_of_log_dir() / log_file
-
-
-def get_path_of_user_config() -> Path:
-    """Get the path to the user configuration.
-
-    :returns:
-    """
-    config_path: Path = Path().home() / ".config" / "gammapy_plugin"
-
-    if not config_path.exists():
-        config_path.mkdir(parents=True)
-
-    return config_path
-
-
-__all__ = [
-    "get_path_of_data_file",
-    "get_path_of_data_dir",
-    "get_path_of_user_config",
-]

@@ -86,7 +86,6 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
   build-main:
-    if: false # turned off until new threeML release
     name: Build and Test (${{ matrix.os}}, Python ${{ matrix.python-version}})
     needs: skip_duplicate
     runs-on: ${{ matrix.os }}
@@ -103,7 +102,7 @@ jobs:
             quick: false
             gammapy_data: /home/runner/work/gammapy_data
 
-    if: ${{ github.event_name == 'push' }} || matrix.quick == true
+    if: ${{ github.event_name == 'push' }} || matrix.quick == true || false # turned off until new threeML release
 
     env:
       GAMMAPY_DATA: ${{ matrix.gammapy_data }}

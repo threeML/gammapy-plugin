@@ -153,23 +153,23 @@ jobs:
       - name: Check long_description
         run: python -m twine check dist/*
 
-  publish:
-    needs: build-main
-    runs-on: ubuntu-latest
-    name: Publish package
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: 3.12
-      - name: Install twine
-        run: python -m pip install twine
-      - name: Build package
-        run: |
-              pip install --upgrade setuptools
-              python setup.py sdist
-      - uses: pypa/gh-action-pypi-publish@master
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_UPLOAD_TOKEN }}
+#   publish:
+#     needs: build-main
+#     runs-on: ubuntu-latest
+#     name: Publish package
+#     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+#     steps:
+#       - uses: actions/checkout@v4
+#       - uses: actions/setup-python@v5
+#         with:
+#           python-version: 3.12
+#       - name: Install twine
+#         run: python -m pip install twine
+#       - name: Build package
+#         run: |
+#               pip install --upgrade setuptools
+#               python setup.py sdist
+#       - uses: pypa/gh-action-pypi-publish@master
+#         with:
+#           user: __token__
+#           password: ${{ secrets.PYPI_UPLOAD_TOKEN }}

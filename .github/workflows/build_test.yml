@@ -102,7 +102,7 @@ jobs:
             quick: false
             gammapy_data: /home/runner/work/gammapy_data
 
-    if: ${{ github.event_name == 'push' }} || matrix.quick == true || false # turned off until new threeML release
+    if: false && ( ${{ github.event_name == 'push' }} || matrix.quick == true )  # turned off until new threeML release
 
     env:
       GAMMAPY_DATA: ${{ matrix.gammapy_data }}

@@ -33,7 +33,9 @@ class SpectralModelConverted(SpectralModel):
             self._astromodel_function = function
             self._components = len(function)
         else:
-            raise NotImplementedError("Must pass list of components or a single function")
+            raise NotImplementedError(
+                "Must pass list of components or a single function"
+            )
 
         spat_corr = kwargs.get("spatial_correction", False)
         self._spatial_correction_factor = 1

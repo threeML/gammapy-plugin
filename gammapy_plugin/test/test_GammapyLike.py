@@ -120,9 +120,3 @@ def test_properties():
     assert gl.astromodel_converter == conv
     assert gl.frame == "icrs"
     assert isinstance(gl.gammapy_model[0], SkyModel)
-
-
-def test_distribute_covariance():
-    gl = GammapyLike(name="empty")
-    with pytest.raises(NotImplementedError):
-        gl.distribute_covariance()

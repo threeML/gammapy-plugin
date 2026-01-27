@@ -1,7 +1,7 @@
-astromodels
-===========
+gammapy_plugin
+==============
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 2
 
    gammapy_plugin

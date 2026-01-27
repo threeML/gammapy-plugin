@@ -21,8 +21,8 @@ import sys
 from pathlib import Path
 
 project = "Gammapy Plugin"
-copyright = "2022, J. Michael Burgess"
-author = "J. Michael Burgess"
+copyright = "2022-2025, T. Preis & J. Michael Burgess"
+author = "T. Preis & J. Michael Burgess"
 
 
 sys.path.insert(0, os.path.abspath("../"))
@@ -62,10 +62,9 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
-    "sphinx.ext.autodoc",
     "sphinx.ext.githubpages",
     "sphinx.ext.napoleon",
-    #    'rtds_action'
+    "sphinx_gallery.load_style",
 ]
 
 
@@ -73,6 +72,7 @@ napoleon_google_docstring = True
 napoleon_use_param = True
 napoleon_include_private_with_doc = True
 napoleon_include_init_with_doc = True
+
 
 autodoc_default_options = {
     "members": "var1, var2",
@@ -82,22 +82,21 @@ autodoc_default_options = {
     "exclude-members": "__weakref__",
 }
 
+if "GITHUB_TOKEN" in os.environ:
 
-# # The name of your GitHub repository
-# rtds_action_github_repo = "grburgess/gammapy_plugin"
+    extensions.append("rtds_action")
 
-# # The path where the artifact should be extracted
-# # Note: this is relative to the conf.py file!
-# rtds_action_path = "notebooks"
+    rtds_action_path = "notebooks"
 
-# # The "prefix" used in the `upload-artifact` step of the action
-# rtds_action_artifact_prefix = "notebooks-for-"
+    # # The "prefix" used in the `upload-artifact` step of the action
+    rtds_action_artifact_prefix = "notebooks-for-"
 
-# # A GitHub personal access token is required, more info below
-# rtds_action_github_token = os.environ["GITHUB_TOKEN"]
+    rtds_action_github_repo = "threeML/gammapy_plugin"
 
+    # # A GitHub personal access token is required, more info below
+    rtds_action_github_token = os.environ["GITHUB_TOKEN"]
 
-# rtds_action_error_if_missing = True
+    rtds_action_error_if_missing = True
 
 
 # Add any paths that contain templates here, relative to this directory.
@@ -106,7 +105,13 @@ templates_path = ["_templates"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "**.ipynb_checkpoints"]
+exclude_patterns = [
+    "_build",
+    "Thumbs.db",
+    ".DS_Store",
+    "**.ipynb_checkpoints",
+    "md_docs/*.md",
+]
 
 
 # nbsphinx_allow_errors =True
@@ -134,7 +139,7 @@ html_static_path = ["_static"]
 #     'css/custom.js',
 # ]
 
-html_show_sourcelink = False
+html_show_sourcelink = True
 html_favicon = "media/favicon.ico"
 
 html_show_sphinx = False
@@ -232,5 +237,11 @@ texinfo_documents = [
 ]
 
 
+def autodoc_skip_member_handler(app, what, name, obj, skip, options):
+    # Basic approach; you might want a regex instead
+    return name.startswith("test")
+
+
 def setup(app):
+    app.connect("autodoc-skip-member", autodoc_skip_member_handler)
     app.connect("builder-inited", run_apidoc)

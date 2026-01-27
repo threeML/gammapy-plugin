@@ -4,6 +4,8 @@ import numpy as np
 from astromodels.core.parameter import Parameter
 from gammapy.modeling.models.core import ModelBase
 
+__all__ = ["parameter_to_gammapy_dict", "parse_gammapy_model"]
+
 log = logging.getLogger(__name__)
 
 

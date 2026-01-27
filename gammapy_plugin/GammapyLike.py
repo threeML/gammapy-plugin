@@ -11,6 +11,8 @@ from threeML.analysis_results import _AnalysisResults
 from gammapy_plugin.converter import AstromodelConverter
 from gammapy_plugin.gammapy_source import parameter_to_gammapy_dict, parse_gammapy_model
 
+__all__ = ["GammapyLike"]
+
 log = logging.getLogger(__name__)
 
 __instrument_name = "Gammapy"

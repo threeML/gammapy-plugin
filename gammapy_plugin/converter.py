@@ -1,10 +1,9 @@
 import logging
-import operator
 from typing import Optional
 
 from astromodels.core.model import Model
 from astromodels.sources import ExtendedSource, PointSource, Source
-from gammapy.modeling.models import SkyModel, CompoundSpectralModel
+from gammapy.modeling.models import SkyModel
 
 from gammapy_plugin.gammapy_source import parameter_to_gammapy_dict
 from gammapy_plugin.models import (
@@ -12,6 +11,8 @@ from gammapy_plugin.models import (
     SpatialModelConverted,
     SpectralModelConverted,
 )
+
+__all__ = ["AstromodelConverter", "SourceConverter"]
 
 log = logging.getLogger(__name__)
 
@@ -146,18 +147,12 @@ class SourceConverter:
 
     def _convert_spectral_model(self) -> None:
         """Convert the spectral model of the source."""
-        log.warning("Only Single Spectral Component Models currently supported")
-
         if len(self._source.components.keys()) > 1:
-            self._spectral_model_components = []
-            for k, v in self._source.components.items():
-                self._spectral_model_components.append(
-                    SpectralModelConverted(
-                        v.shape,
-                        spatial_correction=self._spatial_correction,
-                    )
-                )
-            for m in self._spectral_model_components:
+            self._spectral_model = SpectralModelConverted(
+                [x.shape for x in self._source.components.values()],
+                spatial_correction=self._spatial_correction,
+            )
+
         else:
             self._spectral_model = SpectralModelConverted(
                 self._source.components[list(self._source.components.keys())[0]].shape,

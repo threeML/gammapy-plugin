@@ -63,8 +63,8 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip setuptools flake8 ipython h5py coverage pytest pytest-cov cython codecov
-          pip install --upgrade git+https://github.com/PreisTo/astromodels.git@dev
-          pip install --upgrade git+https://github.com/PreisTo/threeML.git@dev
+          pip install --upgrade --pre astromodels 
+          pip install --upgrade --pre threeML
           pip install --upgrade git+https://github.com/gammapy/gammapy.git@main
 
       - name: Lint with flake8
@@ -85,51 +85,51 @@ jobs:
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-#   build-main:
-#     name: Build and Test (${{ matrix.os}}, Python ${{ matrix.python-version}})
-#     needs: skip_duplicate
-#     runs-on: ${{ matrix.os }}
-#     strategy:
-#       fail-fast: false
-#       matrix:
-#         include:
-#           - os: ubuntu-latest
-#             python-version: "3.12"
-#             quick: true
-#             gammapy_data: /home/runner/work/gammapy_data
-#           - os: ubuntu-latest
-#             python-version: "3.11"
-#             quick: false
-#             gammapy_data: /home/runner/work/gammapy_data
-# 
-#     if: ${{ github.event_name == 'push' }} || matrix.quick == true
-# 
-#     env:
-#       GAMMAPY_DATA: ${{ matrix.gammapy_data }}
-# 
-#     steps:
-#       - uses: actions/checkout@v4
-#       - name: Set up Python ${{ matrix.python-version }}
-#         uses: actions/setup-python@v5
-#         with:
-#           python-version: ${{ matrix.python-version }}
-#           cache: pip
-#       - name: Install dependencies
-#         run: |
-#           pip install --upgrade pip setuptools flake8 ipython h5py coverage pytest pytest-cov cython codecov
-#           pip install .
-# 
-#       - name: Lint with flake8
-#         run: |
-#           flake8 . --count --show-source --statistics
-# 
-#       - name: Test with pytest
-#         run: |
-#           git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
-#           python -m gammapy_plugin.data.create_test_datasets
-#           python -m pytest -vv --cov=gammapy_plugin/ --cov-report=xml
-#         env:
-#           NUMBA_DISABLE_JIT: 0
+  build-main:
+    name: Build and Test (${{ matrix.os}}, Python ${{ matrix.python-version}})
+    needs: skip_duplicate
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            python-version: "3.12"
+            quick: true
+            gammapy_data: /home/runner/work/gammapy_data
+          - os: ubuntu-latest
+            python-version: "3.11"
+            quick: false
+            gammapy_data: /home/runner/work/gammapy_data
+
+    if: ${{ github.event_name == 'push' }} || matrix.quick == true
+
+    env:
+      GAMMAPY_DATA: ${{ matrix.gammapy_data }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip setuptools flake8 ipython h5py coverage pytest pytest-cov cython codecov
+          pip install .
+
+      - name: Lint with flake8
+        run: |
+          flake8 . --count --show-source --statistics
+
+      - name: Test with pytest
+        run: |
+          git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
+          python -m gammapy_plugin.data.create_test_datasets
+          python -m pytest -vv --cov=gammapy_plugin/ --cov-report=xml
+        env:
+          NUMBA_DISABLE_JIT: 0
 
   package:
     name: Build & verify package

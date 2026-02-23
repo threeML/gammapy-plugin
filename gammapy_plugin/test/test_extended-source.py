@@ -3,10 +3,10 @@ import numpy as np
 from astromodels.core.model import Model
 from astromodels.core.units import get_units
 from astromodels.functions import (
+    Gaussian_on_sphere,
     Log_uniform_prior,
     Powerlaw,
     Uniform_prior,
-    Gaussian_on_sphere,
 )
 from astromodels.sources.extended_source import ExtendedSource
 from astropy.coordinates import SkyCoord

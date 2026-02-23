@@ -1,5 +1,5 @@
-import numpy as np
 import astropy.units as u
+import numpy as np
 from astromodels.core.model import Model
 from astromodels.core.spectral_component import SpectralComponent
 from astromodels.functions import Powerlaw

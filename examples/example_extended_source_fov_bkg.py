@@ -1,20 +1,12 @@
 import astropy.units as u
 from astromodels.core.model import Model
 from astromodels.core.units import get_units
-from astromodels.functions import (
-    Log_uniform_prior,
-    Powerlaw,
-    Uniform_prior,
-)
+from astromodels.functions import Log_uniform_prior, Powerlaw, Uniform_prior
 from astromodels.sources.extended_source import ExtendedSource
 from astropy.coordinates import SkyCoord
 from gammapy.data import DataStore
 from gammapy.datasets import Datasets, MapDataset
-from gammapy.makers import (
-    FoVBackgroundMaker,
-    MapDatasetMaker,
-    SafeMaskMaker,
-)
+from gammapy.makers import FoVBackgroundMaker, MapDatasetMaker, SafeMaskMaker
 from gammapy.maps import MapAxis, WcsGeom
 from gammapy.modeling.models import FoVBackgroundModel
 from mpi4py.MPI import COMM_WORLD

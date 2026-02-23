@@ -5,8 +5,8 @@ from astromodels.core.model import Model
 from astromodels.functions.priors import Truncated_gaussian
 from gammapy.datasets import Dataset, Datasets
 from gammapy.modeling.models import DatasetModels, ModelBase, Models
-from threeML.plugin_prototype import PluginPrototype
 from threeML.analysis_results import _AnalysisResults
+from threeML.plugin_prototype import PluginPrototype
 
 from gammapy_plugin.converter import AstromodelConverter
 from gammapy_plugin.gammapy_source import parameter_to_gammapy_dict, parse_gammapy_model

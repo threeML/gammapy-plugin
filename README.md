@@ -9,10 +9,6 @@
 This version is based on previous work by [J. Michael Burgess](https://github.com/grburgess), [Sajan
 Kumar](https://github.com/skumarudel) and [AnjanaTel](https://github.com/AnjanaTel).
 
-## CAVEATS
-
-This plugin is still under heavy development
-
 ## Installation
 
 The following should be sufficient and install all the relevant dependencies.
@@ -47,9 +43,7 @@ instructions)](https://docs.gammapy.org/1.3/getting-started/index.html#getting-s
 
 ### Requirements
 
-Python 3.11 and 3.12 together with ideally the current development version of [`gammapy`](https://github.com/gammapy/gammapy).
-
-You might make it work with `gammapy==1.3` and [PR #5747](https://github.com/gammapy/gammapy/pull/5747).
+Python 3.11 and 3.12 together with `gammapy>=v2.0.0`
 
 ## Usage and Examples
 

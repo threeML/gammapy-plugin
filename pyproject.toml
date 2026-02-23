@@ -59,9 +59,8 @@ parentdir_prefix = "gammapy_plugin-"
 
 
 [tool.pytest]
-addopts = ["--color=yes","--cov=gammapy_plugin","--cov-report=term","-ra"]
-ignore = ["gammapy_plugin/_version.py","gammapy_plugin/test"]
+addopts = ["--color=yes","--cov=gammapy_plugin","--cov-report=term","--cov-report=html","-ra"]
+ignore = ["gammapy_plugin/_version.py"]
 log_cli = true
 log_cli_level = "INFO"
 testpaths = ["gammapy_plugin/test"]
-norecursedirs = ["gammapy_plugin/test"]

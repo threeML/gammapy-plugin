@@ -196,3 +196,14 @@ class SourceConverter:
     def astromodels_source(self) -> Source:
         """Returns the original astromodel source."""
         return self._source
+
+
+class GammapyConverter:
+    """
+    Takes a gammapy SkyModel and transforms it into a astromodels Model
+    """
+
+    def __init__(self, model: SkyModel) -> None:
+        raise NotImplementedError
+
+    # TODO: implement that

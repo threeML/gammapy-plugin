@@ -2,5 +2,5 @@
 max-line-length = 88
 extend-ignore = E203,E701
 exclude = .eggs,.git,docs,scripts,ci,build,dist,*/*.ipynb_checkpoints,examples/*
-
-
+per-file-ignores= 
+	gammapy_plugin/test/test_gammapy_converter.py:F401,

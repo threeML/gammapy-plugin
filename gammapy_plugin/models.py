@@ -79,12 +79,6 @@ class SpectralModelConverted(SpectralModel):
             raise ValueError("You need to specify units for your spectral component")
         log.debug(f"These are the units: {self._x_unit}, {self._y_unit}")
 
-        spat_corr = kwargs.get("spatial_correction", False)
-
-        self._spatial_correction_factor = 1
-        if spat_corr:
-            self._spatial_correction_factor = np.power(180 / np.pi, -2)
-
         self._setup_parameters()
 
         self._integral_unit = self._y_unit * self._x_unit
@@ -144,7 +138,6 @@ class SpectralModelConverted(SpectralModel):
                             ] = v
                     val = (
                         self._astromodel_function[i].evaluate(energy, **kwargs_mapped)
-                        * self._spatial_correction_factor
                     )
                     vals.append(val)
             else:
@@ -160,7 +153,6 @@ class SpectralModelConverted(SpectralModel):
                         self._astromodel_function[i]
                         .evaluate(energy, **kwargs_mapped)
                         .reshape(shape)
-                        * self._spatial_correction_factor
                     )
 
             return sum(vals)
@@ -173,14 +165,12 @@ class SpectralModelConverted(SpectralModel):
             if shape is None:
                 return (
                     self._astromodel_function.evaluate(energy, **kwargs_mapped)
-                    * self._spatial_correction_factor
                 )
             else:
                 return (
                     self._astromodel_function.evaluate(energy, **kwargs_mapped).reshape(
                         shape
                     )
-                    * self._spatial_correction_factor
                 )
 
     @property

@@ -7,8 +7,8 @@ name = "gammapy_plugin"
 description = "The gammapy plugin for 3ML"
 readme = "README.md"
 authors = [
-	{name="J. Michael Burgess",email="jburgess@mpe.mpg.de"},
-	{name="Tobias Preis",email="tobias.preis@uibk.ac.at"}
+	{name="Tobias Preis",email="tobias.preis@uibk.ac.at"},
+	{name="J. Michael Burgess",email="jburgess@mpe.mpg.de"}
 ]
 maintainers = [ 
 	{name="Tobias Preis",email="tobias.preis@uibk.ac.at"}
@@ -28,8 +28,8 @@ dynamic = ["version"]
 dependencies = [
     "numpy",
     "matplotlib",
-    "astromodels",
-    "threeml",
+    "astromodels>=2.5.1",
+    "threeml>=2.5.0",
     "gammapy>=2.0",
 ]
 

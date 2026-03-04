@@ -34,6 +34,7 @@ jobs:
   test-dev-units: # temporary test while improving units handling in astromodels and threeml
     name: Build and Test units-dev(${{ matrix.os}}, Python ${{ matrix.python-version}})
     needs: skip_duplicate
+    if: github.ref == 'refs/heads/dev'
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -89,6 +90,7 @@ jobs:
   test-dev:
     name: Build and Test gammapy@main (${{ matrix.os}}, Python ${{ matrix.python-version}})
     needs: skip_duplicate
+    if: github.ref == 'refs/heads/master'
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -145,6 +147,7 @@ jobs:
   test-main:
     name: Build and Test (${{ matrix.os}}, Python ${{ matrix.python-version}})
     needs: skip_duplicate
+    if: github.ref == 'refs/heads/master'
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false

@@ -123,7 +123,7 @@ def test_extended_source_no_fov_bkg():
     assert (
         np.isclose(
             gp_res.value,
-            gp_plugin_res.value * np.power(180 / np.pi, 2),
+            gp_plugin_res.value,
             rtol=1e-3,
             atol=1e-20,
         )

@@ -32,7 +32,7 @@ jobs:
                   do_not_skip: '["pull_request",  "schedule"]'
 
   test-dev-units: # temporary test while improving units handling in astromodels and threeml
-    name: Build and Test gammapy@main (${{ matrix.os}}, Python ${{ matrix.python-version}})
+    name: Build and Test units-dev(${{ matrix.os}}, Python ${{ matrix.python-version}})
     needs: skip_duplicate
     runs-on: ${{ matrix.os }}
     strategy:

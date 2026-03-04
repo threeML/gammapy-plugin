@@ -109,15 +109,21 @@ def test_extended_source_no_fov_bkg():
         )
         is np.True_
     )
+
+    gp_plugin_res = (
+        res.optimized_model.free_parameters["rxj1713.spectrum.main.Powerlaw.K"].value
+        * res.optimized_model.free_parameters["rxj1713.spectrum.main.Powerlaw.K"].unit
+        * res.optimized_model.extended_sources[
+            "rxj1713"
+        ].spatial_shape.get_total_spatial_integral(1)
+    )
+    gp_res = resu.models.parameters["amplitude"]
+    gp_plugin_res = gp_plugin_res.to(gp_res.unit)
+
     assert (
         np.isclose(
-            res.optimized_model.free_parameters[
-                "rxj1713.spectrum.main.Powerlaw.K"
-            ].value
-            * res.optimized_model.extended_sources[
-                "rxj1713"
-            ].spatial_shape.get_total_spatial_integral(1),
-            resu.models.parameters["amplitude"].value,
+            gp_res.value,
+            gp_plugin_res.value * np.power(180 / np.pi, 2),
             rtol=1e-3,
             atol=1e-20,
         )

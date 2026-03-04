@@ -179,6 +179,11 @@ jobs:
           python -m pytest -vv --cov=gammapy_plugin/ --cov-report=xml
         env:
           NUMBA_DISABLE_JIT: 0
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
 
   package:
     name: Build & verify package

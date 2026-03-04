@@ -136,9 +136,7 @@ class SpectralModelConverted(SpectralModel):
                             kwargs_mapped[
                                 k.split(self._astromodel_function[i].path + ".")[1]
                             ] = v
-                    val = (
-                        self._astromodel_function[i].evaluate(energy, **kwargs_mapped)
-                    )
+                    val = self._astromodel_function[i].evaluate(energy, **kwargs_mapped)
                     vals.append(val)
             else:
                 for i in range(self._components):
@@ -163,15 +161,11 @@ class SpectralModelConverted(SpectralModel):
                 if self._astromodel_function.path in k:
                     kwargs_mapped[k.split(f"{self._astromodel_function.path}.")[1]] = v
             if shape is None:
-                return (
-                    self._astromodel_function.evaluate(energy, **kwargs_mapped)
-                )
+                return self._astromodel_function.evaluate(energy, **kwargs_mapped)
             else:
-                return (
-                    self._astromodel_function.evaluate(energy, **kwargs_mapped).reshape(
-                        shape
-                    )
-                )
+                return self._astromodel_function.evaluate(
+                    energy, **kwargs_mapped
+                ).reshape(shape)
 
     @property
     def mapping(self):

@@ -64,3 +64,6 @@ ignore = ["gammapy_plugin/_version.py"]
 log_cli = true
 log_cli_level = "INFO"
 testpaths = ["gammapy_plugin/test"]
+
+[tool.isort]
+profile = "black"

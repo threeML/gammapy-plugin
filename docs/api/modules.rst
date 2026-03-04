@@ -1,7 +1,7 @@
-gammapy_plugin
+gammapy-plugin
 ==============
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
 
    gammapy_plugin

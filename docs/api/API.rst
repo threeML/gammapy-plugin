@@ -3,7 +3,9 @@ API
 
 Here you can find the documentation of all classes and methods:
 
-.. toctree::
-   :maxdepth: 1
 
-   modules.rst
+.. toctree::
+   :maxdepth: 4
+        
+   gammapy_plugin
+

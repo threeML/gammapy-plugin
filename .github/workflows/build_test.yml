@@ -48,7 +48,7 @@ jobs:
             quick: false
             gammapy_data: /home/runner/work/gammapy_data
 
-    if: ${{ github.event_name == 'push' }} || matrix.quick == true || github.ref == 'refs/heads/dev'
+    if: ${{ github.event_name == 'push'  && github.ref == 'refs/heads/dev' }} || matrix.quick == true 
 
     env:
       GAMMAPY_DATA: ${{ matrix.gammapy_data }}
@@ -103,7 +103,7 @@ jobs:
             quick: false
             gammapy_data: /home/runner/work/gammapy_data
 
-    if: ${{ github.event_name == 'push' }} || matrix.quick == true || github.ref == 'refs/heads/master'
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }} || matrix.quick == true 
 
     env:
       GAMMAPY_DATA: ${{ matrix.gammapy_data }}
@@ -159,7 +159,7 @@ jobs:
             quick: false
             gammapy_data: /home/runner/work/gammapy_data
 
-    if: ${{ github.event_name == 'push' }} || matrix.quick == true || github.ref == 'refs/heads/master'
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }} || matrix.quick == true 
 
     env:
       GAMMAPY_DATA: ${{ matrix.gammapy_data }}

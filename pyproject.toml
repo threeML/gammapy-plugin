@@ -28,8 +28,8 @@ dynamic = ["version"]
 dependencies = [
     "numpy",
     "matplotlib",
-    "astromodels>=2.5.1",
-    "threeml>=2.5.0",
+    "astromodels",
+    "threeml",
     "gammapy>=2.0",
 ]
 

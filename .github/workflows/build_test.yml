@@ -41,14 +41,12 @@ jobs:
         include:
           - os: ubuntu-latest
             python-version: "3.12"
-            quick: true
             gammapy_data: /home/runner/work/gammapy_data
           - os: ubuntu-latest
             python-version: "3.11"
-            quick: false
             gammapy_data: /home/runner/work/gammapy_data
 
-    if: ${{ github.event_name == 'push'  && github.ref == 'refs/heads/dev' }} || matrix.quick == true 
+    if: ${{ github.event_name == 'push'  && github.ref == 'refs/heads/dev' }}
 
     env:
       GAMMAPY_DATA: ${{ matrix.gammapy_data }}
@@ -81,7 +79,6 @@ jobs:
           NUMBA_DISABLE_JIT: 0
 
       - name: Upload coverage to Codecov
-        if: matrix.quick == false
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -96,14 +93,12 @@ jobs:
         include:
           - os: ubuntu-latest
             python-version: "3.12"
-            quick: true
             gammapy_data: /home/runner/work/gammapy_data
           - os: ubuntu-latest
             python-version: "3.11"
-            quick: false
             gammapy_data: /home/runner/work/gammapy_data
 
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }} || matrix.quick == true 
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
 
     env:
       GAMMAPY_DATA: ${{ matrix.gammapy_data }}
@@ -136,7 +131,6 @@ jobs:
           NUMBA_DISABLE_JIT: 0
 
       - name: Upload coverage to Codecov
-        if: matrix.quick == false
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -152,14 +146,12 @@ jobs:
         include:
           - os: ubuntu-latest
             python-version: "3.12"
-            quick: true
             gammapy_data: /home/runner/work/gammapy_data
           - os: ubuntu-latest
             python-version: "3.11"
-            quick: false
             gammapy_data: /home/runner/work/gammapy_data
 
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }} || matrix.quick == true 
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }} 
 
     env:
       GAMMAPY_DATA: ${{ matrix.gammapy_data }}

@@ -3,7 +3,7 @@
 [![codecov](https://codecov.io/github/threeML/gammapy-plugin/graph/badge.svg?token=EGG9OUMT9J)](https://codecov.io/github/threeML/gammapy-plugin)
 
 # Gammapy Plugin
-[![](docs/media/banner_dark.svg)[
+[![A gammapy plugin for threeML](docs/media/banner_dark.svg)]
 
 `threeML` plugin to use `gammapy` datasets in your `threeML` analysis.
 

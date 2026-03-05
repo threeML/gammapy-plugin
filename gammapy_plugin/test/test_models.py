@@ -41,6 +41,14 @@ def test_spectral_model_converted():
     x = np.ones(10).reshape((2, 5)) * 0.5 * u.TeV
     assert np.all(spec_comps.evaluate(x, **para_dict) == pl1(x) + pl2(x))
 
+    with pytest.raises(ValueError):
+        pl2 = Powerlaw()
+        spec_comps = SpectralModelConverted([pl1, pl2])
+    with pytest.raises(ValueError):
+        pl2 = Powerlaw()
+        pl2.set_units(u.keV, None)
+        spec_comps = SpectralModelConverted([pl1, pl2])
+
 
 def test_spatial_model_converted():
     gauss = Gaussian_on_sphere()

@@ -1,4 +1,5 @@
 import astropy.units as u
+import numpy as np
 import pytest
 from astromodels.core.sky_direction import SkyDirection
 from astromodels.functions import Gaussian_on_sphere, Powerlaw
@@ -22,6 +23,8 @@ def test_spectral_model_converted():
     for k, v in pl.parameters.items():
         para_dict[v.path] = v
     assert spec.evaluate(x, **para_dict) == pl(x)
+    x = np.ones(10) * 0.5 * u.TeV
+    assert np.all(spec.evaluate(x, **para_dict) == pl(x))
 
 
 def test_spatial_model_converted():

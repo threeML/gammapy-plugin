@@ -201,7 +201,8 @@ jobs:
       - name: Build package
         run: |
               pip install --upgrade setuptools
-              python setup.py sdist
+              pip install --upgrade build
+              python -m build 
       - name: List result
         run: ls -l dist
       - name: Check long_description

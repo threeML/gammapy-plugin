@@ -2,5 +2,5 @@ Getting started
 ===============
 
 .. nbgallery::
-   md_docs/crab_spectrum.md
+   notebooks/crab_spectrum.ipynb
 

@@ -36,3 +36,13 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 html_theme = "sphinx-rtd-theme"
 html_static_path = ["_static"]
+
+
+html_theme_options = {
+    "logo_only": False,
+    "collapse_navigation": True,
+    "navigation_depth": 4,
+    "prev_next_buttons_location": "bottom",  # top and bottom
+}
+
+html_logo = "media/logo.svg"

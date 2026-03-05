@@ -1,0 +1,10 @@
+myst-parser
+sphinx-gallery
+numpy
+nbsphinx
+numpy
+numba
+sphinx_rtd_dark_mode
+sphinx-copybutton
+sphinxcontrib-email
+jupytext

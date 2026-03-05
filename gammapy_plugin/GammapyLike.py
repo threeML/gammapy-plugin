@@ -114,7 +114,7 @@ class GammapyLike(PluginPrototype):
         """
 
         if self._sources is None:
-            log.warning(
+            log.info(
                 "If you want to specify sources for this Plugin you MUST do so before"
             )
         else:

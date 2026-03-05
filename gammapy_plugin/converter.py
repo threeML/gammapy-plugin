@@ -38,7 +38,7 @@ class AstromodelConverter:
         if frame is not None:
             self._frame = frame
         else:
-            log.warning("No frame passed - will use ICRS")
+            log.info("No frame passed - will use ICRS")
             self._frame = "icrs"
         self._convert_ps = convert_ps
         self._converted_sources = {}

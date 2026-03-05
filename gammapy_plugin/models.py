@@ -260,7 +260,7 @@ class SpatialModelConverted(SpatialModel):
         self._astromodel_function = function
         # self._source_name = self._astromodel_function.name
         if frame is None:
-            log.warning("No frame passed - will use ICRS!")
+            log.info("No frame passed - will use ICRS!")
             frame = "icrs"
         self._frame = frame
         setattr(self, "frame", self._frame)

@@ -38,6 +38,6 @@
     <text class="sub" x="0" y ="0" font-size="28" font-weight="500">A</text>
     <text class="gamma" x="28" y="0" font-size="52" font-weight="700">gammapy</text>
     <text class="sub" x="0" y="52" font-size="28" font-weight="500">plugin for</text>
-    <text x="128" y="52" font-size="52" font-weight="800" class="brand">threeML</text>
+    <text x="135" y="52" font-size="52" font-weight="800" class="brand">threeML</text>
   </g>
 </svg>

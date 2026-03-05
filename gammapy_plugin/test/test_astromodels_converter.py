@@ -15,6 +15,7 @@ def test_source_converter():
     conv = AstromodelConverter(model, frame="galactic")
     sc = conv._converted_sources["test_ps"]
     assert sc.astromodels_source == ps
+    assert len(conv.converted_sources) > 0
 
 
 def test_parameter_mapping():

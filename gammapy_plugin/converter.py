@@ -198,7 +198,7 @@ class SourceConverter:
         return self._source
 
 
-class GammapyConverter:
+class GammapyConverter:  # pragma: no cover
     """
     Takes a gammapy SkyModel and transforms it into a astromodels Model
     """

@@ -49,6 +49,9 @@ def test_spectral_model_converted():
         pl2 = Powerlaw()
         pl2.set_units(u.TeV, None)
         spec_comps = SpectralModelConverted([pl1, pl2])
+    with pytest.raises(NotImplementedError):
+        string = "a string"
+        SpectralModelConverted(string)
 
 
 def test_spatial_model_converted():

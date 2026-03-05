@@ -58,12 +58,13 @@ class SpectralModelConverted(SpectralModel):
                     # TODO maybe transform also possible need to check
                 else:
                     raise ValueError(f"Your Component {f.name} has no x_unit")
+
                 if y_unit is None and f.y_unit is not None:
                     y_unit = f.y_unit
                 elif y_unit is not None and f.y_unit is not None:
                     assert y_unit == f.y_unit, "Component y_unit not matching"
                     # TODO maybe transform also possible need to check
-                else:
+                else:  # pragma: no cover
                     raise ValueError(f"Your Component {f.name} has no y_unit")
                 for p in f.parameters.values():
                     self._components_parameters.append(p)

@@ -44,9 +44,10 @@ def test_spectral_model_converted():
     with pytest.raises(ValueError):
         pl2 = Powerlaw()
         spec_comps = SpectralModelConverted([pl1, pl2])
-    with pytest.raises(ValueError):
+
+    with pytest.raises(AssertionError):
         pl2 = Powerlaw()
-        pl2.set_units(u.keV, None)
+        pl2.set_units(u.TeV, None)
         spec_comps = SpectralModelConverted([pl1, pl2])
 
 

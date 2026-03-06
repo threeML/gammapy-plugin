@@ -1,6 +1,12 @@
 Welcome to Gammapy Plugin's (gammapy_plugin) documentation!
 ===========================================================
-.. image:: media/banner_dark.svg
+.. image:: _static/banner-light.svg
+   :class: only-light banner
+   :alt: Project banner (light)
+
+.. image:: _static/banner-dark.svg
+   :class: only-dark banner
+   :alt: Project banner (dark)
 
 About gammapy_plugin
 --------------------

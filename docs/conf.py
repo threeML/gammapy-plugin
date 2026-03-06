@@ -22,7 +22,6 @@ extensions = [
     "sphinx.ext.githubpages",
     "sphinx.ext.napoleon",
     "sphinx_gallery.load_style",
-    "sphinx_rtd_dark_mode",
     "sphinxcontrib.email",
     "sphinx_copybutton",
 ]
@@ -34,15 +33,8 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = "sphinx-rtd-theme"
+html_theme = "furo"
 html_static_path = ["_static"]
 
-
-html_theme_options = {
-    "logo_only": False,
-    "collapse_navigation": True,
-    "navigation_depth": 4,
-    "prev_next_buttons_location": "bottom",  # top and bottom
-}
 
 html_logo = "media/logo.svg"

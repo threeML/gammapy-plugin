@@ -1,3 +1,5 @@
+docs/notebooks/*
+docs/md_docs/chains
 examples/*_run
 gammapy_plugin/data/test/
 examples/chain*

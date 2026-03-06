@@ -42,3 +42,5 @@ html_theme_options = {
     "source_repository": "https://github.com/threeML/gammapy-plugin/",
     "source_branch": "master",
 }
+
+myst_enable_extensions = ["colon_fence"]

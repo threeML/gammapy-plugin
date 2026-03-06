@@ -1,4 +1,4 @@
-Welcome to Gammapy Plugin's (gammapy_plugin) documentation!
+Welcome to Gammapy Plugin's documentation!
 ===========================================================
 .. image:: _static/banner-light.svg
    :class: only-light banner
@@ -12,14 +12,14 @@ About gammapy_plugin
 --------------------
 
 
-Gammapy Plugin is a `gammapy`_-plugin for `threeML`_ that allows to incorporate all
+`Gammapy`_ Plugin is a plugin for `threeML`_ that allows to incorporate all
 gammapy-supported instruments in your threeML analysis.
 
-.. _gammapy: https://gammapy.org/
+.. _Gammapy: https://gammapy.org/
 .. _threeML: https://threeml.readthedocs.io/en/stable/
 
 .. note::
-   This project is still under very active development.
+   This project is still under very active development!
 
 .. toctree::
    :maxdepth: 1

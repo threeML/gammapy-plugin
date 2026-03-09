@@ -24,10 +24,8 @@ log = logging.getLogger(__name__)
 
 
 class SpectralModelConverted(SpectralModel):
-    """
-    Class for converting a spectral astromodel function into an gammapy
-    SpectralModel.
-    """
+    """Class for converting a spectral astromodel function into an gammapy
+    SpectralModel."""
 
     tag = ["SpectralModelConverted", "spec_conv"]
 

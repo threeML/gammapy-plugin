@@ -228,8 +228,9 @@ class GammapyLike(PluginPrototype):
         return np.sum([np.prod(d.counts.data.shape) for d in self._datasets])
 
     def distribute_covariance(self, result: _AnalysisResults) -> None:
-        """Function to pass the (estimated) Covariance Matrix to the gammapy parameters
-        so that the gammapy plotting functions can display the correct uncertainty
+        """Function to pass the (estimated) Covariance Matrix to the gammapy
+        parameters so that the gammapy plotting functions can display the
+        correct uncertainty.
 
         :param result: the analysis result
         :type result: BayesianResults or MLEResults

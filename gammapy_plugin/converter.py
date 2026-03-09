@@ -23,7 +23,6 @@ class AstromodelConverter:
 
     Every Source in the Model will get its own Gammapy skymodel. The
     evaluation happens via the astromodel definition.
-
     """
 
     def __init__(
@@ -199,9 +198,7 @@ class SourceConverter:
 
 
 class GammapyConverter:  # pragma: no cover
-    """
-    Takes a gammapy SkyModel and transforms it into a astromodels Model
-    """
+    """Takes a gammapy SkyModel and transforms it into a astromodels Model."""
 
     def __init__(self, model: SkyModel) -> None:
         raise NotImplementedError

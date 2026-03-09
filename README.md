@@ -1,4 +1,5 @@
 [![CI](https://github.com/threeML/gammapy-plugin/actions/workflows/build_test.yml/badge.svg)](https://github.com/threeML/gammapy-plugin/actions/workflows/build_test.yml)
+[![CI dev](https://github.com/threeML/gammapy-plugin/actions/workflows/build_test.yml/badge.svg?branch=dev)](https://github.com/threeML/gammapy-plugin/actions/workflows/build_test.yml)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![codecov](https://codecov.io/github/threeML/gammapy-plugin/graph/badge.svg?token=EGG9OUMT9J)](https://codecov.io/github/threeML/gammapy-plugin)
 

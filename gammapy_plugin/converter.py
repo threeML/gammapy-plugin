@@ -5,12 +5,12 @@ from astromodels.core.model import Model
 from astromodels.sources import ExtendedSource, PointSource, Source
 from gammapy.modeling.models import SkyModel
 
-from gammapy_plugin.gammapy_source import parameter_to_gammapy_dict
 from gammapy_plugin.models import (
     PointSourceModelConverted,
     SpatialModelConverted,
     SpectralModelConverted,
 )
+from gammapy_plugin.utils.gammapy_parser import parameter_to_gammapy_dict
 
 __all__ = ["AstromodelConverter", "SourceConverter"]
 
@@ -198,9 +198,22 @@ class SourceConverter:
 
 
 class GammapyConverter:  # pragma: no cover
-    """Takes a gammapy SkyModel and transforms it into a astromodels Model."""
+    """Takes a gammapy SkyModel and transforms it into a astromodels Model.
+
+    Caution! This will use astropy.units and will therefore be slower
+    than an native astromodels Model
+    """
 
     def __init__(self, model: SkyModel) -> None:
-        raise NotImplementedError
+        assert isinstance(model, SkyModel), "You must provide a gammapy.model.SkyModel"
+        self._sky_model = model
 
-    # TODO: implement that
+    def _parse_sources(self):
+        spectral_model = self._sky_model.spectral_model  # noqa: F841
+        spatial_model = self._sky_model.spatial_model  # noqa: F841
+
+    def _create_astromodel(self):
+        # load the sources
+        # load the
+        sources = []
+        self._astromodel = Model(*sources)

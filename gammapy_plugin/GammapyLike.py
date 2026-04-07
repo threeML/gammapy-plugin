@@ -9,7 +9,10 @@ from threeML.analysis_results import _AnalysisResults
 from threeML.plugin_prototype import PluginPrototype
 
 from gammapy_plugin.converter import AstromodelConverter
-from gammapy_plugin.gammapy_source import parameter_to_gammapy_dict, parse_gammapy_model
+from gammapy_plugin.utils.gammapy_parser import (
+    parameter_to_gammapy_dict,
+    parse_gammapy_model,
+)
 
 __all__ = ["GammapyLike"]
 

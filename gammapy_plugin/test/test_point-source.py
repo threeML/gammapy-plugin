@@ -22,10 +22,10 @@ from gammapy_plugin.converter import AstromodelConverter
 from gammapy_plugin.GammapyLike import GammapyLike
 from gammapy_plugin.test.utils import get_close
 
-get_units().energy = u.TeV
-
 
 def test_crab_spectrum():
+    get_units().energy = u.TeV
+
     datastore = DataStore.from_dir("$GAMMAPY_DATA/hess-dl3-dr1/")
     obs_ids = [23523, 23526, 23559, 23592]
     observations = datastore.get_observations(obs_ids)

@@ -60,7 +60,7 @@ jobs:
           cache: pip
       - name: Install dependencies
         run: |
-          pip install --upgrade pip setuptools flake8 ipython h5py coverage pytest pytest-cov cython codecov
+          pip install --upgrade pip setuptools flake8 ipython h5py coverage pytest pytest-cov cython codecov pytest-xdist
           pip install --upgrade git+https://github.com/PreisTo/astromodels.git@sampling_units
           pip install --upgrade git+https://github.com/PreisTo/threeML.git@sampling_units
           pip install --upgrade git+https://github.com/gammapy/gammapy.git@main
@@ -74,7 +74,7 @@ jobs:
           git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
           pip install .
           python -m gammapy_plugin.data.create_test_datasets
-          python -m pytest -vv --cov=gammapy_plugin/ --cov-report=xml
+          pytest -vv --cov=gammapy_plugin/ --cov-report=xml -n auto --dist worksteal
         env:
           NUMBA_DISABLE_JIT: 0
 
@@ -112,7 +112,7 @@ jobs:
           cache: pip
       - name: Install dependencies
         run: |
-          pip install --upgrade pip setuptools flake8 ipython h5py coverage pytest pytest-cov cython codecov
+          pip install --upgrade pip setuptools flake8 ipython h5py coverage pytest pytest-cov cython codecov pytest-xdist
           pip install --upgrade --pre astromodels 
           pip install --upgrade --pre threeML
           pip install --upgrade git+https://github.com/gammapy/gammapy.git@main
@@ -126,7 +126,7 @@ jobs:
           git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
           pip install .
           python -m gammapy_plugin.data.create_test_datasets
-          python -m pytest -vv --cov=gammapy_plugin/ --cov-report=xml
+          pytest -vv --cov=gammapy_plugin/ --cov-report=xml -n auto --dist worksteal
         env:
           NUMBA_DISABLE_JIT: 0
 
@@ -165,7 +165,7 @@ jobs:
           cache: pip
       - name: Install dependencies
         run: |
-          pip install --upgrade pip setuptools flake8 ipython h5py coverage pytest pytest-cov cython codecov
+          pip install --upgrade pip setuptools flake8 ipython h5py coverage pytest pytest-cov cython codecov pytest-xdist
           pip install .
 
       - name: Lint with flake8
@@ -176,7 +176,7 @@ jobs:
         run: |
           git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
           python -m gammapy_plugin.data.create_test_datasets
-          python -m pytest -vv --cov=gammapy_plugin/ --cov-report=xml
+          pytest -vv --cov=gammapy_plugin/ --cov-report=xml -n auto --dist worksteal
         env:
           NUMBA_DISABLE_JIT: 0
       - name: Upload coverage to Codecov

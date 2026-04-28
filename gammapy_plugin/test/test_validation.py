@@ -1,17 +1,12 @@
-from astromodels.sources import PointSource
-from astromodels.functions import Powerlaw, Uniform_prior, Log_uniform_prior
-from astromodels.core.model import Model
-
-from gammapy_plugin.GammapyLike import GammapyLike
-from gammapy.data import DataStore
-from astropy.coordinates import SkyCoord, Angle
-
-from threeML import BayesianAnalysis
-from threeML.data_list import DataList
-
-import pytest
-import numpy as np
 import astropy.units as u
+import numpy as np
+import pytest
+from astromodels.core.model import Model
+from astromodels.core.units import get_units
+from astromodels.functions import Log_uniform_prior, Powerlaw, Uniform_prior
+from astromodels.sources import PointSource
+from astropy.coordinates import Angle, SkyCoord
+from gammapy.data import DataStore
 from gammapy.datasets import Datasets, SpectrumDataset
 from gammapy.makers import (
     ReflectedRegionsBackgroundMaker,
@@ -20,7 +15,10 @@ from gammapy.makers import (
 )
 from gammapy.maps import MapAxis, RegionGeom, WcsGeom
 from regions import CircleSkyRegion
-from astromodels.core.units import get_units
+from threeML import BayesianAnalysis
+from threeML.data_list import DataList
+
+from gammapy_plugin.GammapyLike import GammapyLike
 
 
 @pytest.fixture

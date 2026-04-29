@@ -50,7 +50,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Conda - Python ${{ matrix.python-version }}
         uses: conda-incubator/setup-miniconda@v3
         with:
           activate-environment: "test_env"
@@ -61,12 +61,14 @@ jobs:
           environment-file: ${{ matrix.env-file }}
           use-only-tar-bz2: false
           channel-priority: true
+
       - name: Install dependencies
         run: |
           pip install --upgrade git+https://github.com/PreisTo/astromodels.git@sampling_units
           pip install --upgrade git+https://github.com/PreisTo/threeML.git@sampling_units
 
       - name: Lint with flake8
+        shell: bash -l {0}
         run: |
           flake8 . --count --show-source --statistics
 

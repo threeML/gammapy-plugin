@@ -105,6 +105,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip flake8 coverage pytest pytest-cov
+          pip install --upgrade --pre astromodels 
+          pip install --upgrade --pre threeML
           pip install --upgrade git+https://github.com/gammapy/gammapy.git@main
 
       - name: Lint with flake8

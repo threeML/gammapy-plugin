@@ -46,7 +46,7 @@ jobs:
 
     # Use a GHA expression so no shell expansion is needed
     env:
-      GAMMAPY_DATA: ${{ github.workspace }}/gammapy_data
+      GAMMAPY_DATA: ${{ github.temp}}/gammapy_data
 
     steps:
       - uses: actions/checkout@v4

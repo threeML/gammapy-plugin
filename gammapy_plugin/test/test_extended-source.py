@@ -23,18 +23,12 @@ from threeML import DataList, JointLikelihood
 
 from gammapy_plugin.converter import AstromodelConverter
 from gammapy_plugin.GammapyLike import GammapyLike
-from gammapy_plugin.test.utils import read_in_gammapy_datasets
-from gammapy_plugin.utils.package_data import get_path_of_data_dir
-
-target_position = SkyCoord.from_name("RX J1713.7-3946").galactic
 
 
-def test_extended_source_no_fov_bkg():
+def test_extended_source_no_fov_bkg(rxj_test_data):
+    target_position = SkyCoord.from_name("RX J1713.7-3946").galactic
     get_units().energy = u.TeV
-    datasets = read_in_gammapy_datasets(
-        get_path_of_data_dir().joinpath("test/rxj17137_3946/")
-    )
-
+    datasets = rxj_test_data
     geom = datasets[0].geoms["geom"]
     circle = CircleSkyRegion(center=target_position, radius=1 * u.deg)
     regions = [circle]
@@ -131,11 +125,11 @@ def test_extended_source_no_fov_bkg():
     )
 
 
-def test_fov_bkg_model_setting():
+def test_fov_bkg_model_setting(rxj_test_data):
     get_units().energy = u.TeV
-    datasets = read_in_gammapy_datasets(
-        get_path_of_data_dir().joinpath("test/rxj17137_3946/")
-    )
+    target_position = SkyCoord.from_name("RX J1713.7-3946").galactic
+
+    datasets = rxj_test_data
     geom = datasets[0].geoms["geom"]
     circle = CircleSkyRegion(center=target_position, radius=1 * u.deg)
     regions = [circle]

@@ -1,131 +1,17 @@
 import astropy.units as u
 import numpy as np
-import pytest
 from astromodels.core.model import Model
 from astromodels.core.units import get_units
 from astromodels.functions import Log_uniform_prior, Powerlaw, Uniform_prior
 from astromodels.sources import PointSource
-from astropy.coordinates import Angle, SkyCoord
-from gammapy.data import DataStore
-from gammapy.datasets import Datasets, SpectrumDataset
-from gammapy.makers import (
-    ReflectedRegionsBackgroundMaker,
-    SafeMaskMaker,
-    SpectrumDatasetMaker,
-)
-from gammapy.maps import MapAxis, RegionGeom, WcsGeom
-from regions import CircleSkyRegion
+from astropy.coordinates import SkyCoord
 from threeML import BayesianAnalysis
 from threeML.data_list import DataList
 
 from gammapy_plugin.GammapyLike import GammapyLike
 
 
-@pytest.fixture
-def _crab_dataset():
-    datastore = DataStore.from_dir("$GAMMAPY_DATA/hess-dl3-dr1/")
-    selection = dict(
-        type="sky_circle",
-        frame="icrs",
-        lon="83.633 deg",
-        lat="22.014 deg",
-        radius="5 deg",
-    )
-    selected_obs_table = datastore.obs_table.select_observations(selection)
-    observations = datastore.get_observations(selected_obs_table["OBS_ID"])
-    target_position = SkyCoord(ra=83.63, dec=22.01, unit="deg", frame="icrs")
-
-    on_region_radius = Angle("0.125 deg")
-    on_region = CircleSkyRegion(
-        center=target_position.galactic, radius=on_region_radius
-    )
-
-    skydir = target_position.galactic
-    geom = WcsGeom.create(
-        npix=(150, 150), binsz=0.05, skydir=skydir, proj="TAN", frame="galactic"
-    )
-
-    energy_axis = MapAxis.from_energy_bounds(
-        0.5, 40, nbin=10, per_decade=True, unit="TeV", name="energy"
-    )
-    energy_axis_true = MapAxis.from_energy_bounds(
-        0.1, 100, nbin=20, per_decade=True, unit="TeV", name="energy_true"
-    )
-
-    geom = RegionGeom.create(region=on_region, axes=[energy_axis])
-    dataset_empty = SpectrumDataset.create(geom=geom, energy_axis_true=energy_axis_true)
-
-    dataset_maker = SpectrumDatasetMaker(
-        containment_correction=True, selection=["counts", "exposure", "edisp"]
-    )
-    bkg_maker = ReflectedRegionsBackgroundMaker()
-    safe_mask_maker = SafeMaskMaker(methods=["aeff-max"], aeff_percent=15)
-    datasets = Datasets()
-
-    for obs_id, observation in zip(selected_obs_table["OBS_ID"], observations):
-        dataset = dataset_maker.run(dataset_empty.copy(name=str(obs_id)), observation)
-        dataset_on_off = bkg_maker.run(dataset, observation)
-        dataset_on_off = safe_mask_maker.run(dataset_on_off, observation)
-        datasets.append(dataset_on_off)
-
-    return datasets
-
-
-@pytest.fixture
-def _pks2155304_dataset():
-    datastore = DataStore.from_dir("$GAMMAPY_DATA/hess-dl3-dr1/")
-    selection = dict(
-        type="sky_circle",
-        frame="icrs",
-        lon="329.72 deg",
-        lat="-30.22 deg",
-        radius="5 deg",
-    )
-    selected_obs_table = datastore.obs_table.select_observations(selection)
-    selected_obs_table = selected_obs_table[
-        selected_obs_table["TARGET_NAME"] == "PKS 2155-304 (steady)"
-    ]
-
-    observations = datastore.get_observations(selected_obs_table["OBS_ID"])
-    target_position = SkyCoord.from_name("PKS 2155-304")
-
-    on_region_radius = Angle("0.125 deg")
-    on_region = CircleSkyRegion(
-        center=target_position.galactic, radius=on_region_radius
-    )
-
-    skydir = target_position.galactic
-    geom = WcsGeom.create(
-        npix=(150, 150), binsz=0.05, skydir=skydir, proj="TAN", frame="galactic"
-    )
-
-    energy_axis = MapAxis.from_energy_bounds(
-        0.4, 7.5, nbin=10, unit="TeV", name="energy"
-    )
-    energy_axis_true = MapAxis.from_energy_bounds(
-        0.1, 100, nbin=20, per_decade=True, unit="TeV", name="energy_true"
-    )
-
-    geom = RegionGeom.create(region=on_region, axes=[energy_axis])
-    dataset_empty = SpectrumDataset.create(geom=geom, energy_axis_true=energy_axis_true)
-
-    dataset_maker = SpectrumDatasetMaker(
-        containment_correction=True, selection=["counts", "exposure", "edisp"]
-    )
-    bkg_maker = ReflectedRegionsBackgroundMaker()
-    safe_mask_maker = SafeMaskMaker(methods=["aeff-max"], aeff_percent=15)
-    datasets = Datasets()
-
-    for obs_id, observation in zip(selected_obs_table["OBS_ID"], observations):
-        dataset = dataset_maker.run(dataset_empty.copy(name=str(obs_id)), observation)
-        dataset_on_off = bkg_maker.run(dataset, observation)
-        dataset_on_off = safe_mask_maker.run(dataset_on_off, observation)
-        datasets.append(dataset_on_off)
-
-    return datasets
-
-
-def test_crab_spectrum(_crab_dataset, tmp_path):
+def test_crab_spectrum(crab_test_data, tmp_path):
     get_units().energy = u.keV
 
     position = SkyCoord.from_name("Crab")
@@ -140,7 +26,7 @@ def test_crab_spectrum(_crab_dataset, tmp_path):
     model = Model(ps)
 
     gl = GammapyLike(name="gammapy_plugin")
-    gl.set_datasets(_crab_dataset, mode="stacked")
+    gl.set_datasets(crab_test_data, mode="stacked")
     gl.set_sources("crab")
     gl.set_model(model)
 
@@ -162,7 +48,7 @@ def test_crab_spectrum(_crab_dataset, tmp_path):
     )
 
 
-def test_pks2155304_spectrum(_pks2155304_dataset, tmp_path):
+def test_pks2155304_spectrum(pks2155304_test_data, tmp_path):
     get_units().energy = u.keV
 
     position = SkyCoord.from_name("PKS 2155-304")
@@ -173,10 +59,8 @@ def test_pks2155304_spectrum(_pks2155304_dataset, tmp_path):
     pl.piv.value = 0.65 * 1e9
     pl.piv.free = False
     model = Model(ps)
-    for d in _pks2155304_dataset:
-        print(d.energy_range)
     gl = GammapyLike(name="gammapy_plugin")
-    gl.set_datasets(_pks2155304_dataset, mode="stacked")
+    gl.set_datasets(pks2155304_test_data, mode="stacked")
     gl.set_sources("pks")
     gl.set_model(model)
 

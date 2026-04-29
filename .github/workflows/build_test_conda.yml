@@ -97,7 +97,7 @@ jobs:
           # Ensure env is visible and valid
           echo "Using GAMMAPY_DATA=${GAMMAPY_DATA}"
           python -m gammapy_plugin.data.create_test_datasets
-          pytest -vv --cov=gammapy_plugin/ --cov-report=xml -n auto --dist worksteal
+          pytest -vv --cov=gammapy_plugin/ --cov-report=xml 
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5

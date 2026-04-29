@@ -18,20 +18,20 @@ on:
 
 jobs:
   skip_duplicate:
-        runs-on: ubuntu-slim
-        outputs:
-            should_skip: ${{ steps.skip_check.outputs.should_skip }}
-        steps:
-            - id: skip_check
-              uses: fkirc/skip-duplicate-actions@master
-              with:
-                  github_token: ${{ github.token }}
-                  concurrent_skipping: never
-                  skip_after_successful_duplicate: true
-                  paths_ignore: '["**/README.md", "**/docs/**"]'
-                  do_not_skip: '["pull_request",  "schedule"]'
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@master
+        with:
+          github_token: ${{ github.token }}
+          concurrent_skipping: never
+          skip_after_successful_duplicate: true
+          paths_ignore: '["**/README.md", "**/docs/**"]'
+          do_not_skip: '["pull_request",  "schedule"]'
 
-  test-dev-units: # temporary test while improving units handling in astromodels and threeml
+  test-dev-units:
     name: Build and Test units-dev(${{ matrix.os}}, Python ${{ matrix.python-version}})
     needs: skip_duplicate
     runs-on: ${{ matrix.os }}
@@ -42,12 +42,15 @@ jobs:
         os: ["ubuntu-latest", "macos-latest"]
         env-file: [ci/environment.yml]
 
-    if: ${{ github.event_name == 'push'  && github.ref == 'refs/heads/dev' }}
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
 
+    # Use a GHA expression so no shell expansion is needed
     env:
-      GAMMAPY_DATA: $HOME/work/gammapy_data
+      GAMMAPY_DATA: ${{ github.workspace }}/gammapy_data
+
     steps:
       - uses: actions/checkout@v4
+
       - name: Set up Conda - Python ${{ matrix.python-version }}
         uses: conda-incubator/setup-miniconda@v3
         with:
@@ -70,23 +73,27 @@ jobs:
         shell: bash -l {0}
         run: |
           flake8 . --count --show-source --statistics
-      - name: Install package
+
+      - name: Install package and set up Gammapy data
         shell: bash -l {0}
         run: |
-          git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
-          ls $GAMMAPY_DATA -alth
+          echo "GAMMAPY_DATA=${GAMMAPY_DATA}"
+          mkdir -p "${GAMMAPY_DATA}"
+          git clone https://github.com/gammapy/gammapy-data.git "${GAMMAPY_DATA}"
+          ls -alth "${GAMMAPY_DATA}"
           pip install .
 
       - name: Test with pytest
         shell: bash -l {0}
-        run: |
-          python -m gammapy_plugin.data.create_test_datasets
-          pytest -vv --cov=gammapy_plugin/ --cov-report=xml -n auto --dist worksteal
         env:
           NUMBA_DISABLE_JIT: 0
+        run: |
+          # Ensure env is visible and valid
+          echo "Using GAMMAPY_DATA=${GAMMAPY_DATA}"
+          python -m gammapy_plugin.data.create_test_datasets
+          pytest -vv --cov=gammapy_plugin/ --cov-report=xml -n auto --dist worksteal
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-

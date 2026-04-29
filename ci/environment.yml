@@ -1,0 +1,22 @@
+name: test_env
+
+channels:
+  - threeml
+  - conda-forge
+  
+dependencies:
+  - gammapy>=2.0
+  - astromodels>=2.5.0
+  - threeML>=2.5.0
+  - numpy
+  - flake8
+  - ipython
+  - coverage
+  - pytest
+  - pytest-cov
+  - pytest-xdist
+  - pymultinest
+
+  
+
+  

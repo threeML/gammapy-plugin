@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+      - dev
+    paths-ignore:
+      - "README.md"
+      - "**/docs/**"
+      - ".github/workflows/docs.yml"
+  pull_request:
+    branches:
+      - master
+      - dev
+  schedule:
+    - cron: "0 11 * * 1"
+
+jobs:
+  skip_duplicate:
+        runs-on: ubuntu-slim
+        outputs:
+            should_skip: ${{ steps.skip_check.outputs.should_skip }}
+        steps:
+            - id: skip_check
+              uses: fkirc/skip-duplicate-actions@master
+              with:
+                  github_token: ${{ github.token }}
+                  concurrent_skipping: never
+                  skip_after_successful_duplicate: true
+                  paths_ignore: '["**/README.md", "**/docs/**"]'
+                  do_not_skip: '["pull_request",  "schedule"]'
+
+  test-dev-units: # temporary test while improving units handling in astromodels and threeml
+    name: Build and Test units-dev(${{ matrix.os}}, Python ${{ matrix.python-version}})
+    needs: skip_duplicate
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+        os: ["ubuntu-latest", "macos-latest"]
+        gammapy_data: /home/runner/work/gammapy_data
+        env-file: ci/environment.yml
+
+    if: ${{ github.event_name == 'push'  && github.ref == 'refs/heads/dev' }}
+
+    env:
+      GAMMAPY_DATA: ${{ matrix.gammapy_data }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: conda-incubator/setup-miniconda@v3
+          with:
+            activate-environment: "test_env"
+            auto-activate-base: false
+            miniforge-version: latest
+            python-version: ${{ matrix.python-version }}
+            auto-update-conda: true
+            environment-file: ${{ matrix.env-file }}
+            use-only-tar-bz2: false
+            channel-priority: true
+      - name: Install dependencies
+        run: |
+          mamba uninstall astromodels threeML --force
+          pip install --upgrade git+https://github.com/PreisTo/astromodels.git@sampling_units
+          pip install --upgrade git+https://github.com/PreisTo/threeML.git@sampling_units
+
+      - name: Lint with flake8
+        run: |
+          flake8 . --count --show-source --statistics
+
+      - name: Test with pytest
+        run: |
+          git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
+          pip install .
+          python -m gammapy_plugin.data.create_test_datasets
+          pytest -vv --cov=gammapy_plugin/ --cov-report=xml -n auto --dist worksteal
+        env:
+          NUMBA_DISABLE_JIT: 0
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+

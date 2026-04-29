@@ -6,48 +6,35 @@ from gammapy.modeling.models import FoVBackgroundModel, SkyModel
 
 from gammapy_plugin.converter import AstromodelConverter
 from gammapy_plugin.GammapyLike import GammapyLike
-from gammapy_plugin.test.utils import read_in_gammapy_datasets
-from gammapy_plugin.utils.package_data import get_path_of_data_dir
 
 
-def test_set_datasets_stacked():
-    datasets = read_in_gammapy_datasets(
-        get_path_of_data_dir().joinpath("test/rxj17137_3946/")
-    )
+def test_set_datasets_stacked(rxj_test_data):
+    datasets = rxj_test_data
     gl_stacked = GammapyLike(name="stacked")
     gl_stacked.set_datasets(datasets.stack_reduce(name="stacked"), mode="stacked")
     gl_stacked.set_datasets(datasets.stack_reduce(name="stacked"), mode="individual")
     gl_stacked.set_datasets(datasets, mode="stacked")
 
 
-def test_set_datasets_individual():
-    datasets = read_in_gammapy_datasets(
-        get_path_of_data_dir().joinpath("test/rxj17137_3946/")
-    )
+def test_set_datasets_individual(rxj_test_data):
     gl_individual = GammapyLike(name="individual")
-    gl_individual.set_datasets(datasets)
+    gl_individual.set_datasets(rxj_test_data)
 
 
-def test_set_datasets_list():
-    datasets = read_in_gammapy_datasets(
-        get_path_of_data_dir().joinpath("test/rxj17137_3946/")
-    )
+def test_set_datasets_list(rxj_test_data):
     gl_list = GammapyLike(name="list")
-    datasets_list = [d for d in datasets]
+    datasets_list = [d for d in rxj_test_data]
     gl_list.set_datasets(datasets_list, mode="stacked")
 
 
-def test_set_multiple_datasets():
-    datasets = read_in_gammapy_datasets(
-        get_path_of_data_dir().joinpath("test/rxj17137_3946/")
-    )
+def test_set_multiple_datasets(rxj_test_data):
     gl_multi_individual = GammapyLike(name="individual")
-    gl_multi_individual.set_datasets(datasets)
+    gl_multi_individual.set_datasets(rxj_test_data)
     pl = Powerlaw()
     ps = PointSource(ra=0, dec=0, spectral_shape=pl, source_name="test")
     model = Model(ps)
     bkg_models = []
-    for d in datasets:
+    for d in rxj_test_data:
         bkg_models.append(FoVBackgroundModel(name=f"{d.name}_bkg", dataset_name=d.name))
     gl_multi_individual.set_model(model)
     gl_multi_individual.set_background_models(bkg_models)
@@ -62,13 +49,10 @@ def test_set_datasets_error():
         gl_error.set_datasets(None)
 
 
-def test_set_datasets_wrong_mode():
-    datasets = read_in_gammapy_datasets(
-        get_path_of_data_dir().joinpath("test/rxj17137_3946/")
-    )
+def test_set_datasets_wrong_mode(rxj_test_data):
     gl_wrong_mode = GammapyLike("test")
     with pytest.raises(ValueError):
-        gl_wrong_mode.set_datasets(datasets, mode="something_weird")
+        gl_wrong_mode.set_datasets(rxj_test_data, mode="something_weird")
 
 
 def test_set_sources():
@@ -80,12 +64,9 @@ def test_set_sources():
         gl.set_sources(GammapyLike("hehe"))
 
 
-def test_set_background_models_init():
-    datasets = read_in_gammapy_datasets(
-        get_path_of_data_dir().joinpath("test/rxj17137_3946/")
-    )
+def test_set_background_models_init(rxj_test_data):
     bkg_models = {}
-    for d in datasets:
+    for d in rxj_test_data:
         bkg_models[d.name + "_bkg"] = FoVBackgroundModel(
             name=d.name + "_bkg", dataset_name=d.name
         )
@@ -98,17 +79,14 @@ def test_wrong_bkg_model():
         gl.set_background_models("string")
 
 
-def test_properties():
-    datasets = read_in_gammapy_datasets(
-        get_path_of_data_dir().joinpath("test/rxj17137_3946/")
-    )
+def test_properties(rxj_test_data):
     bkg_models = {}
-    for d in datasets:
+    for d in rxj_test_data:
         bkg_models[d.name + "_bkg"] = FoVBackgroundModel(
             name=d.name + "_bkg", dataset_name=d.name
         )
     gl = GammapyLike(name="init_bkg")
-    gl.set_datasets(datasets, mode="individual")
+    gl.set_datasets(rxj_test_data, mode="individual")
     gl.gammapy_model
     gl.set_background_models(list(bkg_models.values()))
     pl = Powerlaw()

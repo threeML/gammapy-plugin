@@ -55,10 +55,10 @@ jobs:
       GAMMAPY_DATA: ${{ matrix.gammapy_data }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Set up Conda - Python ${{ matrix.python-version }}
-        uses: conda-incubator/setup-miniconda@v3
+        uses: conda-incubator/setup-miniconda@v4
         with:
           activate-environment: "test_env"
           auto-activate-base: false
@@ -100,6 +100,6 @@ jobs:
           pytest -vv --cov=gammapy_plugin/ --cov-report=xml 
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}

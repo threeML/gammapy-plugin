@@ -6,12 +6,12 @@ jobs:
     name: "Build the notebooks for the docs"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
           python-version: 3.11
-      - uses: conda-incubator/setup-miniconda@v3
+      - uses: conda-incubator/setup-miniconda@v4
         with:
           auto-activate-base: true
           activate-environment: ""
@@ -40,7 +40,7 @@ jobs:
           mkdir -p docs/notebooks
           mv docs/md/*.ipynb docs/notebooks
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: notebooks-for-${{ github.sha }}
           path: docs/notebooks
@@ -49,13 +49,13 @@ jobs:
     name: "Create the API stubs"
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal token
           fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: 3.11
 
@@ -83,7 +83,7 @@ jobs:
 
           sphinx-apidoc -f -o docs/api/ gammapy_plugin
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: api-stubs-for-${{ github.sha }}
           path: docs/api
@@ -93,13 +93,13 @@ jobs:
     runs-on: macos-latest
     needs: [notebooks, api_doc]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal token
           fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: 3.11
 

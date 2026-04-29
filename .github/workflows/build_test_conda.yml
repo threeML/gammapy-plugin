@@ -74,6 +74,7 @@ jobs:
         shell: bash -l {0}
         run: |
           git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
+          ls $GAMMAPY_DATA -alth
           pip install .
 
       - name: Test with pytest

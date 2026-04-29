@@ -22,7 +22,7 @@ pip install .
 ```
 
 You can test your installation by installing `pytest` and running the tests
-after downloading and creating some test datasets:
+after downloading some test datasets:
 
 ```bash
 # install pytest
@@ -32,20 +32,18 @@ pip install pytest
 export GAMMAPY_DATA=/path/to/gammapy_datasets/
 git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
 
-# create some gammapy MapDatasets used for testing
-python -m gammapy_plugin.data.create_test_datasets
-
 # run pytests
 python -m pytest
 ```
 
 The first part is equivalent to running `gammapy download datasets` [(see the `gammapy` installation
 instructions)](https://docs.gammapy.org/1.3/getting-started/index.html#getting-started).
-[examples](./examples) as well as by `pytest`.
+
+These data are used by the [examples](./examples) as well as by `pytest`.
 
 ### Requirements
 
-Python 3.11 and 3.12 together with `gammapy>=v2.0.0`
+Python 3.11, 3.12 or 3.13 together with `gammapy>=v2.0.0`
 
 ## Usage and Examples
 

@@ -40,8 +40,8 @@ jobs:
       matrix:
         python-version: ["3.11", "3.12", "3.13"]
         os: ["ubuntu-latest", "macos-latest"]
-        gammapy_data: /home/runner/work/gammapy_data
-        env-file: ci/environment.yml
+        gammapy_data: [/home/runner/work/gammapy_data]
+        env-file: [ci/environment.yml]
 
     if: ${{ github.event_name == 'push'  && github.ref == 'refs/heads/dev' }}
 

@@ -1,5 +1,6 @@
 import astropy.units as u
 import numpy as np
+import pytest
 from astromodels.core.model import Model
 from astromodels.core.units import get_units
 from astromodels.functions import Log_uniform_prior, Powerlaw, Uniform_prior
@@ -12,6 +13,7 @@ from gammapy_plugin.GammapyLike import GammapyLike
 
 
 def test_crab_spectrum(crab_test_data, tmp_path):
+    _ = pytest.importorskip("pymultinest")
     get_units().energy = u.keV
 
     position = SkyCoord.from_name("Crab")
@@ -49,6 +51,8 @@ def test_crab_spectrum(crab_test_data, tmp_path):
 
 
 def test_pks2155304_spectrum(pks2155304_test_data, tmp_path):
+    _ = pytest.importorskip("pymultinest")
+
     get_units().energy = u.keV
 
     position = SkyCoord.from_name("PKS 2155-304")

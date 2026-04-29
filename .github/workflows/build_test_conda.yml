@@ -63,7 +63,6 @@ jobs:
           channel-priority: true
       - name: Install dependencies
         run: |
-          mamba uninstall astromodels threeML --force
           pip install --upgrade git+https://github.com/PreisTo/astromodels.git@sampling_units
           pip install --upgrade git+https://github.com/PreisTo/threeML.git@sampling_units
 

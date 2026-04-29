@@ -52,15 +52,15 @@ jobs:
       - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
         uses: conda-incubator/setup-miniconda@v3
-          with:
-            activate-environment: "test_env"
-            auto-activate-base: false
-            miniforge-version: latest
-            python-version: ${{ matrix.python-version }}
-            auto-update-conda: true
-            environment-file: ${{ matrix.env-file }}
-            use-only-tar-bz2: false
-            channel-priority: true
+        with:
+          activate-environment: "test_env"
+          auto-activate-base: false
+          miniforge-version: latest
+          python-version: ${{ matrix.python-version }}
+          auto-update-conda: true
+          environment-file: ${{ matrix.env-file }}
+          use-only-tar-bz2: false
+          channel-priority: true
       - name: Install dependencies
         run: |
           mamba uninstall astromodels threeML --force

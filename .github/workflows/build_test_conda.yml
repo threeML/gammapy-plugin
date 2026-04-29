@@ -41,12 +41,18 @@ jobs:
         python-version: ["3.11", "3.12", "3.13"]
         os: ["ubuntu-latest", "macos-latest"]
         env-file: [ci/environment.yml]
+        include:
+          - os: "macos-latest"
+            gammapy_data: "/Users/runner/gammapy_data"
+          - os: "ubuntu-latest"
+            gammapy_data: "/home/runner/gammapy_data"
+
+          
 
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
 
-    # Use a GHA expression so no shell expansion is needed
     env:
-      GAMMAPY_DATA: ${{ github.temp}}/gammapy_data
+      GAMMAPY_DATA: ${{ matrix.gammapy_data }}
 
     steps:
       - uses: actions/checkout@v4

@@ -73,6 +73,7 @@ jobs:
           flake8 . --count --show-source --statistics
 
       - name: Test with pytest
+        shell: bash -l {0}
         run: |
           git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
           pip install .

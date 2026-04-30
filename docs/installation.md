@@ -14,8 +14,7 @@ Workin on a conda and pypi package for gammapy-plugin as well!
 conda install -c threeML -c conda-forge threeml astromodels
 conda install -c conda-forge "gammapy>=2.0.0"
 
-git clone https://github.com/threeML/gammapy-plugin.git
-cd gammapy-plugin
-pip install .
+pip install git+https://github.com/threeML/gammapy-plugin.git
+
 
 ```

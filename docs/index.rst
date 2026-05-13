@@ -28,11 +28,14 @@ gammapy-supported instruments in your threeML analysis.
 .. note::
    This project is still under very active development!
 
+To get started check out the `get-started`_ section.
+
+.. _get-started: intro.rst
 
 .. toctree::
    :maxdepth: 1
    :caption: Contents
-
+        
    intro
    api/API.rst
 

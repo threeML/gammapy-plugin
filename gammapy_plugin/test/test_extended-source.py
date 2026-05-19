@@ -22,7 +22,7 @@ from regions import CircleSkyRegion
 from threeML import DataList, JointLikelihood
 
 from gammapy_plugin.converter import AstromodelConverter
-from gammapy_plugin.GammapyLike import GammapyLike
+from gammapy_plugin.gammapy_like import GammapyLike
 
 
 def test_extended_source_no_fov_bkg(rxj_test_data):

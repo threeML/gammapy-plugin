@@ -5,7 +5,7 @@ from astromodels.functions import Cutoff_powerlaw
 from astromodels.sources import PointSource
 
 from gammapy_plugin.converter import AstromodelConverter
-from gammapy_plugin.GammapyLike import GammapyLike
+from gammapy_plugin.gammapy_like import GammapyLike
 
 
 def test_astromodels_numba_function(rxj_test_data):

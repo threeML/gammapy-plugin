@@ -5,7 +5,7 @@ from astromodels.sources import PointSource
 from gammapy.modeling.models import FoVBackgroundModel, SkyModel
 
 from gammapy_plugin.converter import AstromodelConverter
-from gammapy_plugin.GammapyLike import GammapyLike
+from gammapy_plugin.gammapy_like import GammapyLike
 
 
 def test_set_datasets_stacked(rxj_test_data):

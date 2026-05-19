@@ -14,7 +14,7 @@ from regions import CircleSkyRegion
 from threeML import BayesianAnalysis, DataList
 
 from gammapy_plugin.converter import AstromodelConverter
-from gammapy_plugin.GammapyLike import GammapyLike
+from gammapy_plugin.gammapy_like import GammapyLike
 from gammapy_plugin.utils.astromodels_functions import Gaussian_on_sphere
 
 comm = COMM_WORLD

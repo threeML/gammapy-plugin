@@ -45,7 +45,7 @@ from threeML import BayesianAnalysis
 from threeML.data_list import DataList
 
 from gammapy_plugin.converter import AstromodelConverter
-from gammapy_plugin.GammapyLike import GammapyLike
+from gammapy_plugin.gammapy_like import GammapyLike
 from gammapy_plugin.test.utils import get_close
 ```
 

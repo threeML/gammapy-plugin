@@ -1,10 +1,10 @@
 context:
   name: gammapy_plugin
-  #version: ${{ git.latest_tag('../')[1:] if git.latest_tag('../') and git.latest_tag('../')[0] == 'v' else git.latest_tag('../') }}
+  version: ${{ git.latest_tag('../')[1:] if git.latest_tag('../') and git.latest_tag('../')[0] == 'v' else git.latest_tag('../') }}
 
 package:
   name: ${{ name }}
-  version: "0.0.1" 
+  version: ${{ version }}
 
 source:
   path: .
@@ -37,6 +37,7 @@ tests:
       - gammapy download datasets
       - export GAMMAPY_DATA=$PWD/gammapy-datasets/2.1
       - pytest -vv --pyargs gammapy_plugin
+
     requirements:
       run:
         - pytest

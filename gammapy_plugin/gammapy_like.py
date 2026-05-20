@@ -1,11 +1,9 @@
 import logging
-
 import numpy as np
 from astromodels.core.model import Model
 from astromodels.functions.priors import Truncated_gaussian
 from gammapy.datasets import Dataset, Datasets
 from gammapy.modeling.models import DatasetModels, ModelBase, Models
-from threeML.analysis_results import _AnalysisResults
 from threeML.plugin_prototype import PluginPrototype
 
 from gammapy_plugin.converter import AstromodelConverter
@@ -13,6 +11,11 @@ from gammapy_plugin.utils.gammapy_parser import (
     parameter_to_gammapy_dict,
     parse_gammapy_model,
 )
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from threeML.analysis_results import _AnalysisResults
+
 
 __all__ = ["GammapyLike"]
 
@@ -230,7 +233,7 @@ class GammapyLike(PluginPrototype):
         # TODO: check if this works for all allowed data types
         return np.sum([np.prod(d.counts.data.shape) for d in self._datasets])
 
-    def distribute_covariance(self, result: _AnalysisResults) -> None:
+    def distribute_covariance(self, result: "_AnalysisResults") -> None:
         """Function to pass the (estimated) Covariance Matrix to the gammapy
         parameters so that the gammapy plotting functions can display the
         correct uncertainty.

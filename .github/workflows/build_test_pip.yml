@@ -1,5 +1,4 @@
 name: CI
-t
 on:
   push:
     branches:

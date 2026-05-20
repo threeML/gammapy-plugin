@@ -1,5 +1,5 @@
 name: CI
-
+t
 on:
   push:
     branches:
@@ -63,7 +63,6 @@ jobs:
           pip install --upgrade pip flake8 coverage pytest pytest-cov 
           pip install --upgrade git+https://github.com/PreisTo/astromodels.git@sampling_units
           pip install --upgrade git+https://github.com/PreisTo/threeML.git@sampling_units
-          pip install --upgrade git+https://github.com/gammapy/gammapy.git@main
 
       - name: Lint with flake8
         run: |

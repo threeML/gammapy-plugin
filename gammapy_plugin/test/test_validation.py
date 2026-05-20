@@ -9,7 +9,7 @@ from astropy.coordinates import SkyCoord
 from threeML import BayesianAnalysis
 from threeML.data_list import DataList
 
-from gammapy_plugin.GammapyLike import GammapyLike
+from gammapy_plugin.gammapy_like import GammapyLike
 
 
 def test_crab_spectrum(crab_test_data, tmp_path):

@@ -1,5 +1,11 @@
 """Top-level package for Gammapy Plugin."""
 
-from . import _version
+from ._version import get_versions
 
-__version__ = _version.get_versions()["version"]
+from .gammapy_like import GammapyLike
+
+__version__ = get_versions()["version"]
+del get_versions
+
+
+__all__ = ["GammapyLike"]

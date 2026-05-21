@@ -14,6 +14,12 @@ Welcome to Gammapy Plugin's documentation!
    normalization of the spectrum will be a factor :math:`(180/\pi)^2` too small.
    This will be fixed within upcoming versions of `astromodels` and `threeML`.
 
+.. warning::
+   Currently `astromodels` only fully supports ICRS geometries.
+   Please transform all your `gammapy` datasets accordingly.
+   We are working on implementing this in `astromodels`.
+   
+
 About gammapy_plugin
 --------------------
 

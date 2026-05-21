@@ -37,8 +37,12 @@ To get started check out the `get-started`_ section.
    :caption: Contents
         
    intro
+   notebooks/converter.ipynb
+
    api/API.rst
 
-.. nbgallery::
+.. nblinkgallery::
+
    notebooks/crab_spectrum.ipynb
+   notebooks/converter.ipynb
      

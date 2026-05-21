@@ -12,8 +12,9 @@ Detailed installation instructions can be found `here`_
    :maxdepth: 1
 
    installation.md
+   notebooks/crab_spectrum.ipynb
 
 
-.. nbgallery::
+.. nblinkgallery::
    notebooks/crab_spectrum.ipynb
 

@@ -1,12 +1,13 @@
-import pytest
+import astropy.units as u
 import numpy as np
-from gammapy_plugin.converter import AstromodelConverter
+import pytest
 from astromodels.core.model import Model
 from astromodels.functions import Powerlaw
 from astromodels.sources import PointSource
-import astropy.units as u
 from gammapy.modeling import Fit
 from gammapy.modeling.models import PowerLawSpectralModel, SkyModel
+
+from gammapy_plugin.converter import AstromodelConverter
 
 
 def test_gammapy_fit(crab_test_data):

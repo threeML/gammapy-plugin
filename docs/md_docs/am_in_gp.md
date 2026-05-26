@@ -26,7 +26,7 @@ from astromodels.sources import PointSource
 import astropy.units as u
 from astromodels.core.units import get_units
 
-get_units().energy = u.TeV
+get_units().energy = u.TeV # this is HIGHLY EXPERIMENTAL!!!
 pl = Powerlaw()
 ps = PointSource("crab", ra=83.63, dec=22.01, spectral_shape=pl)
 pl.piv = 1 * u.TeV

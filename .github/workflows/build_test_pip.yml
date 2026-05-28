@@ -67,7 +67,7 @@ jobs:
       - name: Test with pytest
         run: |
           git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
-          pip install .
+          pip install -e .
           pytest -vv --cov=gammapy_plugin --cov-report=xml --cov-report=term 
         env:
           NUMBA_DISABLE_JIT: 0
@@ -116,7 +116,7 @@ jobs:
       - name: Test with pytest
         run: |
           git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
-          pip install . 
+          pip install -e . 
           pytest -vv --cov=gammapy_plugin --cov-report=xml --cov-report=term 
         env:
           NUMBA_DISABLE_JIT: 0
@@ -164,7 +164,7 @@ jobs:
       - name: Test with pytest
         run: |
           git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
-          pip install .
+          pip install -e .
           pytest -vv --cov=gammapy_plugin --cov-report=xml --cov-report=term 
         env:
           NUMBA_DISABLE_JIT: 0

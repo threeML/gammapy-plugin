@@ -30,9 +30,15 @@ class AstromodelConverter:
     ) -> None:
         """
         :param model: the astromodel model
-        :param frame: geometry frame for gammapy, defaults to ICRS
+        :type model: astromodels.core.model.Model
+        :param frame: geometry frame for gammapy, defaults to ICRS, optional
+        :type frame: str
+        :param convert_ps: convert PointSources to a PointSpatialModel, optional
+        :type convert_ps: bool
         """
-        assert isinstance(model, Model), "Needs an astromodels Model"
+        assert isinstance(
+            model, Model
+        ), "AstromodelConverter needs an astromodels Model"
         self._astromodel_model = model
         if frame is not None:
             self._frame = frame
@@ -47,7 +53,7 @@ class AstromodelConverter:
         self._create_gammapy_models_list()
 
     def _convert_extendend_sources(self) -> None:
-        """Converts an extended source into a gammapy skymodel."""
+        """Converts all extended sources into individual gammapy skymodels."""
         for (
             source_name,
             source_instance,
@@ -57,7 +63,7 @@ class AstromodelConverter:
             )
 
     def _convert_point_sources(self) -> None:
-        """Converts point sources into individual skymodels."""
+        """Converts all point sources into individual skymodels."""
         for (
             source_name,
             source_instance,
@@ -74,21 +80,39 @@ class AstromodelConverter:
 
     def _update_parameters(self) -> None:
         """Update all the parameters in the SkyModels with the values from the
-        astromodels model."""
+        astromodels model using the underlying SourceConverters."""
         for name, source in self._converted_sources.items():
             source._update_parameters()
 
     @property
     def gammapy_models(self) -> list[SkyModel]:
-        """Returns all the gammapy skymodels for that model."""
+        """
+        Returns all the gammapy skymodels for that model.
+
+        :return: list with all the SkyModels
+        :rtype: list[SkyModel]
+        """
         return self._gammapy_models
 
     @property
     def model(self) -> Model:
+        """
+        Return the corresponding astromodels model
+
+        :return: the astromodels model
+        :rtype: astromodels.core.model.Model
+        """
+
         return self._astromodel_model
 
     @property
-    def converted_sources(self):
+    def converted_sources(self) -> dict:
+        """
+        Returns dictionary with all the converted sources.
+
+        :return: the converted sources dict
+        :rtype: dict
+        """
         return self._converted_sources
 
 

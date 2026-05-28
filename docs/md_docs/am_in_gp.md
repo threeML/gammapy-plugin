@@ -9,7 +9,7 @@ jupyter:
   kernelspec:
     display_name: Python (threeml)
     language: python
-    name: threeml
+    name: python3
 ---
 
 # Using astromodels in gammapy

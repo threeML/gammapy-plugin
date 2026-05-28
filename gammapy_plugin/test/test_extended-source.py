@@ -1,3 +1,5 @@
+from warnings import warn
+
 import astropy.units as u
 import numpy as np
 from astromodels.core.model import Model
@@ -23,7 +25,6 @@ from threeML import DataList, JointLikelihood
 
 from gammapy_plugin.converter import AstromodelConverter
 from gammapy_plugin.gammapy_like import GammapyLike
-from warnings import warn
 
 
 def test_extended_source_no_fov_bkg(rxj_test_data):

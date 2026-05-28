@@ -1,4 +1,6 @@
 import logging
+from typing import TYPE_CHECKING
+
 import numpy as np
 from astromodels.core.model import Model
 from astromodels.functions.priors import Truncated_gaussian
@@ -11,7 +13,6 @@ from gammapy_plugin.utils.gammapy_parser import (
     parameter_to_gammapy_dict,
     parse_gammapy_model,
 )
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from threeML.analysis_results import _AnalysisResults
@@ -21,7 +22,7 @@ __all__ = ["GammapyLike"]
 
 log = logging.getLogger(__name__)
 
-__instrument_name = "Gammapy"
+__instrument_name = "gammapy"
 
 
 class GammapyLike(PluginPrototype):

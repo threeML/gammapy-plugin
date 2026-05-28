@@ -16,6 +16,8 @@ build:
   jobs:
     pre_build:
       - sphinx-apidoc . -o docs/api
+      - export GAMMAPY_DATA=$HOME/gammapy_data && mkdir -p $GAMMAPY_DATA
+      - git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
       - jupytext --to ipynb --pipe black --execute docs/md_docs/*.md
       - mv docs/md_docs/*.ipynb docs/notebooks
 

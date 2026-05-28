@@ -76,6 +76,7 @@ jobs:
         uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage.xml 
 
   test-dev:
     name: Build and Test gammapy@main (${{ matrix.os}}, Python ${{ matrix.python-version}})
@@ -116,7 +117,7 @@ jobs:
         run: |
           git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
           pip install .
-          pytest -vv --cov=gammapy_plugin/ --cov-report=xml  -n auto --dist worksteal
+          pytest -vv --cov=gammapy_plugin/ --cov-report=xml -n auto --dist worksteal
         env:
           NUMBA_DISABLE_JIT: 0
 
@@ -124,6 +125,8 @@ jobs:
         uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage.xml 
+
 
 
   test-main:
@@ -169,6 +172,7 @@ jobs:
         uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage.xml 
 
 
   package:

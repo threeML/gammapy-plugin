@@ -9,7 +9,7 @@ jupyter:
   kernelspec:
     display_name: threeML
     language: python
-    name: threeml
+    name: python3
     
 ---
 # Converting a astromodels Model 

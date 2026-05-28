@@ -221,6 +221,13 @@ class SourceConverter:
         )
         self._gather_mappings()
 
+    def update(self) -> None:
+        """
+        This invokes the updating of all parameters of the converted model in the
+        gammapy SkyModels
+        """
+        self._update_parameters()
+
     @property
     def skymodel(self) -> SkyModel:
         """Returns the Gammapy skymodel for this source.

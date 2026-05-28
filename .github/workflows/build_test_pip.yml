@@ -68,7 +68,7 @@ jobs:
         run: |
           git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
           pip install .
-          pytest -vv --cov=gammapy_plugin/ --cov-report=xml -n auto --dist worksteal
+          pytest -vv --cov=gammapy_plugin/ --cov-report=xml --cov-report=term -n auto --dist worksteal
         env:
           NUMBA_DISABLE_JIT: 0
 
@@ -117,7 +117,7 @@ jobs:
         run: |
           git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
           pip install .
-          pytest -vv --cov=gammapy_plugin/ --cov-report=xml -n auto --dist worksteal
+          pytest -vv --cov=gammapy_plugin/ --cov-report=xml --cov-report=term -n auto --dist worksteal
         env:
           NUMBA_DISABLE_JIT: 0
 
@@ -165,7 +165,7 @@ jobs:
       - name: Test with pytest
         run: |
           git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
-          pytest -vv --cov=gammapy_plugin/ --cov-report=xml -n auto --dist worksteal 
+          pytest -vv --cov=gammapy_plugin/ --cov-report=xml --cov-report=term -n auto --dist worksteal 
         env:
           NUMBA_DISABLE_JIT: 0
       - name: Upload coverage to Codecov

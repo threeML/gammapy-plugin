@@ -55,7 +55,7 @@ jobs:
           cache: pip
       - name: Install dependencies
         run: |
-          pip install --upgrade pip flake8 coverage pytest pytest-cov 
+          pip install --upgrade pip flake8 coverage pytest pytest-cov pytest-xdist
           pip install --upgrade git+https://github.com/PreisTo/astromodels.git@sampling_units
           pip install --upgrade git+https://github.com/PreisTo/threeML.git@sampling_units
 
@@ -67,7 +67,7 @@ jobs:
         run: |
           git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
           pip install .
-          pytest -vv --cov=gammapy_plugin/ --cov-report=xml 
+          pytest -vv --cov=gammapy_plugin/ --cov-report=xml -n auto --dist worksteal
         env:
           NUMBA_DISABLE_JIT: 0
 
@@ -105,7 +105,7 @@ jobs:
           cache: pip
       - name: Install dependencies
         run: |
-          pip install --upgrade pip flake8 coverage pytest pytest-cov
+          pip install --upgrade pip flake8 coverage pytest pytest-cov pytest-xdist
           pip install --upgrade --pre astromodels 
           pip install --upgrade --pre threeML
           pip install --upgrade git+https://github.com/gammapy/gammapy.git@main
@@ -118,7 +118,7 @@ jobs:
         run: |
           git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
           pip install .
-          pytest -vv --cov=gammapy_plugin/ --cov-report=xml 
+          pytest -vv --cov=gammapy_plugin/ --cov-report=xml  -n auto --dist worksteal
         env:
           NUMBA_DISABLE_JIT: 0
 
@@ -157,7 +157,7 @@ jobs:
           cache: pip
       - name: Install dependencies
         run: |
-          pip install --upgrade pip flake8 coverage pytest pytest-cov
+          pip install --upgrade pip flake8 coverage pytest pytest-cov pytest-xdist
           pip install .
 
       - name: Lint with flake8
@@ -167,7 +167,7 @@ jobs:
       - name: Test with pytest
         run: |
           git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
-          pytest -vv --cov=gammapy_plugin/ --cov-report=xml 
+          pytest -vv --cov=gammapy_plugin/ --cov-report=xml -n auto --dist worksteal 
         env:
           NUMBA_DISABLE_JIT: 0
       - name: Upload coverage to Codecov

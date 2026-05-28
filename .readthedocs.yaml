@@ -16,6 +16,8 @@ build:
   jobs:
     pre_build:
       - sphinx-apidoc . -o docs/api
+      - jupytext --to ipynb --pipe black --execute docs/md_docs/*.md
+      - mv docs/md_docs/*.ipynb docs/notebooks
 
 # Build documentation in the "docs/" directory with Sphinx
 sphinx:

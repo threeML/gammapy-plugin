@@ -58,6 +58,7 @@ jobs:
           pip install --upgrade pip flake8 coverage pytest pytest-cov pytest-xdist
           pip install --upgrade git+https://github.com/PreisTo/astromodels.git@sampling_units
           pip install --upgrade git+https://github.com/PreisTo/threeML.git@sampling_units
+          pip install --upgrade ultranest
 
       - name: Lint with flake8
         run: |
@@ -109,6 +110,7 @@ jobs:
           pip install --upgrade --pre astromodels 
           pip install --upgrade --pre threeML
           pip install --upgrade git+https://github.com/gammapy/gammapy.git@main
+          pip install --upgrade ultranest
 
       - name: Lint with flake8
         run: |
@@ -159,6 +161,7 @@ jobs:
         run: |
           pip install --upgrade pip flake8 coverage pytest pytest-cov pytest-xdist
           pip install .
+          pip install ultranest
 
       - name: Lint with flake8
         run: |

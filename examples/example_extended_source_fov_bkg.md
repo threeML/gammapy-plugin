@@ -58,7 +58,7 @@ from threeML.classicMLE.joint_likelihood import JointLikelihood
 from threeML.utils.progress_bar import trange
 
 from gammapy_plugin.converter import AstromodelConverter
-from gammapy_plugin.GammapyLike import GammapyLike
+from gammapy_plugin.gammapy_like import GammapyLike
 from astromodels.functions.functions_2D import Gaussian_on_sphere
 
 get_units().energy = u.TeV
@@ -929,7 +929,7 @@ from regions import CircleSkyRegion
 from threeML import DataList, JointLikelihood
 
 from gammapy_plugin.converter import AstromodelConverter
-from gammapy_plugin.GammapyLike import GammapyLike
+from gammapy_plugin.gammapy_plugin import GammapyLike
 from gammapy_plugin.test.utils import read_in_gammapy_datasets
 from gammapy_plugin.utils.package_data import get_path_of_data_dir
 

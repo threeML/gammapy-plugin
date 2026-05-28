@@ -19,20 +19,27 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
-    "sphinx.ext.githubpages",
     "sphinx.ext.napoleon",
     "sphinx_gallery.load_style",
-    "sphinx_rtd_dark_mode",
     "sphinxcontrib.email",
     "sphinx_copybutton",
 ]
 
 templates_path = ["_templates"]
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "md_docs"]
 
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = "sphinx-rtd-theme"
+html_theme = "furo"
 html_static_path = ["_static"]
+html_css_files = ["css/overrides.css"]
+
+html_logo = "_static/logo.svg"
+html_theme_options = {
+    "source_repository": "https://github.com/threeML/gammapy-plugin/",
+    "source_branch": "main",
+}
+autodoc_typehints = "description"
+myst_enable_extensions = ["colon_fence"]

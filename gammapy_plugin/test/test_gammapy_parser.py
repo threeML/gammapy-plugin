@@ -3,7 +3,10 @@ import numpy as np
 from astromodels.core.parameter import Parameter
 from gammapy.modeling.models import PowerLawSpectralModel, SkyModel
 
-from gammapy_plugin.gammapy_source import parameter_to_gammapy_dict, parse_gammapy_model
+from gammapy_plugin.utils.gammapy_parser import (
+    parameter_to_gammapy_dict,
+    parse_gammapy_model,
+)
 
 
 def test_parameter_to_gammapy_dict():

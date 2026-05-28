@@ -1,3 +1,5 @@
+from warnings import warn
+
 import astropy.units as u
 import numpy as np
 from astromodels.core.model import Model
@@ -22,19 +24,13 @@ from regions import CircleSkyRegion
 from threeML import DataList, JointLikelihood
 
 from gammapy_plugin.converter import AstromodelConverter
-from gammapy_plugin.GammapyLike import GammapyLike
-from gammapy_plugin.test.utils import read_in_gammapy_datasets
-from gammapy_plugin.utils.package_data import get_path_of_data_dir
-
-get_units().energy = u.TeV
-target_position = SkyCoord.from_name("RX J1713.7-3946").galactic
+from gammapy_plugin.gammapy_like import GammapyLike
 
 
-def test_extended_source_no_fov_bkg():
-    datasets = read_in_gammapy_datasets(
-        get_path_of_data_dir().joinpath("test/rxj17137_3946/")
-    )
-
+def test_extended_source_no_fov_bkg(rxj_test_data):
+    target_position = SkyCoord.from_name("RX J1713.7-3946").galactic
+    get_units().energy = u.TeV
+    datasets = rxj_test_data
     geom = datasets[0].geoms["geom"]
     circle = CircleSkyRegion(center=target_position, radius=1 * u.deg)
     regions = [circle]
@@ -109,13 +105,14 @@ def test_extended_source_no_fov_bkg():
         )
         is np.True_
     )
-
+    warn("Unit issue in astromodels and 3ML - having to multipy by (180/pi)^2")
     gp_plugin_res = (
         res.optimized_model.free_parameters["rxj1713.spectrum.main.Powerlaw.K"].value
         * res.optimized_model.free_parameters["rxj1713.spectrum.main.Powerlaw.K"].unit
         * res.optimized_model.extended_sources[
             "rxj1713"
         ].spatial_shape.get_total_spatial_integral(1)
+        * np.power(180 / np.pi, 2)
     )
     gp_res = resu.models.parameters["amplitude"]
     gp_plugin_res = gp_plugin_res.to(gp_res.unit)
@@ -123,7 +120,7 @@ def test_extended_source_no_fov_bkg():
     assert (
         np.isclose(
             gp_res.value,
-            gp_plugin_res.value * np.power(180 / np.pi, 2),
+            gp_plugin_res.value,
             rtol=1e-3,
             atol=1e-20,
         )
@@ -131,10 +128,11 @@ def test_extended_source_no_fov_bkg():
     )
 
 
-def test_fov_bkg_model_setting():
-    datasets = read_in_gammapy_datasets(
-        get_path_of_data_dir().joinpath("test/rxj17137_3946/")
-    )
+def test_fov_bkg_model_setting(rxj_test_data):
+    get_units().energy = u.TeV
+    target_position = SkyCoord.from_name("RX J1713.7-3946").galactic
+
+    datasets = rxj_test_data
     geom = datasets[0].geoms["geom"]
     circle = CircleSkyRegion(center=target_position, radius=1 * u.deg)
     regions = [circle]

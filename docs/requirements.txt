@@ -1,0 +1,10 @@
+myst-parser
+sphinx-gallery
+numpy
+nbsphinx
+numpy
+numba
+sphinx-copybutton
+sphinxcontrib-email
+jupytext
+furo

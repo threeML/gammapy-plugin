@@ -1,0 +1,9 @@
+/* Furo sets html[data-theme="light"|"dark"] */
+html[data-theme="light"] .only-dark { display: none !important; }
+html[data-theme="dark"] .only-light { display: none !important; }
+
+/* Optional sizing */
+.banner {
+  width: 100%;
+  height: auto;
+}

@@ -24,10 +24,8 @@ log = logging.getLogger(__name__)
 
 
 class SpectralModelConverted(SpectralModel):
-    """
-    Class for converting a spectral astromodel function into an gammapy
-    SpectralModel.
-    """
+    """Class for converting a spectral astromodel function into an gammapy
+    SpectralModel."""
 
     tag = ["SpectralModelConverted", "spec_conv"]
 
@@ -58,12 +56,13 @@ class SpectralModelConverted(SpectralModel):
                     # TODO maybe transform also possible need to check
                 else:
                     raise ValueError(f"Your Component {f.name} has no x_unit")
+
                 if y_unit is None and f.y_unit is not None:
                     y_unit = f.y_unit
                 elif y_unit is not None and f.y_unit is not None:
                     assert y_unit == f.y_unit, "Component y_unit not matching"
                     # TODO maybe transform also possible need to check
-                else:
+                else:  # pragma: no cover
                     raise ValueError(f"Your Component {f.name} has no y_unit")
                 for p in f.parameters.values():
                     self._components_parameters.append(p)
@@ -136,9 +135,7 @@ class SpectralModelConverted(SpectralModel):
                             kwargs_mapped[
                                 k.split(self._astromodel_function[i].path + ".")[1]
                             ] = v
-                    val = (
-                        self._astromodel_function[i].evaluate(energy, **kwargs_mapped)
-                    )
+                    val = self._astromodel_function[i].evaluate(energy, **kwargs_mapped)
                     vals.append(val)
             else:
                 for i in range(self._components):
@@ -163,15 +160,11 @@ class SpectralModelConverted(SpectralModel):
                 if self._astromodel_function.path in k:
                     kwargs_mapped[k.split(f"{self._astromodel_function.path}.")[1]] = v
             if shape is None:
-                return (
-                    self._astromodel_function.evaluate(energy, **kwargs_mapped)
-                )
+                return self._astromodel_function.evaluate(energy, **kwargs_mapped)
             else:
-                return (
-                    self._astromodel_function.evaluate(energy, **kwargs_mapped).reshape(
-                        shape
-                    )
-                )
+                return self._astromodel_function.evaluate(
+                    energy, **kwargs_mapped
+                ).reshape(shape)
 
     @property
     def mapping(self):
@@ -266,7 +259,7 @@ class SpatialModelConverted(SpatialModel):
         self._astromodel_function = function
         # self._source_name = self._astromodel_function.name
         if frame is None:
-            log.warning("No frame passed - will use ICRS!")
+            log.info("No frame passed - will use ICRS!")
             frame = "icrs"
         self._frame = frame
         setattr(self, "frame", self._frame)

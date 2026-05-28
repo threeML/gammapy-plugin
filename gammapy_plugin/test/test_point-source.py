@@ -19,13 +19,13 @@ from threeML.classicMLE.joint_likelihood import JointLikelihood
 from threeML.data_list import DataList
 
 from gammapy_plugin.converter import AstromodelConverter
-from gammapy_plugin.GammapyLike import GammapyLike
+from gammapy_plugin.gammapy_like import GammapyLike
 from gammapy_plugin.test.utils import get_close
-
-get_units().energy = u.TeV
 
 
 def test_crab_spectrum():
+    get_units().energy = u.TeV
+
     datastore = DataStore.from_dir("$GAMMAPY_DATA/hess-dl3-dr1/")
     obs_ids = [23523, 23526, 23559, 23592]
     observations = datastore.get_observations(obs_ids)
@@ -94,6 +94,7 @@ def test_crab_spectrum():
     jl = JointLikelihood(model, DataList(gl))
     jl.fit()
     res = jl.results
+    gl.distribute_covariance(res)
 
     logp_gammapy = LogParabolaSpectralModel(
         amplitude=1e-12 * u.Unit("cm-2 s-1 TeV-1"), reference=1 * u.TeV

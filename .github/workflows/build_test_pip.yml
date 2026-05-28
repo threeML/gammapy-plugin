@@ -67,8 +67,8 @@ jobs:
       - name: Test with pytest
         run: |
           git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
-          pip install .
-          pytest -vv --cov=gammapy_plugin/ --cov-report=xml --cov-report=term -n auto --dist worksteal
+          pip install . -e
+          pytest -vv --cov=gammapy_plugin --cov-report=xml --cov-report=term -n auto --dist worksteal
         env:
           NUMBA_DISABLE_JIT: 0
 
@@ -116,8 +116,8 @@ jobs:
       - name: Test with pytest
         run: |
           git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
-          pip install .
-          pytest -vv --cov=gammapy_plugin/ --cov-report=xml --cov-report=term -n auto --dist worksteal
+          pip install . -e
+          pytest -vv --cov=gammapy_plugin --cov-report=xml --cov-report=term -n auto --dist worksteal
         env:
           NUMBA_DISABLE_JIT: 0
 
@@ -155,7 +155,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip flake8 coverage pytest pytest-cov pytest-xdist
-          pip install .
+          pip install . -e
           pip install ultranest
 
       - name: Lint with flake8
@@ -165,7 +165,7 @@ jobs:
       - name: Test with pytest
         run: |
           git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
-          pytest -vv --cov=gammapy_plugin/ --cov-report=xml --cov-report=term -n auto --dist worksteal 
+          pytest -vv --cov=gammapy_plugin --cov-report=xml --cov-report=term -n auto --dist worksteal 
         env:
           NUMBA_DISABLE_JIT: 0
       - name: Upload coverage to Codecov

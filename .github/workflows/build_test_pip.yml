@@ -31,7 +31,7 @@ jobs:
                   do_not_skip: '["pull_request",  "schedule"]'
 
   test-dev-units: # temporary test while improving units handling in astromodels and threeml
-    name: Build and Test units-dev(${{ matrix.os}}, Python ${{ matrix.python-version}})
+    name: Build and Test units-dev (${{ matrix.os}}, Python ${{ matrix.python-version}})
     needs: skip_duplicate
     runs-on: ${{ matrix.os }}
     strategy:
@@ -45,7 +45,7 @@ jobs:
             python-version: "3.11"
             gammapy_data: /home/runner/work/gammapy_data
 
-    if: ${{ github.event_name == 'push'  && github.ref == 'refs/heads/dev' }}
+    if: ${{ github.event_name == 'push'  && github.ref == 'refs/heads/sampling_units' }}
 
     env:
       GAMMAPY_DATA: ${{ matrix.gammapy_data }}
@@ -71,7 +71,6 @@ jobs:
         run: |
           git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
           pip install .
-          python -m gammapy_plugin.data.create_test_datasets
           pytest -vv --cov=gammapy_plugin/ --cov-report=xml 
         env:
           NUMBA_DISABLE_JIT: 0
@@ -96,7 +95,7 @@ jobs:
             python-version: "3.11"
             gammapy_data: /home/runner/work/gammapy_data
 
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
 
     env:
       GAMMAPY_DATA: ${{ matrix.gammapy_data }}
@@ -123,7 +122,6 @@ jobs:
         run: |
           git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
           pip install .
-          python -m gammapy_plugin.data.create_test_datasets
           pytest -vv --cov=gammapy_plugin/ --cov-report=xml 
         env:
           NUMBA_DISABLE_JIT: 0
@@ -149,7 +147,7 @@ jobs:
             python-version: "3.11"
             gammapy_data: /home/runner/work/gammapy_data
 
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }} 
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }} 
 
     env:
       GAMMAPY_DATA: ${{ matrix.gammapy_data }}
@@ -173,7 +171,6 @@ jobs:
       - name: Test with pytest
         run: |
           git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
-          python -m gammapy_plugin.data.create_test_datasets
           pytest -vv --cov=gammapy_plugin/ --cov-report=xml 
         env:
           NUMBA_DISABLE_JIT: 0

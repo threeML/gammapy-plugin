@@ -1,3 +1,5 @@
+from warnings import warn
+
 import astropy.units as u
 import numpy as np
 from astromodels.core.model import Model
@@ -103,13 +105,14 @@ def test_extended_source_no_fov_bkg(rxj_test_data):
         )
         is np.True_
     )
-
+    warn("Unit issue in astromodels and 3ML - having to multipy by (180/pi)^2")
     gp_plugin_res = (
         res.optimized_model.free_parameters["rxj1713.spectrum.main.Powerlaw.K"].value
         * res.optimized_model.free_parameters["rxj1713.spectrum.main.Powerlaw.K"].unit
         * res.optimized_model.extended_sources[
             "rxj1713"
         ].spatial_shape.get_total_spatial_integral(1)
+        * np.power(180 / np.pi, 2)
     )
     gp_res = resu.models.parameters["amplitude"]
     gp_plugin_res = gp_plugin_res.to(gp_res.unit)

@@ -31,21 +31,17 @@ jobs:
                   do_not_skip: '["pull_request",  "schedule"]'
 
   test-dev-units: # temporary test while improving units handling in astromodels and threeml
-    name: Build and Test units-dev(${{ matrix.os}}, Python ${{ matrix.python-version}})
+    name: Build and Test units-dev (${{ matrix.os}}, Python ${{ matrix.python-version}})
     needs: skip_duplicate
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - os: ubuntu-latest
-            python-version: "3.12"
-            gammapy_data: /home/runner/work/gammapy_data
-          - os: ubuntu-latest
-            python-version: "3.11"
-            gammapy_data: /home/runner/work/gammapy_data
+        os: ["ubuntu-latest"]
+        python-version: ["3.12","3.13"]
+        gammapy_data: ["/home/runner/work/gammapy_data"]
 
-    if: ${{ github.event_name == 'push'  && github.ref == 'refs/heads/dev' }}
+    if: ${{ github.event_name == 'push'  && github.ref == 'refs/heads/sampling_units' }}
 
     env:
       GAMMAPY_DATA: ${{ matrix.gammapy_data }}
@@ -59,9 +55,10 @@ jobs:
           cache: pip
       - name: Install dependencies
         run: |
-          pip install --upgrade pip flake8 coverage pytest pytest-cov 
+          pip install --upgrade pip flake8 coverage pytest pytest-cov pytest-xdist
           pip install --upgrade git+https://github.com/PreisTo/astromodels.git@sampling_units
           pip install --upgrade git+https://github.com/PreisTo/threeML.git@sampling_units
+          pip install --upgrade ultranest
 
       - name: Lint with flake8
         run: |
@@ -70,9 +67,8 @@ jobs:
       - name: Test with pytest
         run: |
           git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
-          pip install .
-          python -m gammapy_plugin.data.create_test_datasets
-          pytest -vv --cov=gammapy_plugin/ --cov-report=xml 
+          pip install -e .
+          pytest -vv --cov=gammapy_plugin --cov-report=xml --cov-report=term 
         env:
           NUMBA_DISABLE_JIT: 0
 
@@ -80,6 +76,7 @@ jobs:
         uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage.xml 
 
   test-dev:
     name: Build and Test gammapy@main (${{ matrix.os}}, Python ${{ matrix.python-version}})
@@ -88,15 +85,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - os: ubuntu-latest
-            python-version: "3.12"
-            gammapy_data: /home/runner/work/gammapy_data
-          - os: ubuntu-latest
-            python-version: "3.11"
-            gammapy_data: /home/runner/work/gammapy_data
+        os: ["ubuntu-latest"]
+        python-version: ["3.12","3.13"]
+        gammapy_data: ["/home/runner/work/gammapy_data"]
 
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
 
     env:
       GAMMAPY_DATA: ${{ matrix.gammapy_data }}
@@ -110,10 +103,11 @@ jobs:
           cache: pip
       - name: Install dependencies
         run: |
-          pip install --upgrade pip flake8 coverage pytest pytest-cov
+          pip install --upgrade pip flake8 coverage pytest pytest-cov pytest-xdist
           pip install --upgrade --pre astromodels 
           pip install --upgrade --pre threeML
           pip install --upgrade git+https://github.com/gammapy/gammapy.git@main
+          pip install --upgrade ultranest
 
       - name: Lint with flake8
         run: |
@@ -122,9 +116,8 @@ jobs:
       - name: Test with pytest
         run: |
           git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
-          pip install .
-          python -m gammapy_plugin.data.create_test_datasets
-          pytest -vv --cov=gammapy_plugin/ --cov-report=xml 
+          pip install -e . 
+          pytest -vv --cov=gammapy_plugin --cov-report=xml --cov-report=term 
         env:
           NUMBA_DISABLE_JIT: 0
 
@@ -132,6 +125,8 @@ jobs:
         uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage.xml 
+
 
 
   test-main:
@@ -141,15 +136,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - os: ubuntu-latest
-            python-version: "3.12"
-            gammapy_data: /home/runner/work/gammapy_data
-          - os: ubuntu-latest
-            python-version: "3.11"
-            gammapy_data: /home/runner/work/gammapy_data
-
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }} 
+        os: ["ubuntu-latest"]
+        python-version: ["3.12","3.13"]
+        gammapy_data: ["/home/runner/work/gammapy_data"]
+       
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }} 
 
     env:
       GAMMAPY_DATA: ${{ matrix.gammapy_data }}
@@ -163,8 +154,8 @@ jobs:
           cache: pip
       - name: Install dependencies
         run: |
-          pip install --upgrade pip flake8 coverage pytest pytest-cov
-          pip install .
+          pip install --upgrade pip flake8 coverage pytest pytest-cov pytest-xdist
+          pip install ultranest
 
       - name: Lint with flake8
         run: |
@@ -173,19 +164,20 @@ jobs:
       - name: Test with pytest
         run: |
           git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
-          python -m gammapy_plugin.data.create_test_datasets
-          pytest -vv --cov=gammapy_plugin/ --cov-report=xml 
+          pip install -e .
+          pytest -vv --cov=gammapy_plugin --cov-report=xml --cov-report=term 
         env:
           NUMBA_DISABLE_JIT: 0
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage.xml 
 
 
   package:
     name: Build & verify package
-    runs-on: ubuntu-latest
+    runs-on: "ubuntu-latest"
 
     steps:
       - uses: actions/checkout@v6

@@ -13,7 +13,7 @@ from gammapy_plugin.gammapy_like import GammapyLike
 
 
 def test_crab_spectrum(crab_test_data, tmp_path):
-    _ = pytest.importorskip("pymultinest")
+    _ = pytest.importorskip("ultranest")
     get_units().energy = u.keV
 
     position = SkyCoord.from_name("Crab")
@@ -34,8 +34,8 @@ def test_crab_spectrum(crab_test_data, tmp_path):
 
     dl = DataList(gl)
     ba = BayesianAnalysis(model, dl)
-    ba.set_sampler("multinest")
-    ba.sampler.setup(resume=False, chain_name=str(tmp_path / "chain/fit-"))
+    ba.set_sampler("ultranest")
+    ba.sampler.setup(resume="overwrite", chain_name=str(tmp_path / "chain/fit-"))
     ba.sample(quiet=True)
 
     assert np.isclose(
@@ -51,7 +51,7 @@ def test_crab_spectrum(crab_test_data, tmp_path):
 
 
 def test_pks2155304_spectrum(pks2155304_test_data, tmp_path):
-    _ = pytest.importorskip("pymultinest")
+    _ = pytest.importorskip("ultranest")
 
     get_units().energy = u.keV
 
@@ -70,8 +70,8 @@ def test_pks2155304_spectrum(pks2155304_test_data, tmp_path):
 
     dl = DataList(gl)
     ba = BayesianAnalysis(model, dl)
-    ba.set_sampler("multinest")
-    ba.sampler.setup(resume=False, chain_name=str(tmp_path / "pks/fit-"))
+    ba.set_sampler("ultranest")
+    ba.sampler.setup(resume="overwrite", chain_name=str(tmp_path / "pks/fit-"))
     ba.sample(quiet=True)
 
     assert np.isclose(

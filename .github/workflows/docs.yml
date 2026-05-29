@@ -49,14 +49,17 @@ jobs:
         with:
           name: notebooks-for-${{ env.SHA }}
           path: docs/notebooks
-      - name: Trigger RTD
+
+      - name: Trigger RTD 
         shell: bash -l {0}
         run: |
           curl -X POST \
-            "https://app.readthedocs.org/api/v2/webhook/gammapy-plugin/327402/" \
-            --data-urlencode "branches=${BRANCH}" \
-            --data-urlencode "token=${TOKEN}" \
-            --data-urlencode "default_branch=main"
+            "https://app.readthedocs.org/api/v3/projects/gammapy-plugin/versions/latest/builds/" \
+            -H "Authorization: Token $TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"branch\": \"${BRANCH}\"
+            }"
 
         env:
           TOKEN: ${{ secrets.RTD_API }}

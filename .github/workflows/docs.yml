@@ -22,6 +22,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - name: Set SHA
+        run: |
+          SHA="${{ github.event.pull_request.head.sha || github.sha }}"
+          echo "SHA=$SHA" >> "$GITHUB_ENV"
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
@@ -40,9 +44,9 @@ jobs:
           jupytext --to ipynb --pipe black --execute docs/md_docs/*.md
           mkdir -p docs/notebooks
           mv docs/md_docs/*.ipynb docs/notebooks
-          echo "Next - uploading artifacts for sha ${{ github.sha }}"
+          echo "Next - uploading artifacts for sha ${SHA}"
 
       - uses: actions/upload-artifact@v6
         with:
-          name: notebooks-for-${{ github.sha }}
+          name: notebooks-for-${SHA}
           path: docs/notebooks

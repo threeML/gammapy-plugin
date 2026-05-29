@@ -65,4 +65,4 @@ jobs:
         env:
           TOKEN: ${{ secrets.RTD_API }}
           BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
-          PR_NUMBER: ${{ github.event.number || "latest" }}
+          PR_NUMBER: ${{ github.event.number || 'latest' }}

@@ -52,9 +52,12 @@ jobs:
       - name: Trigger RTD
         shell: bash -l {0}
         run: |
-          curl \
-            --data "branches=${{ github.head_ref || github.ref_name }}&token=${{ env.TOKEN }}&default_branch=main" \
-            https://app.readthedocs.org/api/v2/webhook/gammapy-plugin/327402/
+          curl -X POST \
+            "https://app.readthedocs.org/api/v2/webhook/gammapy-plugin/327402/" \
+            --data-urlencode "branches=${BRANCH}" \
+            --data-urlencode "token=${TOKEN}" \
+            --data-urlencode "default_branch=main"
 
         env:
-          TOKEN: ${{ secrets.RTD_API }} 
+          TOKEN: ${{ secrets.RTD_API }}
+          BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}

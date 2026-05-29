@@ -84,6 +84,11 @@ class AstromodelConverter:
         for name, source in self._converted_sources.items():
             source._update_parameters()
 
+    def update(self) -> None:
+        """Update all parameters of all SkyModels witht the current values from the
+        astromodels model. Public method for _update_parameters"""
+        self._update_parameters()
+
     @property
     def gammapy_models(self) -> list[SkyModel]:
         """
@@ -220,6 +225,13 @@ class SourceConverter:
             temporal_model=self._temporal_model,
         )
         self._gather_mappings()
+
+    def update(self) -> None:
+        """
+        This invokes the updating of all parameters of the converted model in the
+        gammapy SkyModels
+        """
+        self._update_parameters()
 
     @property
     def skymodel(self) -> SkyModel:

@@ -45,8 +45,7 @@ jobs:
           mkdir -p docs/notebooks
           mv docs/md_docs/*.ipynb docs/notebooks
           echo "Next - uploading artifacts for sha ${SHA}"
-
       - uses: actions/upload-artifact@v6
         with:
-          name: notebooks-for-${SHA}
+          name: notebooks-for-${{ env.SHA }}
           path: docs/notebooks

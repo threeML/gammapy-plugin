@@ -148,8 +148,8 @@ gl.set_datasets(datasets)
 gl.set_model(model, converted_model=conv)
 
 ba = BayesianAnalysis(model, DataList(gl))
-ba.set_sampler("multinest")
-ba.sampler.setup(resume = False)
+ba.set_sampler("ultranest")
+ba.sampler.setup()
 ba.sample()
 res = ba.results
 res

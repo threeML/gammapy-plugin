@@ -55,7 +55,7 @@ jobs:
         shell: bash -l {0}
         run: |
           curl -X POST \
-            "https://app.readthedocs.org/api/v3/projects/gammapy-plugin/versions/latest/builds/" \
+            "https://app.readthedocs.org/api/v3/projects/gammapy-plugin/versions/${PR_NUMBER}/builds/" \
             -H "Authorization: Token $TOKEN" \
             -H "Content-Type: application/json" \
             -d "{
@@ -65,3 +65,4 @@ jobs:
         env:
           TOKEN: ${{ secrets.RTD_API }}
           BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
+          PR_NUMBER: ${{ github.event.number || "latest" }}

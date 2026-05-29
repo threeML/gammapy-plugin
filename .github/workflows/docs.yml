@@ -49,3 +49,12 @@ jobs:
         with:
           name: notebooks-for-${{ env.SHA }}
           path: docs/notebooks
+      - name: Trigger RTD
+        shell: bash -l {0}
+        run: |
+          curl \
+            --data "branches=${{ ${{ github.head_ref || github.ref_name }} }}&token=${{ env.TOKEN }}&default_branch=main" \
+            https://app.readthedocs.org/api/v2/webhook/gammapy-plugin/327402/
+
+        with:
+          TOKEN: ${{ secrets.RTD_API }} 

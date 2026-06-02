@@ -41,6 +41,7 @@ tests:
     requirements:
       run:
         - pytest
+        - filelock
         - if: not (linux and aarch64)
           then:
           - ultranest

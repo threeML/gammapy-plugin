@@ -33,13 +33,18 @@ dependencies = [
     "gammapy>=2.0",
 ]
 
+[project.optional-dependencies]
+tests = [
+    "pytest",
+    "pytest-cov",
+    "pytest-xdist",
+    "filelock",
+]
+flake = ["flake8"]
+
 [project.urls]
 Homepage = "https://github.com/threeML/gammapy-plugin"
 Issues = "https://github.com/threeML/gammapy-plugin/issues"
-
-[project.optional-dependencies]
-tests = ["pytest","pytest-coverage","coverage"]
-flake = ["flake8"]
 
 
 [tool.setuptools]

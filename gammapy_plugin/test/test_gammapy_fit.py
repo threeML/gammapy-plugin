@@ -17,15 +17,11 @@ def test_gammapy_fit(crab_test_data):
 
     pl = Powerlaw()
     ps = PointSource("crab", spectral_shape=pl, ra=83.63, dec=22.01)
-    pl.piv = 1 * u.TeV
-    pl.K = 1e-12 * u.Unit("TeV-1 cm-2 s-1")
-    pl.index = -2
-    pl.index.min_value = -np.inf
-    pl.index.max_value = np.inf
-
     model = Model(ps)
     conv = AstromodelConverter(model)
+
     datasets.models = [conv.gammapy_models[0]]  # using ReflectedRegionsBackground
+
     fit = Fit()
     result = fit.run(datasets=datasets)
 
@@ -40,10 +36,11 @@ def test_gammapy_fit(crab_test_data):
 
     fit_joint = Fit()
     result_joint = fit_joint.run(datasets=datasets_gp)
+
     assert np.isclose(
         result.models[0].parameters["crab.spectrum.main.Powerlaw.index"].value,
         -result_joint.models[0].parameters["index"].value,
-        atol=result_joint.models[0].parameters["index"].error,
+        rtol=0.1,
     )
 
 

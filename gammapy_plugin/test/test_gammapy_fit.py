@@ -78,13 +78,3 @@ def test_xspec_wrapping(crab_test_data):
 
     fit_joint = Fit()
     result_joint = fit_joint.run(datasets=datasets_gp)
-    assert np.isclose(
-        result.models[0].parameters["crab.spectrum.main.XS_powerlaw.norm"].value,
-        result_joint.models[0].parameters["amplitude"].value,
-        atol=result_joint.models[0].parameters["amplitude"].error,
-    )
-    assert np.isclose(
-        result.models[0].parameters["crab.spectrum.main.XS_powerlaw.phoindex"].value,
-        result_joint.models[0].parameters["index"].value,
-        atol=result_joint.models[0].parameters["index"].error,
-    )

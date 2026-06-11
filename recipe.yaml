@@ -1,6 +1,6 @@
 context:
   name: gammapy_plugin
-  version: ${{ git.latest_tag('../')[1:] if git.latest_tag('../') and git.latest_tag('../')[0] == 'v' else git.latest_tag('../') }}
+  version: ${{ git.latest_tag('.')[1:] if git.latest_tag('.') and git.latest_tag('.')[0] == 'v' else git.latest_tag('.') }}
 
 package:
   name: ${{ name }}
@@ -18,7 +18,7 @@ requirements:
     - pip
     - python
     - setuptools
-    - versioneer
+    - setuptools-scm
 
   run:
     - python

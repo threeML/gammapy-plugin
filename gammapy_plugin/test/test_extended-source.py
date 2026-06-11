@@ -3,7 +3,6 @@ from warnings import warn
 import astropy.units as u
 import numpy as np
 from astromodels.core.model import Model
-from astromodels.core.units import get_units
 from astromodels.functions import (
     Gaussian_on_sphere,
     Log_uniform_prior,
@@ -29,7 +28,6 @@ from gammapy_plugin.gammapy_like import GammapyLike
 
 def test_extended_source_no_fov_bkg(rxj_test_data):
     target_position = SkyCoord.from_name("RX J1713.7-3946").galactic
-    get_units().energy = u.TeV
     datasets = rxj_test_data
     geom = datasets[0].geoms["geom"]
     circle = CircleSkyRegion(center=target_position, radius=1 * u.deg)
@@ -48,9 +46,9 @@ def test_extended_source_no_fov_bkg(rxj_test_data):
     es = ExtendedSource(source_name="rxj1713", spectral_shape=pl, spatial_shape=spat)
     pl.index.value = -2
     pl.index.prior = Uniform_prior(lower_bound=-3, upper_bound=-1)
-    pl.K = 2.3 * 1e-11
-    pl.K.prior = Log_uniform_prior(lower_bound=1e-18, upper_bound=1e-8)
-    pl.piv.value = 1
+    pl.K = 2.3 * 1e-20
+    pl.K.prior = Log_uniform_prior(lower_bound=1e-27, upper_bound=1e-17)
+    pl.piv.value = 1e9
     pl.piv.free = False
     spat.lon0.free = False
     spat.lat0.free = False
@@ -122,14 +120,12 @@ def test_extended_source_no_fov_bkg(rxj_test_data):
             gp_res.value,
             gp_plugin_res.value,
             rtol=1e-3,
-            atol=1e-20,
         )
         is np.True_
     )
 
 
 def test_fov_bkg_model_setting(rxj_test_data):
-    get_units().energy = u.TeV
     target_position = SkyCoord.from_name("RX J1713.7-3946").galactic
 
     datasets = rxj_test_data
@@ -164,9 +160,9 @@ def test_fov_bkg_model_setting(rxj_test_data):
     es = ExtendedSource(source_name="rxj1713", spectral_shape=pl, spatial_shape=spat)
     pl.index.value = -2
     pl.index.prior = Uniform_prior(lower_bound=-3, upper_bound=-1)
-    pl.K = 2.3 * 1e-11
-    pl.K.prior = Log_uniform_prior(lower_bound=1e-18, upper_bound=1e-8)
-    pl.piv.value = 1
+    pl.K = 2.3 * 1e-20
+    pl.K.prior = Log_uniform_prior(lower_bound=1e-27, upper_bound=1e-17)
+    pl.piv.value = 1e9
     pl.piv.free = False
     spat.lon0.free = False
     spat.lat0.free = False

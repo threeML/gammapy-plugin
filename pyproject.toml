@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools","versioneer[toml]"]
+requires = ["setuptools>=80", "setuptools-scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -53,15 +53,14 @@ include-package-data = true
 [tool.setuptools.package-data]
 "gammapy_plugin.data.datasets" =  ["*.py","*.fits"]
 
+[tool.setuptools_scm]
+# Configure custom options here (version schemes, file writing, etc.)
+version_file = "gammapy_plugin/_version.py"
 
-[tool.versioneer]
-VCS = "git"
-style = "pep440"
-versionfile_source = "gammapy_plugin/_version.py"
-versionfile_build = "gammapy_plugin/_version.py"
-tag_prefix = "v"
-parentdir_prefix = "gammapy_plugin-"
-
+# Example: Git-specific configuration
+[tool.setuptools_scm.scm.git]
+pre_parse = "fail_on_missing_submodules"  # Fail if submodules are not initialized
+describe_command = "git describe --dirty --tags --long --exclude *js*"  # Custom Git describe command
 
 [tool.pytest]
 addopts = ["--color=yes","-ra"]

@@ -1,6 +1,5 @@
 import astropy.units as u
 import numpy as np
-from astromodels.core.units import get_units
 from astromodels.sources import PointSource
 from gammapy.modeling.models import (
     ExpCutoffPowerLawSpectralModel,
@@ -15,10 +14,10 @@ from gammapy_plugin.utils.astromodels_functions import (
 
 def test_log_parabola_gammapy():
 
-    get_units().energy = u.TeV
     logp = Log_parabola_gammapy()
     # needed for using units
     ps = PointSource(source_name="test_source", spectral_shape=logp, ra=0, dec=0)
+    logp.set_units(u.TeV, u.Unit("TeV-1 cm-2 s-1"))
     logp.K = 1e-11 * u.Unit("TeV-1 cm-2 s-1")
     logp.piv = 2 * u.TeV
     logp.alpha.value = 2.0
@@ -37,10 +36,10 @@ def test_log_parabola_gammapy():
 
 
 def test_exp_cutoff_powerlaw_gammapy():
-    get_units().energy = u.TeV
     expc = Exp_cutoff_powerlaw_gammapy()
     # needed for using units
     ps = PointSource(source_name="test_source", spectral_shape=expc, ra=0, dec=0)
+    expc.set_units(u.TeV, u.Unit("TeV-1 cm-2 s-1"))
     expc.K = 1e-11 * u.Unit("TeV-1 cm-2 s-1")
     expc.piv = 2 * u.TeV
     expc.alpha.value = 0.89

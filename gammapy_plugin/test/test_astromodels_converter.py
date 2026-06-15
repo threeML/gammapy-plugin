@@ -68,3 +68,13 @@ def test_multi_comp():
         ps1(1e9),
         conv.gammapy_models[0].spectral_model(1 * u.TeV).value,
     )
+
+
+def test_composite():
+    pl1 = Powerlaw()
+    pl2 = Powerlaw()
+    comp = pl1 + pl2
+    ps = PointSource(ra=0, dec=0, spectral_shape=comp, source_name="test_comp")
+    model = Model(ps)
+    conv = AstromodelConverter(model, frame="icrs")
+    assert conv.converted_sources

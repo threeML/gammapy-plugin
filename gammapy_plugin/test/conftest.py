@@ -3,6 +3,7 @@ import logging
 import astropy.units as u
 import pytest
 from astropy.coordinates import Angle, SkyCoord
+from filelock import FileLock
 from gammapy.data import DataStore
 from gammapy.datasets import Datasets, MapDataset, SpectrumDataset
 from gammapy.makers import (

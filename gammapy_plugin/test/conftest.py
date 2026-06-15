@@ -3,6 +3,7 @@ import logging
 import astropy.units as u
 import pytest
 from astropy.coordinates import Angle, SkyCoord
+from filelock import FileLock
 from gammapy.data import DataStore
 from gammapy.datasets import Datasets, MapDataset, SpectrumDataset
 from gammapy.makers import (
@@ -17,9 +18,7 @@ from regions import CircleSkyRegion
 log = logging.getLogger(__name__)
 
 
-@pytest.fixture
-def rxj_test_data():
-
+def produce_rxj_test_data():
     datastore = DataStore.from_dir("$GAMMAPY_DATA/hess-dl3-dr1/")
     target_position = SkyCoord.from_name("RX J1713.7-3946").galactic
 
@@ -65,8 +64,23 @@ def rxj_test_data():
     return datasets
 
 
-@pytest.fixture
-def crab_test_data():
+@pytest.fixture(scope="session")
+def rxj_test_data(tmp_path_factory, worker_id):
+    if worker_id == "master":
+        return produce_rxj_test_data()
+
+    root_tmp_dir = tmp_path_factory.getbasetemp().parent
+    fn = root_tmp_dir / "rxj.fits"
+    with FileLock(str(fn) + ".lock"):
+        if fn.is_file():
+            data = Datasets.read(fn)
+        else:
+            data = produce_rxj_test_data()
+            data.write(fn)
+    return data
+
+
+def produce_crab_test_data():
     datastore = DataStore.from_dir("$GAMMAPY_DATA/hess-dl3-dr1/")
     selection = dict(
         type="sky_circle",
@@ -115,8 +129,23 @@ def crab_test_data():
     return datasets
 
 
-@pytest.fixture
-def pks2155304_test_data():
+@pytest.fixture(scope="session")
+def crab_test_data(tmp_path_factory, worker_id):
+    if worker_id == "master":
+        return produce_crab_test_data()
+
+    root_tmp_dir = tmp_path_factory.getbasetemp().parent
+    fn = root_tmp_dir / "crab.fits"
+    with FileLock(str(fn) + ".lock"):
+        if fn.is_file():
+            data = Datasets.read(fn)
+        else:
+            data = produce_crab_test_data()
+            data.write(fn)
+    return data
+
+
+def produce_pks2155304_test_data():
     datastore = DataStore.from_dir("$GAMMAPY_DATA/hess-dl3-dr1/")
     selection = dict(
         type="sky_circle",
@@ -167,3 +196,19 @@ def pks2155304_test_data():
         datasets.append(dataset_on_off)
 
     return datasets
+
+
+@pytest.fixture(scope="session")
+def pks2155304_test_data(tmp_path_factory, worker_id):
+    if worker_id == "master":
+        return produce_pks2155304_test_data()
+
+    root_tmp_dir = tmp_path_factory.getbasetemp().parent
+    fn = root_tmp_dir / "pks2155304.fits"
+    with FileLock(str(fn) + ".lock"):
+        if fn.is_file():
+            data = Datasets.read(fn)
+        else:
+            data = produce_pks2155304_test_data()
+            data.write(fn)
+    return data

@@ -8,7 +8,6 @@ from gammapy_plugin.models import (
     PointSourceModelConverted,
     SpatialModelConverted,
     SpectralModelConverted,
-    TemporalModelConverted,
 )
 
 
@@ -68,9 +67,3 @@ def test_point_spatial_model_converted():
     PointSourceModelConverted(sd, frame="icrs")
     with pytest.raises(NotImplementedError):
         PointSourceModelConverted(sd, frame="fk5")
-
-
-def test_temporal_model_converted():
-    with pytest.raises(NotImplementedError):
-        pl = Powerlaw()
-        TemporalModelConverted(pl)

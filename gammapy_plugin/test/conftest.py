@@ -14,7 +14,6 @@ from gammapy.makers import (
 )
 from gammapy.maps import MapAxis, RegionGeom, WcsGeom
 from regions import CircleSkyRegion
-from filelock import FileLock
 
 log = logging.getLogger(__name__)
 

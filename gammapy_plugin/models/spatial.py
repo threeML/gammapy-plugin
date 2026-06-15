@@ -81,7 +81,7 @@ class SpatialModelConverted(SpatialModel):
     # todo check return type
     def evaluate(self, *args, **kwargs):
         """Evaluates astromodels function instead of gammapy one."""
-        return self._astromodel_function.evaluate(*args, **kwargs)
+        return self._astromodel_function(*args)
 
     @property
     def mapping(self):

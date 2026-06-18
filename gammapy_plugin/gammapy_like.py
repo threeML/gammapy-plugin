@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Union, Optional, Dict, Any
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 import numpy as np
 from astromodels.core.model import Model

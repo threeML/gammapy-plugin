@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union, Optional, Dict, Any
 
 import numpy as np
 from astromodels.core.model import Model
@@ -16,6 +16,7 @@ from gammapy_plugin.utils.gammapy_parser import (
 
 if TYPE_CHECKING:
     from threeML.analysis_results import _AnalysisResults
+    from threeML.io.plotting.data_residual_plot import ResidualPlot
 
 
 __all__ = ["GammapyLike"]
@@ -271,3 +272,71 @@ class GammapyLike(PluginPrototype):
     def frame(self) -> str:
         """Coordinate Frame of the plugin."""
         return self._frame
+
+    def display_model(
+        self,
+        data_color: str = "k",
+        model_color: str = "r",
+        background_color: str = "b",
+        step: bool = True,
+        show_data: bool = True,
+        show_residuals: bool = True,
+        ratio_residuals: bool = False,
+        show_legend: bool = True,
+        min_rate: Union[int, float] = 1e-99,
+        model_label: Optional[str] = None,
+        model_kwargs: Optional[Dict[str, Any]] = None,
+        data_kwargs: Optional[Dict[str, Any]] = None,
+        background_label: Optional[str] = None,
+        background_kwargs: Optional[Dict[str, Any]] = None,
+        source_only: bool = True,
+        show_background: bool = False,
+        **kwargs,
+    ) -> "ResidualPlot":
+
+        from threeML.io.plotting.data_residual_plot import ResidualPlot
+
+        # TODO: have to ensure this is only for specturm data set valid
+
+        residual_plot = ResidualPlot(
+            show_residuals=True,
+            ratio_residuals=True,
+            **kwargs,
+        )
+
+        # compute the values for the plotting
+        # TODO: this is only the case for 1D datasets
+
+        y_unweighted = self._datasets[0].counts.data.reshape(-1)
+        x = self._datasets[0].counts.geom.axes["energy"].as_plot_center.to("keV").value
+        xerr = [
+            self._datasets[0].counts.geom.axes["energy"].as_plot_xerr[i].to("keV").value
+            for i in [0, 1]
+        ]
+
+        bins = (
+            self._datasets[0].counts.geom.axes["energy"].as_plot_edges.to("keV").value
+        )
+        widths = np.diff(bins)
+        y = y_unweighted / widths
+
+        residuals = (
+            self._datasets[0].counts.get_spectrum() - self._datasets[0].npred()
+        ) / self._datasets[0].npred()
+
+        residual_plot.add_data(
+            x,
+            y,
+            residuals,
+            xerr=xerr,
+            label=self._name,
+            show_data=show_data,
+        )
+
+        return residual_plot.finalize(
+            xlabel="Energy\n(keV)",
+            ylabel="Counts/keV",
+            xscale="log",
+            yscale="log",
+            show_legend=show_legend,
+        )

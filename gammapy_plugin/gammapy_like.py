@@ -275,22 +275,6 @@ class GammapyLike(PluginPrototype):
 
     def display_model(
         self,
-        data_color: str = "k",
-        model_color: str = "r",
-        background_color: str = "b",
-        step: bool = True,
-        show_data: bool = True,
-        show_residuals: bool = True,
-        ratio_residuals: bool = False,
-        show_legend: bool = True,
-        min_rate: Union[int, float] = 1e-99,
-        model_label: Optional[str] = None,
-        model_kwargs: Optional[Dict[str, Any]] = None,
-        data_kwargs: Optional[Dict[str, Any]] = None,
-        background_label: Optional[str] = None,
-        background_kwargs: Optional[Dict[str, Any]] = None,
-        source_only: bool = True,
-        show_background: bool = False,
         **kwargs,
     ) -> "ResidualPlot":
 
@@ -303,40 +287,38 @@ class GammapyLike(PluginPrototype):
             ratio_residuals=True,
             **kwargs,
         )
+        for i in range(len(self._datasets)):
+            y_unweighted = self._datasets[i].counts.data.reshape(-1)
+            x = self._datasets[i].counts.geom.axes["energy"].as_plot_center.to("keV").value
+            xerr = [
+                self._datasets[i].counts.geom.axes["energy"].as_plot_xerr[j].to("keV").value
+                for j in [0, 1]
+            ]
 
-        # compute the values for the plotting
-        # TODO: this is only the case for 1D datasets
+            bins = (
+                self._datasets[i].counts.geom.axes["energy"].as_plot_edges.to("keV").value
+            )
+            widths = np.diff(bins)
+            y = y_unweighted / widths
 
-        y_unweighted = self._datasets[0].counts.data.reshape(-1)
-        x = self._datasets[0].counts.geom.axes["energy"].as_plot_center.to("keV").value
-        xerr = [
-            self._datasets[0].counts.geom.axes["energy"].as_plot_xerr[i].to("keV").value
-            for i in [0, 1]
-        ]
+            residuals = (
+                self._datasets[i].counts.get_spectrum() - self._datasets[i].npred()
+            ) / self._datasets[i].npred()
+            residuals = residuals.data.reshape(-1)
 
-        bins = (
-            self._datasets[0].counts.geom.axes["energy"].as_plot_edges.to("keV").value
-        )
-        widths = np.diff(bins)
-        y = y_unweighted / widths
-
-        residuals = (
-            self._datasets[0].counts.get_spectrum() - self._datasets[0].npred()
-        ) / self._datasets[0].npred()
-
-        residual_plot.add_data(
-            x,
-            y,
-            residuals,
-            xerr=xerr,
-            label=self._name,
-            show_data=show_data,
-        )
+            residual_plot.add_data(
+                x,
+                y,
+                residuals,
+                xerr=xerr,
+                label=self._datasets[i].name,
+                show_data=kwargs.get("show_data",True),
+            )
 
         return residual_plot.finalize(
             xlabel="Energy\n(keV)",
             ylabel="Counts/keV",
             xscale="log",
             yscale="log",
-            show_legend=show_legend,
+            show_legend=kwargs.get("show_legend",True),
         )

@@ -2,7 +2,6 @@ import astropy.units as u
 import numpy as np
 from astromodels.core.model import Model
 from astromodels.core.spectral_component import SpectralComponent
-from astromodels.core.units import get_units
 from astromodels.functions import Powerlaw
 from astromodels.sources import PointSource
 
@@ -58,15 +57,24 @@ def test_parameter_mapping():
 
 
 def test_multi_comp():
-    get_units().energy = u.TeV
-    pl1 = Powerlaw(index=-1, K=1, piv=1)
-    pl2 = Powerlaw(index=-2, K=2, piv=1)
+    pl1 = Powerlaw(index=-1, K=1e-9, piv=1e9)
+    pl2 = Powerlaw(index=-2, K=2e2 - 9, piv=1e9)
     sc1 = SpectralComponent("comp1", pl1)
     sc2 = SpectralComponent("comp2", pl2)
     ps1 = PointSource(ra=0, dec=0, components=[sc1, sc2], source_name="test_ps")
     model = Model(ps1)
     conv = AstromodelConverter(model, frame="galactic")
     assert np.isclose(
-        ps1(1),
+        ps1(1e9),
         conv.gammapy_models[0].spectral_model(1 * u.TeV).value,
     )
+
+
+def test_composite():
+    pl1 = Powerlaw()
+    pl2 = Powerlaw()
+    comp = pl1 + pl2
+    ps = PointSource(ra=0, dec=0, spectral_shape=comp, source_name="test_comp")
+    model = Model(ps)
+    conv = AstromodelConverter(model, frame="icrs")
+    assert conv.converted_sources

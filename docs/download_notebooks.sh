@@ -1,10 +1,15 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -eo pipefail
 
 OWNER="threeML"
 REPO="gammapy-plugin"
 SHA="${READTHEDOCS_GIT_COMMIT_HASH}"
 TOKEN="${GITHUB_TOKEN}"
+
+if [ -z "$TOKEN" ]; then
+	echo "This is a Pull Request Build - cannot download artifacts safely"
+	exit 0
+fi
 
 API="https://api.github.com/repos/$OWNER/$REPO"
 

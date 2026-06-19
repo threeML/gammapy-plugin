@@ -7,9 +7,8 @@ jupyter:
       format_version: '1.3'
       jupytext_version: 1.19.1
   kernelspec:
-    display_name: Python (threeML)
+    display_name: Python 3 
     language: python
-    name: threeml
 ---
 
 # 3D Analysis of an Extended Source

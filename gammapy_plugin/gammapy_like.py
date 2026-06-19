@@ -283,27 +283,39 @@ class GammapyLike(PluginPrototype):
         # TODO: have to ensure this is only for specturm data set valid
 
         residual_plot = ResidualPlot(
-            show_residuals=True,
-            ratio_residuals=True,
             **kwargs,
         )
         for i in range(len(self._datasets)):
+
             y_unweighted = self._datasets[i].counts.data.reshape(-1)
-            x = self._datasets[i].counts.geom.axes["energy"].as_plot_center.to("keV").value
+            x = (
+                self._datasets[i]
+                .counts.geom.axes["energy"]
+                .as_plot_center.to("keV")
+                .value
+            )
             xerr = [
-                self._datasets[i].counts.geom.axes["energy"].as_plot_xerr[j].to("keV").value
+                self._datasets[i]
+                .counts.geom.axes["energy"]
+                .as_plot_xerr[j]
+                .to("keV")
+                .value
                 for j in [0, 1]
             ]
 
             bins = (
-                self._datasets[i].counts.geom.axes["energy"].as_plot_edges.to("keV").value
+                self._datasets[i]
+                .counts.geom.axes["energy"]
+                .as_plot_edges.to("keV")
+                .value
             )
             widths = np.diff(bins)
             y = y_unweighted / widths
 
             residuals = (
-                self._datasets[i].counts.get_spectrum() - self._datasets[i].npred()
-            ) / self._datasets[i].npred()
+                self._datasets[i].counts.get_spectrum()
+                - self._datasets[i].npred().get_spectrum()
+            ) / self._datasets[i].npred().get_spectrum()
             residuals = residuals.data.reshape(-1)
 
             residual_plot.add_data(
@@ -312,7 +324,13 @@ class GammapyLike(PluginPrototype):
                 residuals,
                 xerr=xerr,
                 label=self._datasets[i].name,
-                show_data=kwargs.get("show_data",True),
+                show_data=kwargs.get("show_data", True),
+            )
+
+            residual_plot.add_model(
+                x,
+                self._datasets[i].npred().get_spectrum().data.reshape(-1) / widths,
+                label=kwargs.get("model_label", "Expected"),
             )
 
         return residual_plot.finalize(
@@ -320,5 +338,5 @@ class GammapyLike(PluginPrototype):
             ylabel="Counts/keV",
             xscale="log",
             yscale="log",
-            show_legend=kwargs.get("show_legend",True),
+            show_legend=kwargs.get("show_legend", True),
         )

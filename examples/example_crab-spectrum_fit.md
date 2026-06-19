@@ -7,9 +7,8 @@ jupyter:
       format_version: '1.3'
       jupytext_version: 1.19.1
   kernelspec:
-    display_name: docs_env
+    display_name: Python 3
     language: python
-    name: docs_env
 ---
 
 ```python
@@ -38,6 +37,7 @@ from gammapy_plugin.converter import AstromodelConverter
 from gammapy_plugin.gammapy_like import GammapyLike
 from gammapy_plugin.test.utils import get_close
 
+from threeML.io.plotting.post_process_data_plots import display_spectrum_model_counts
 # get_units().energy = u.TeV
 ```
 
@@ -121,124 +121,13 @@ res = jl.results
 ```
 
 ```python
-import numpy as np
-import matplotlib.pyplot as plt
-
-e = np.geomspace(1e-1, 1e2, 1000) * u.TeV
-```
-
-```python
-def mohrmann_weird_spec(E, N0, E0, gamma1, gamma2, Ebreak, beta):
-    return (
-        N0
-        * np.power(E / E0, -gamma1)
-        * np.power(1 + np.power(E / Ebreak, (gamma2 - gamma1) / beta), -beta)
-    )
-```
-
-```python
-plt.plot(e, e**2 * ps(e).to("TeV-1 cm-2 s-1"), label="this shit")
-plt.plot(
-    e,
-    e**2
-    * mohrmann_weird_spec(
-        e,
-        3.35 * 1e-10 * u.Unit("TeV-1 s-1 cm-2"),
-        1.0 * u.TeV,
-        1.61,
-        2.95,
-        0.33 * u.TeV,
-        1.73,
-    ),
-    label="mohrmann",
-)
-plt.fill_between(
-    np.geomspace(0.4 * u.TeV, 50 * u.TeV, 100),
-    np.geomspace(0.4 * u.TeV, 50 * u.TeV, 100) ** 2
-    * ps(np.geomspace(0.4, 50, 100) * u.TeV).to("TeV -1 cm-2 s-1"),
-    alpha=0.2,
-)
-# plt.ylim(3*10e-15,3*10e-11)
-plt.xscale("log")
-plt.yscale("log")
-plt.legend()
-```
-
-```python
 plot_spectra(
     res, energy_unit=u.TeV, flux_unit=u.Unit("TeV-1 cm-2 s-1"), ene_min=0.4, ene_max=50
 )
 ```
 
 ```python
-?plot_spectra
-```
-
-```python
-dir(res)
-```
-
-```python
-res.plot_chains()
-```
-
-```python
-res.write_to("crappycrabby.fits", overwrite=True)
-```
-
-```python
-from astropy.io import fits as fits
-```
-
-```python
-with fits.open("crappycrabby.fits") as f:
-    print(*[f"{x}\n" for x in f[1].header["MODEL"].split("_NEWLINE_")])
-```
-
-```python
-from threeML import load_analysis_results
-from astromodels import *
-
-# get_units().energy = u.keV
-# get_units().to_dict()
-```
-
-```python
-ar = load_analysis_results("crappycrabby.fits")
-```
-
-```python
-
-```
-
-```python
-ar
-```
-
-```python
-plot_spectra(ar, ene_min=1e8, ene_max=1e10)
-```
-
-```python
-ar.optimized_model.crab
-```
-
-```python
-threeML_config.model_plot.point_source_plot["flux_unit"] = "1/(TeV s cm2)"
-```
-
-```python
-
-```
-
-```python
-threeML_config.model_plot.point_source_plot["ene_unit"] = "TeV"
-```
-
-```python
-import numpy as np
-
-np.linspace(1 * u.TeV, 10 * u.TeV, 10)
+display_spectrum_model_counts(jl)
 ```
 
 ```python

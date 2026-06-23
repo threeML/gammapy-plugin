@@ -30,6 +30,7 @@ class SpectralModelConverted(SpectralModel):
             else:
                 self._x_unit = self._astromodel_function.x_unit
                 self._y_unit = self._astromodel_function.y_unit
+            self._components_parameters = self._astromodel_function.parameters.values()
         elif isinstance(function, list):
             for f in function:
                 assert isinstance(
@@ -42,21 +43,27 @@ class SpectralModelConverted(SpectralModel):
 
             self._components_parameters = []
             for f in self._astromodel_function:
-                if x_unit is None and f.x_unit is not None:
-                    x_unit = f.x_unit
-                elif x_unit is not None and f.x_unit is not None:
-                    assert x_unit == f.x_unit, "Component x_unit not matching"
-                    # TODO maybe transform also possible need to check
+                if not hasattr(f, "_requested_x_unit"):
+                    if x_unit is None and f.x_unit is not None:
+                        x_unit = f.x_unit
+                    elif x_unit is not None and f.x_unit is not None:
+                        assert x_unit == f.x_unit, "Component x_unit not matching"
+                        # TODO: maybe transform also possible need to check
+                    else:
+                        raise ValueError(f"Your Component {f.name} has no x_unit")
                 else:
-                    raise ValueError(f"Your Component {f.name} has no x_unit")
+                    x_unit = f._requested_x_unit
+                if not hasattr(f, "_requested_y_unit"):
+                    if y_unit is None and f.y_unit is not None:
+                        y_unit = f.y_unit
+                    elif y_unit is not None and f.y_unit is not None:
+                        assert y_unit == f.y_unit, "Component y_unit not matching"
+                        # TODO maybe transform also possible need to check
+                    else:  # pragma: no cover
+                        raise ValueError(f"Your Component {f.name} has no y_unit")
+                else:
+                    y_unit = f._requested_y_unit
 
-                if y_unit is None and f.y_unit is not None:
-                    y_unit = f.y_unit
-                elif y_unit is not None and f.y_unit is not None:
-                    assert y_unit == f.y_unit, "Component y_unit not matching"
-                    # TODO maybe transform also possible need to check
-                else:  # pragma: no cover
-                    raise ValueError(f"Your Component {f.name} has no y_unit")
                 for p in f.parameters.values():
                     self._components_parameters.append(p)
             self._x_unit = x_unit
@@ -83,11 +90,7 @@ class SpectralModelConverted(SpectralModel):
         # needed later for correctly evaluating the function
         self._mapping = {}
         self._mapping_free = {}
-        parameter_dict = (
-            self._astromodel_function.parameters.values()
-            if self._components_parameters is None
-            else self._components_parameters
-        )
+        parameter_dict = self._components_parameters
         for v in parameter_dict:
             vmin = np.nan
             vmax = np.nan
@@ -118,7 +121,6 @@ class SpectralModelConverted(SpectralModel):
             shape = energy.shape
             energy = energy.flatten()
         if self._components is not None:
-
             vals = []
             if shape is None:
                 for i in range(self._components):
@@ -131,10 +133,6 @@ class SpectralModelConverted(SpectralModel):
             return sum(vals)
 
         else:
-            kwargs_mapped = {}
-            for k, v in kwargs.items():
-                if self._astromodel_function.path in k:
-                    kwargs_mapped[k.split(f"{self._astromodel_function.path}.")[1]] = v
             if shape is None:
                 return self._astromodel_function(energy)
             else:

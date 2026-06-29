@@ -95,8 +95,7 @@ jobs:
         python-version: ["3.12","3.13"]
         gammapy_data: ["/home/runner/work/gammapy_data"]
        
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }} 
-
+    if: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.base_ref == 'main') }} 
     env:
       GAMMAPY_DATA: ${{ matrix.gammapy_data }}
 

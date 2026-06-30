@@ -31,7 +31,7 @@ dependencies = [
     "astromodels",
     "threeml",
     "gammapy>=2.0",
-    "regions<0.12",
+    "regions<0.13",
 ]
 
 [project.optional-dependencies]

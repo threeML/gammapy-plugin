@@ -47,8 +47,6 @@ Python 3.12 or 3.13 together with `gammapy>=v2.0.0`
 
 ## Usage and Examples
 
-For an example check out e.g. [the example notebook for an extended source](./examples/example_extended_source_fov_bkg.ipynb).
-
 The basic procedure after creating a `gammapy` dataset is
 
 ```python

@@ -2,7 +2,7 @@ name: CI
 on:
   push:
     branches:
-      - master
+      - main
       - dev
     paths-ignore:
       - "README.md"
@@ -10,7 +10,7 @@ on:
       - ".github/workflows/docs.yml"
   pull_request:
     branches:
-      - master
+      - main
       - dev
   schedule:
     - cron: "0 11 * * 1"
@@ -43,7 +43,7 @@ jobs:
         python-version: ["3.12","3.13"]
         gammapy_data: ["/home/runner/work/gammapy_data"]
 
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/dev' }}
+    if: ${{ needs.skip_duplicate.outputs.should_skip != 'true' && ((github.event_name == 'push' && github.ref == 'refs/heads/dev') || (github.event_name == 'pull_request' && github.base_ref == 'dev')) }} 
 
     env:
       GAMMAPY_DATA: ${{ matrix.gammapy_data }}
@@ -95,7 +95,7 @@ jobs:
         python-version: ["3.12","3.13"]
         gammapy_data: ["/home/runner/work/gammapy_data"]
        
-    if: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.base_ref == 'main') }} 
+    if: ${{ needs.skip_duplicate.outputs.should_skip != 'true' && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.base_ref == 'main')) }} 
     env:
       GAMMAPY_DATA: ${{ matrix.gammapy_data }}
 
@@ -137,7 +137,7 @@ jobs:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
-          python-version: 3.11
+          python-version: "3.12"
           cache: pip
 
       - name: Install twine

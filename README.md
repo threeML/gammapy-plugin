@@ -39,15 +39,13 @@ python -m pytest
 The first part is equivalent to running `gammapy download datasets` [(see the `gammapy` installation
 instructions)](https://docs.gammapy.org/1.3/getting-started/index.html#getting-started).
 
-These data are used by the [examples](./examples) as well as by `pytest`.
+These data are by the `pytest` tests.
 
 ### Requirements
 
-Python 3.11, 3.12 or 3.13 together with `gammapy>=v2.0.0`
+Python 3.12 or 3.13 together with `gammapy>=v2.0.0`
 
 ## Usage and Examples
-
-For an example check out e.g. [the example notebook for an extended source](./examples/example_extended_source_fov_bkg.ipynb).
 
 The basic procedure after creating a `gammapy` dataset is
 

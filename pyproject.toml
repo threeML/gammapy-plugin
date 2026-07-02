@@ -31,6 +31,7 @@ dependencies = [
     "astromodels",
     "threeml",
     "gammapy>=2.0",
+    "regions<0.12",
 ]
 
 [project.optional-dependencies]
@@ -49,6 +50,9 @@ Issues = "https://github.com/threeML/gammapy-plugin/issues"
 
 [tool.setuptools]
 include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["gammapy_plugin"]
 
 [tool.setuptools.package-data]
 "gammapy_plugin.data.datasets" =  ["*.py","*.fits"]

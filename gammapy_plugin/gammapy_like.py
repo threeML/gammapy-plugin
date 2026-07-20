@@ -275,12 +275,11 @@ class GammapyLike(PluginPrototype):
 
     def display_model(
         self,
+        *args,
         **kwargs,
     ) -> "ResidualPlot":
 
         from threeML.io.plotting.data_residual_plot import ResidualPlot
-
-        # TODO: have to ensure this is only for specturm data set valid
 
         residual_plot = ResidualPlot(
             **kwargs,

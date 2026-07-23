@@ -9,6 +9,7 @@ from gammapy.modeling.models import DatasetModels, ModelBase, Models
 from threeML.plugin_prototype import PluginPrototype
 
 from gammapy_plugin.converter import AstromodelConverter
+from gammapy_plugin.io.plot_model import plot_model
 from gammapy_plugin.utils.gammapy_parser import (
     parameter_to_gammapy_dict,
     parse_gammapy_model,
@@ -279,63 +280,4 @@ class GammapyLike(PluginPrototype):
         **kwargs,
     ) -> "ResidualPlot":
 
-        from threeML.io.plotting.data_residual_plot import ResidualPlot
-
-        residual_plot = ResidualPlot(
-            **kwargs,
-        )
-        for i in range(len(self._datasets)):
-
-            y_unweighted = self._datasets[i].counts.data.reshape(-1)
-            x = (
-                self._datasets[i]
-                .counts.geom.axes["energy"]
-                .as_plot_center.to("keV")
-                .value
-            )
-            xerr = [
-                self._datasets[i]
-                .counts.geom.axes["energy"]
-                .as_plot_xerr[j]
-                .to("keV")
-                .value
-                for j in [0, 1]
-            ]
-
-            bins = (
-                self._datasets[i]
-                .counts.geom.axes["energy"]
-                .as_plot_edges.to("keV")
-                .value
-            )
-            widths = np.diff(bins)
-            y = y_unweighted / widths
-
-            residuals = (
-                self._datasets[i].counts.get_spectrum()
-                - self._datasets[i].npred().get_spectrum()
-            ) / self._datasets[i].npred().get_spectrum()
-            residuals = residuals.data.reshape(-1)
-
-            residual_plot.add_data(
-                x,
-                y,
-                residuals,
-                xerr=xerr,
-                label=self._datasets[i].name,
-                show_data=kwargs.get("show_data", True),
-            )
-
-            residual_plot.add_model(
-                x,
-                self._datasets[i].npred().get_spectrum().data.reshape(-1) / widths,
-                label=kwargs.get("model_label", "Expected"),
-            )
-
-        return residual_plot.finalize(
-            xlabel="Energy\n(keV)",
-            ylabel="Counts/keV",
-            xscale="log",
-            yscale="log",
-            show_legend=kwargs.get("show_legend", True),
-        )
+        return plot_model(self._datasets, *args, **kwargs)

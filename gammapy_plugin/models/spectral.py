@@ -8,6 +8,8 @@ from gammapy.modeling.models import (
 )
 from gammapy.modeling.parameter import Parameter, Parameters
 
+from gammapy_plugin.utils.gammapy_parser import _conversion_list
+
 log = logging.getLogger(__name__)
 
 
@@ -25,11 +27,23 @@ class SpectralModelConverted(SpectralModel):
             self._components = None
             if hasattr(self._astromodel_function, "_requested_x_unit"):
                 # this is a composite function
-                self._x_unit = self._astromodel_function._requested_x_unit
-                self._y_unit = self._astromodel_function._requested_y_unit
+                temp_x = self._astromodel_function._requested_x_unit
+                temp_y = self._astromodel_function._requested_y_unit
             else:
-                self._x_unit = self._astromodel_function.x_unit
-                self._y_unit = self._astromodel_function.y_unit
+                temp_x = self._astromodel_function.x_unit
+                temp_y = self._astromodel_function.y_unit
+
+            self._x_unit = (
+                _conversion_list[temp_x][1]
+                if temp_x in _conversion_list.keys()
+                else temp_x
+            )
+            self._y_unit = (
+                _conversion_list[temp_y][1]
+                if temp_y in _conversion_list.keys()
+                else temp_y
+            )
+
             self._components_parameters = self._astromodel_function.parameters.values()
         elif isinstance(function, list):
             for f in function:
@@ -45,24 +59,44 @@ class SpectralModelConverted(SpectralModel):
             for f in self._astromodel_function:
                 if not hasattr(f, "_requested_x_unit"):
                     if x_unit is None and f.x_unit is not None:
-                        x_unit = f.x_unit
+                        x_unit = (
+                            _conversion_list[f.x_unit][1]
+                            if f.x_unit in _conversion_list.keys()
+                            else f.x_unit
+                        )
                     elif x_unit is not None and f.x_unit is not None:
-                        assert x_unit == f.x_unit, "Component x_unit not matching"
+                        assert x_unit.is_equivalent(
+                            f.x_unit
+                        ), "Component x_unit not matching"
                         # TODO: maybe transform also possible need to check
                     else:
                         raise ValueError(f"Your Component {f.name} has no x_unit")
                 else:
-                    x_unit = f._requested_x_unit
+                    x_unit = (
+                        _conversion_list[f._requested_x_unit][1]
+                        if f._requested_x_unit in _conversion_list.keys()
+                        else f._requested_x_unit
+                    )
                 if not hasattr(f, "_requested_y_unit"):
                     if y_unit is None and f.y_unit is not None:
-                        y_unit = f.y_unit
+                        y_unit = (
+                            _conversion_list[f.y_unit][1]
+                            if f.y_unit in _conversion_list.keys()
+                            else f.y_unit
+                        )
                     elif y_unit is not None and f.y_unit is not None:
-                        assert y_unit == f.y_unit, "Component y_unit not matching"
-                        # TODO maybe transform also possible need to check
-                    else:  # pragma: no cover
+                        assert y_unit.is_equivalent(
+                            f.y_unit
+                        ), "Component y_unit not matching"
+                        # TODO: maybe transform also possible need to check
+                    else:
                         raise ValueError(f"Your Component {f.name} has no y_unit")
                 else:
-                    y_unit = f._requested_y_unit
+                    y_unit = (
+                        _conversion_list[f._requested_y_unit][1]
+                        if f._requested_y_unit in _conversion_list.keys()
+                        else f._requested_y_unit
+                    )
 
                 for p in f.parameters.values():
                     self._components_parameters.append(p)
@@ -92,6 +126,12 @@ class SpectralModelConverted(SpectralModel):
         self._mapping_free = {}
         parameter_dict = self._components_parameters
         for v in parameter_dict:
+            if v.unit in _conversion_list.keys():
+                unit = _conversion_list[v.unit][1]
+                factor = _conversion_list[v.unit][0]
+            else:
+                unit = v.unit
+                factor = 1.0
             vmin = np.nan
             vmax = np.nan
             if v.min_value is not None:
@@ -104,10 +144,10 @@ class SpectralModelConverted(SpectralModel):
             paras.append(
                 Parameter(
                     name=v.path,
-                    value=v.value,
-                    unit=v.unit,
-                    min=vmin,
-                    max=vmax,
+                    value=v.value * factor,
+                    unit=unit,
+                    min=vmin * factor,
+                    max=vmax * factor,
                     frozen=not bool(v.free),
                 )
             )

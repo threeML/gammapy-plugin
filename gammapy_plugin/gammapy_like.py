@@ -9,6 +9,7 @@ from gammapy.modeling.models import DatasetModels, ModelBase, Models
 from threeML.plugin_prototype import PluginPrototype
 
 from gammapy_plugin.converter import AstromodelConverter
+from gammapy_plugin.io.plot_model import plot_model
 from gammapy_plugin.utils.gammapy_parser import (
     parameter_to_gammapy_dict,
     parse_gammapy_model,
@@ -16,6 +17,7 @@ from gammapy_plugin.utils.gammapy_parser import (
 
 if TYPE_CHECKING:
     from threeML.analysis_results import _AnalysisResults
+    from threeML.io.plotting.data_residual_plot import ResidualPlot
 
 
 __all__ = ["GammapyLike"]
@@ -271,3 +273,11 @@ class GammapyLike(PluginPrototype):
     def frame(self) -> str:
         """Coordinate Frame of the plugin."""
         return self._frame
+
+    def display_model(
+        self,
+        *args,
+        **kwargs,
+    ) -> "ResidualPlot":
+
+        return plot_model(self._datasets, *args, **kwargs)

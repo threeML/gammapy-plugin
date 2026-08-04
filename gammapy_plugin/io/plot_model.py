@@ -14,7 +14,7 @@ def plot_model(
     )
     for i in range(len(datasets)):
 
-        y_unweighted = datasets[i].counts.data.reshape(-1)
+        y_unweighted = datasets[i].counts.get_spectrum().data.reshape(-1)
         x = datasets[i].counts.geom.axes["energy"].as_plot_center.to("keV").value
         xerr = [
             datasets[i].counts.geom.axes["energy"].as_plot_xerr[j].to("keV").value
@@ -42,13 +42,14 @@ def plot_model(
 
         residual_plot.add_model(
             x,
-            datasets[i].npred().get_spectrum().data.reshape(-1) / widths,
+            datasets[i].npred().get_spectrum().data.reshape(-1)
+            / (widths * datasets[i].gti.time_sum.to(u.s).value),
             label=kwargs.get("model_label", "Expected"),
         )
 
     return residual_plot.finalize(
         xlabel="Energy\n(keV)",
-        ylabel="Counts/keV",
+        ylabel="Counts/keV/s",
         xscale="log",
         yscale="log",
         show_legend=kwargs.get("show_legend", True),

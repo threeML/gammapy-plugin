@@ -10,7 +10,9 @@ from gammapy_plugin.models import (
     SpatialModelConverted,
     SpectralModelConverted,
 )
-from gammapy_plugin.utils.gammapy_parser import parameter_to_gammapy_dict
+from gammapy_plugin.utils.gammapy_parser import (
+    parameter_to_gammapy_dict,
+)
 
 __all__ = ["AstromodelConverter", "SourceConverter"]
 

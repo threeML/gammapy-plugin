@@ -1,4 +1,5 @@
 import numpy as np
+import astropy.units as u
 from threeML.io.plotting.data_residual_plot import ResidualPlot
 
 
@@ -23,6 +24,7 @@ def plot_model(
         bins = datasets[i].counts.geom.axes["energy"].as_plot_edges.to("keV").value
         widths = np.diff(bins)
         y = y_unweighted / widths
+        y /= datasets[i].gti.time_sum.to(u.s).value
 
         residuals = (
             datasets[i].counts.get_spectrum() - datasets[i].npred().get_spectrum()

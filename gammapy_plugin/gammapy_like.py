@@ -249,7 +249,7 @@ class GammapyLike(PluginPrototype):
         """
         self._likelihood_model_converted._update_parameters()
         self._update_background_models()
-        return -0.5 * self._datasets._stat_sum_likelihood()
+        return -0.5 * self._datasets.stat_sum_likelihood()
 
     def inner_fit(self):
         return self.get_log_like()

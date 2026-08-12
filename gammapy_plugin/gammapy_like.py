@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import gammapy
@@ -57,7 +58,7 @@ class GammapyLike(PluginPrototype):
 
     def set_datasets(
         self,
-        datasets: Dataset | Datasets | list[Dataset],
+        datasets: Dataset | Datasets | list[Dataset] | Path | str,
         mode: str = "individual",
         stacked_name: str = "stacked",
     ) -> None:
@@ -73,6 +74,17 @@ class GammapyLike(PluginPrototype):
             "stacked",
         ]:
             raise ValueError("mode needs to be individual or stacked")
+        if isinstance(datasets, (str, Path)):
+            log.warn(
+                "You have provided a path to a file - we will assume this is a Datasets"
+                " file. If not this will likely fail"
+            )
+            datasets = Datasets.read(datasets)
+            self._datasets = datasets
+            if mode == "stacked":
+                self._datasets = Datasets(
+                    self._datasets.stack_reduce(name=stacked_name)
+                )
 
         if isinstance(datasets, list):
             self._datasets = Datasets()

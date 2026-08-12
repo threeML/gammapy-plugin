@@ -1,9 +1,11 @@
 import logging
 from typing import TYPE_CHECKING
+from packaging.version import Version
 
 import numpy as np
 from astromodels.core.model import Model
 from astromodels.functions.priors import Truncated_gaussian
+import gammapy
 from gammapy.datasets import Dataset, Datasets
 from gammapy.modeling.models import DatasetModels, ModelBase, Models
 from threeML.plugin_prototype import PluginPrototype
@@ -24,6 +26,8 @@ __all__ = ["GammapyLike"]
 log = logging.getLogger(__name__)
 
 __instrument_name = "gammapy"
+
+__gammapy_version = Version(gammapy.__version__)
 
 
 class GammapyLike(PluginPrototype):
@@ -249,7 +253,10 @@ class GammapyLike(PluginPrototype):
         """
         self._likelihood_model_converted._update_parameters()
         self._update_background_models()
-        return -0.5 * self._datasets.stat_sum_likelihood()
+        if __gammapy_version >= Version("2.2.0"):
+            return -0.5 * self._datasets.stat_sum_likelihood()
+        else:
+            return -0.5 * self._datasets._stat_sum_likelihood()
 
     def inner_fit(self):
         return self.get_log_like()

@@ -39,7 +39,6 @@ class Log_parabola_gammapy(Function1D, metaclass=FunctionMeta):
 
             desc : curvature
             initial value : 1.0
-
     """
 
     def _set_units(self, x_unit, y_unit):
@@ -96,7 +95,6 @@ class Exp_cutoff_powerlaw_gammapy(Function1D, metaclass=FunctionMeta):
             desc : alpha
             initial value : 1
             fix : yes
-
     """
 
     def _set_units(self, x_unit, y_unit):

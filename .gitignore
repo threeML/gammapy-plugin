@@ -2,6 +2,7 @@ docs/notebooks/*
 docs/md_docs/chains
 examples/*_run
 gammapy_plugin/data/test/
+gammapy_plugin/_version.py
 examples/chain*
 examples/*.fits
 *.prof

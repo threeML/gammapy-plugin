@@ -19,7 +19,6 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
-    "sphinx.ext.githubpages",
     "sphinx.ext.napoleon",
     "sphinx_gallery.load_style",
     "sphinxcontrib.email",
@@ -40,7 +39,7 @@ html_css_files = ["css/overrides.css"]
 html_logo = "_static/logo.svg"
 html_theme_options = {
     "source_repository": "https://github.com/threeML/gammapy-plugin/",
-    "source_branch": "master",
+    "source_branch": "main",
 }
-
+autodoc_typehints = "description"
 myst_enable_extensions = ["colon_fence"]

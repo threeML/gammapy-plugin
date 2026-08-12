@@ -1,0 +1,59 @@
+context:
+  name: gammapy_plugin
+  version: ${{ git.latest_tag('.')[1:] if git.latest_tag('.') and git.latest_tag('.')[0] == 'v' else git.latest_tag('.') }}
+
+package:
+  name: ${{ name }}
+  version: ${{ version }}
+
+source:
+  path: ../../
+
+build:
+  noarch: python
+  script: pip install . -v
+
+requirements:
+  host:
+    - pip
+    - python
+    - setuptools
+    - setuptools-scm
+
+  run:
+    - python
+    - numpy
+    - matplotlib
+    - astromodels >=2.6.0
+    - threeML >=2.6.0
+    - gammapy >=2.0
+    - regions <0.12
+
+tests:
+  - python:
+      imports:
+        - gammapy_plugin
+        - gammapy_plugin.gammapy_like
+
+  - script:
+      - gammapy download datasets
+      - export GAMMAPY_DATA=$PWD/gammapy-datasets/2.0.1
+      - pytest -vv --pyargs gammapy_plugin
+
+    requirements:
+      run:
+        - pytest
+        - filelock
+        - pytest-xdist
+        - if: not (linux and aarch64)
+          then:
+          - ultranest
+          - pymultinest
+
+
+about:
+  homepage: https://github.com/threeML/gammapy-plugin
+  license: GPL-3.0-or-later
+  license_file: LICENSE
+  summary: gammapy plugin for threeML
+  documentation: https://gammapy-plugin.readthedocs.io/en/latest/

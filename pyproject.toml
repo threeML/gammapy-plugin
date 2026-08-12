@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools","versioneer[toml]"]
+requires = ["setuptools>=80", "setuptools-scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -20,46 +20,54 @@ classifiers = [
     "Environment :: Console",
     "Intended Audience :: Science/Research",
     "Operating System :: POSIX",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: Physics",
 ]
 dynamic = ["version"]
 dependencies = [
     "numpy",
     "matplotlib",
-    "astromodels",
-    "threeml",
+    "astromodels>=2.6.0",
+    "threeml>=2.6.0",
     "gammapy>=2.0",
+    "regions<0.12",
 ]
+
+[project.optional-dependencies]
+tests = [
+    "pytest",
+    "pytest-cov",
+    "pytest-xdist",
+    "filelock",
+]
+flake = ["flake8"]
 
 [project.urls]
 Homepage = "https://github.com/threeML/gammapy-plugin"
 Issues = "https://github.com/threeML/gammapy-plugin/issues"
 
-[project.optional-dependencies]
-tests = ["pytest","pytest-coverage","coverage"]
-flake = ["flake8"]
-
 
 [tool.setuptools]
 include-package-data = true
 
+[tool.setuptools.packages.find]
+include = ["gammapy_plugin"]
+
 [tool.setuptools.package-data]
 "gammapy_plugin.data.datasets" =  ["*.py","*.fits"]
 
+[tool.setuptools_scm]
+# Configure custom options here (version schemes, file writing, etc.)
+version_file = "gammapy_plugin/_version.py"
 
-[tool.versioneer]
-VCS = "git"
-style = "pep440"
-versionfile_source = "gammapy_plugin/_version.py"
-versionfile_build = "gammapy_plugin/_version.py"
-tag_prefix = "v"
-parentdir_prefix = "gammapy_plugin-"
-
+# Example: Git-specific configuration
+[tool.setuptools_scm.scm.git]
+pre_parse = "fail_on_missing_submodules"  # Fail if submodules are not initialized
+describe_command = "git describe --dirty --tags --long --exclude *js*"  # Custom Git describe command
 
 [tool.pytest]
-addopts = ["--color=yes","--cov=gammapy_plugin","--cov-report=term","--cov-report=html","-ra"]
+addopts = ["--color=yes","-ra"]
 testpaths = ["gammapy_plugin/test"]
 
 [tool.isort]

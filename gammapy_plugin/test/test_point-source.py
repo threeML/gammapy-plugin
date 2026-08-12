@@ -1,6 +1,6 @@
 import astropy.units as u
+import numpy as np
 from astromodels.core.model import Model
-from astromodels.core.units import get_units
 from astromodels.functions import Log_parabola, Log_uniform_prior, Uniform_prior
 from astromodels.sources import PointSource
 from astropy.coordinates import Angle, SkyCoord
@@ -19,10 +19,7 @@ from threeML.classicMLE.joint_likelihood import JointLikelihood
 from threeML.data_list import DataList
 
 from gammapy_plugin.converter import AstromodelConverter
-from gammapy_plugin.GammapyLike import GammapyLike
-from gammapy_plugin.test.utils import get_close
-
-get_units().energy = u.TeV
+from gammapy_plugin.gammapy_like import GammapyLike
 
 
 def test_crab_spectrum():
@@ -71,6 +68,13 @@ def test_crab_spectrum():
     datasets_copy = datasets.copy()
 
     logp = Log_parabola()
+    ps = PointSource(
+        source_name="crab",
+        ra=target_position.ra.deg,
+        dec=target_position.dec.deg,
+        spectral_shape=logp,
+    )
+    logp.set_units(u.TeV, u.Unit("TeV-1 cm-2 s-1"))
     logp.K.prior = Log_uniform_prior(lower_bound=1e-22, upper_bound=1e-19)
     logp.K.value = 1e-12
     logp.piv.value = 1
@@ -79,12 +83,6 @@ def test_crab_spectrum():
     logp.alpha.value = -2
     logp.beta.prior = Uniform_prior(lower_bound=-2, upper_bound=2)
     logp.beta.value = 1
-    ps = PointSource(
-        source_name="crab",
-        ra=target_position.ra.deg,
-        dec=target_position.dec.deg,
-        spectral_shape=logp,
-    )
     model = Model(ps)
     conv = AstromodelConverter(model, frame="galactic")
     gl = GammapyLike("hess", sources="crab")
@@ -94,7 +92,6 @@ def test_crab_spectrum():
     jl = JointLikelihood(model, DataList(gl))
     jl.fit()
     res = jl.results
-    gl.distribute_covariance(res)
 
     logp_gammapy = LogParabolaSpectralModel(
         amplitude=1e-12 * u.Unit("cm-2 s-1 TeV-1"), reference=1 * u.TeV
@@ -105,4 +102,17 @@ def test_crab_spectrum():
     fit_stacked = Fit()
     fit_stacked.run([dataset_stacked])
 
-    assert get_close(res, models.spectral_model.to_dict()) is True
+    assert np.isclose(
+        res.optimized_model["crab.spectrum.main.Log_parabola.K"].value * 1e9,
+        logp_gammapy.amplitude.value,
+    )
+    assert np.isclose(
+        -res.optimized_model["crab.spectrum.main.Log_parabola.alpha"].value,
+        logp_gammapy.alpha.value,
+        rtol=1e-3,
+    )
+    assert np.isclose(
+        res.optimized_model["crab.spectrum.main.Log_parabola.beta"].value,
+        logp_gammapy.beta.value,
+        rtol=1e-3,
+    )

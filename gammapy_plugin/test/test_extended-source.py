@@ -1,7 +1,8 @@
+from warnings import warn
+
 import astropy.units as u
 import numpy as np
 from astromodels.core.model import Model
-from astromodels.core.units import get_units
 from astromodels.functions import (
     Gaussian_on_sphere,
     Log_uniform_prior,
@@ -10,7 +11,10 @@ from astromodels.functions import (
 )
 from astromodels.sources.extended_source import ExtendedSource
 from astropy.coordinates import SkyCoord
-from gammapy.makers import FoVBackgroundMaker
+from gammapy.data import DataStore
+from gammapy.datasets import Datasets, MapDataset
+from gammapy.makers import FoVBackgroundMaker, MapDatasetMaker, SafeMaskMaker
+from gammapy.maps import MapAxis, WcsGeom
 from gammapy.modeling import Fit
 from gammapy.modeling.models import (
     FoVBackgroundModel,
@@ -20,29 +24,63 @@ from gammapy.modeling.models import (
 )
 from regions import CircleSkyRegion
 from threeML import DataList, JointLikelihood
+from threeML.io.plotting.post_process_data_plots import display_spectrum_model_counts
 
 from gammapy_plugin.converter import AstromodelConverter
-from gammapy_plugin.GammapyLike import GammapyLike
-from gammapy_plugin.test.utils import read_in_gammapy_datasets
-from gammapy_plugin.utils.package_data import get_path_of_data_dir
-
-get_units().energy = u.TeV
-target_position = SkyCoord.from_name("RX J1713.7-3946").galactic
+from gammapy_plugin.gammapy_like import GammapyLike
 
 
-def test_extended_source_no_fov_bkg():
-    datasets = read_in_gammapy_datasets(
-        get_path_of_data_dir().joinpath("test/rxj17137_3946/")
+def test_extended_source_no_fov_bkg(rxj_test_data):
+    datastore = DataStore.from_dir("$GAMMAPY_DATA/hess-dl3-dr1/")
+    target_position = SkyCoord.from_name("RX J1713.7-3946").galactic
+
+    selection = dict(
+        type="sky_circle",
+        frame="galactic",
+        lon=target_position.l,
+        lat=target_position.b,
+        radius="5deg",
+    )
+    select_obs_tab = datastore.obs_table.select_observations(selection)
+
+    obs = datastore.get_observations(select_obs_tab["OBS_ID"])
+
+    # Prepare the geometry
+    energy_axis = MapAxis.from_energy_bounds(0.3, 10.0, 15, unit="TeV")
+    energy_axis_true = MapAxis.from_energy_bounds(
+        0.1, 20, 10, per_decade=True, unit="TeV", name="energy_true"
+    )
+    geom = WcsGeom.create(
+        skydir=target_position,
+        binsz=0.02,
+        width=(6 * u.deg, 6 * u.deg),
+        frame="galactic",
+        axes=[energy_axis],
+    )
+    maker = MapDatasetMaker(
+        selection=["counts", "background", "psf", "edisp", "exposure"],
+    )
+    safe_mask_maker = SafeMaskMaker(
+        methods=["offset-max", "aeff-max", "bkg-peak"], offset_max="2.3 deg"
     )
 
-    geom = datasets[0].geoms["geom"]
+    datasets = Datasets()
     circle = CircleSkyRegion(center=target_position, radius=1 * u.deg)
     regions = [circle]
     exclusion_mask = ~geom.region_mask(regions=regions)
     fov_bkg_maker = FoVBackgroundMaker(method="fit", exclusion_mask=exclusion_mask)
-    for dataset in datasets:
+
+    for o in obs:
+        dataset = MapDataset.create(
+            geom=geom, energy_axis_true=energy_axis_true, name=f"HESS_{o.obs_id}"
+        )
+        dataset = maker.run(dataset, o)
+        dataset = safe_mask_maker.run(dataset, o)
         dataset = fov_bkg_maker.run(dataset)
+        datasets.append(dataset)
+
     stacked = datasets.stack_reduce(name="stacked")
+
     pl = Powerlaw()
     spat = Gaussian_on_sphere(
         lon0=target_position.transform_to("galactic").l.deg,
@@ -52,9 +90,9 @@ def test_extended_source_no_fov_bkg():
     es = ExtendedSource(source_name="rxj1713", spectral_shape=pl, spatial_shape=spat)
     pl.index.value = -2
     pl.index.prior = Uniform_prior(lower_bound=-3, upper_bound=-1)
-    pl.K = 2.3 * 1e-11
-    pl.K.prior = Log_uniform_prior(lower_bound=1e-18, upper_bound=1e-8)
-    pl.piv.value = 1
+    pl.K = 2.3 * 1e-20
+    pl.K.prior = Log_uniform_prior(lower_bound=1e-27, upper_bound=1e-17)
+    pl.piv.value = 1e9
     pl.piv.free = False
     spat.lon0.free = False
     spat.lat0.free = False
@@ -109,13 +147,14 @@ def test_extended_source_no_fov_bkg():
         )
         is np.True_
     )
-
+    warn("Unit issue in astromodels and 3ML - having to multipy by (180/pi)^2")
     gp_plugin_res = (
         res.optimized_model.free_parameters["rxj1713.spectrum.main.Powerlaw.K"].value
         * res.optimized_model.free_parameters["rxj1713.spectrum.main.Powerlaw.K"].unit
         * res.optimized_model.extended_sources[
             "rxj1713"
         ].spatial_shape.get_total_spatial_integral(1)
+        * np.power(180 / np.pi, 2)
     )
     gp_res = resu.models.parameters["amplitude"]
     gp_plugin_res = gp_plugin_res.to(gp_res.unit)
@@ -125,16 +164,16 @@ def test_extended_source_no_fov_bkg():
             gp_res.value,
             gp_plugin_res.value,
             rtol=1e-3,
-            atol=1e-20,
         )
         is np.True_
     )
+    _ = display_spectrum_model_counts(jl)  # will throw warnings for 3ml <2.6.0
 
 
-def test_fov_bkg_model_setting():
-    datasets = read_in_gammapy_datasets(
-        get_path_of_data_dir().joinpath("test/rxj17137_3946/")
-    )
+def test_fov_bkg_model_setting(rxj_test_data):
+    target_position = SkyCoord.from_name("RX J1713.7-3946").galactic
+
+    datasets = rxj_test_data
     geom = datasets[0].geoms["geom"]
     circle = CircleSkyRegion(center=target_position, radius=1 * u.deg)
     regions = [circle]
@@ -166,9 +205,9 @@ def test_fov_bkg_model_setting():
     es = ExtendedSource(source_name="rxj1713", spectral_shape=pl, spatial_shape=spat)
     pl.index.value = -2
     pl.index.prior = Uniform_prior(lower_bound=-3, upper_bound=-1)
-    pl.K = 2.3 * 1e-11
-    pl.K.prior = Log_uniform_prior(lower_bound=1e-18, upper_bound=1e-8)
-    pl.piv.value = 1
+    pl.K = 2.3 * 1e-20
+    pl.K.prior = Log_uniform_prior(lower_bound=1e-27, upper_bound=1e-17)
+    pl.piv.value = 1e9
     pl.piv.free = False
     spat.lon0.free = False
     spat.lat0.free = False

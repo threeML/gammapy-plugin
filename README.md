@@ -1,7 +1,7 @@
-[![CI](https://github.com/threeML/gammapy-plugin/actions/workflows/build_test.yml/badge.svg)](https://github.com/threeML/gammapy-plugin/actions/workflows/build_test.yml)
-[![CI dev](https://github.com/threeML/gammapy-plugin/actions/workflows/build_test.yml/badge.svg?branch=dev)](https://github.com/threeML/gammapy-plugin/actions/workflows/build_test.yml)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![CI](https://github.com/threeML/gammapy-plugin/actions/workflows/build_test_pip.yml/badge.svg?branch=main)](https://github.com/threeML/gammapy-plugin/actions/workflows/build_test_pip.yml)
+[![Docs](https://app.readthedocs.org/projects/gammapy-plugin/badge/?version=latest&style=flat)](https://gammapy-plugin.readthedocs.io/en/latest/)
 [![codecov](https://codecov.io/github/threeML/gammapy-plugin/graph/badge.svg?token=EGG9OUMT9J)](https://codecov.io/github/threeML/gammapy-plugin)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 # Gammapy Plugin
 ![A gammapy plugin for threeML](docs/_static/banner-dark.svg)
@@ -22,7 +22,7 @@ pip install .
 ```
 
 You can test your installation by installing `pytest` and running the tests
-after downloading and creating some test datasets:
+after downloading some test datasets:
 
 ```bash
 # install pytest
@@ -32,24 +32,20 @@ pip install pytest
 export GAMMAPY_DATA=/path/to/gammapy_datasets/
 git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
 
-# create some gammapy MapDatasets used for testing
-python -m gammapy_plugin.data.create_test_datasets
-
 # run pytests
 python -m pytest
 ```
 
 The first part is equivalent to running `gammapy download datasets` [(see the `gammapy` installation
 instructions)](https://docs.gammapy.org/1.3/getting-started/index.html#getting-started).
-[examples](./examples) as well as by `pytest`.
+
+These data are by the `pytest` tests.
 
 ### Requirements
 
-Python 3.11 and 3.12 together with `gammapy>=v2.0.0`
+Python 3.12 or 3.13 together with `gammapy>=v2.0.0`
 
 ## Usage and Examples
-
-For an example check out e.g. [the example notebook for an extended source](./examples/example_extended_source_fov_bkg.ipynb).
 
 The basic procedure after creating a `gammapy` dataset is
 

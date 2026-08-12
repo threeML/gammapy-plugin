@@ -148,6 +148,7 @@ class GammapyLike(PluginPrototype):
 
         self._update_gammapy_model_list()
         self._assign_models()
+        self._set_get_log_like()
 
     def _update_gammapy_model_list(self) -> Models:
         """
@@ -246,6 +247,22 @@ class GammapyLike(PluginPrototype):
                 self._nuisance_parameters_dicts[k]
             )
 
+    def _set_get_log_like(self):
+        if hasattr(self._datasets, "_stat_sum_likelihood"):
+            func = self._datasets._stat_sum_likelihood
+        elif hasattr(self._datasets, "stat_sum_likelihood"):
+            func = self._datasets.stat_sum_likelihood
+        else:
+            raise AttributeError(
+                "gammapy.Datasets has neither _stat_sum_likelihood nor "
+                "stat_sum_likelihood - something went fundamentally wrong!"
+            )
+
+        def log_like():
+            return -0.5 * func()
+
+        self.log_like_func = log_like
+
     def get_log_like(self) -> float:
         """
         Return the value of the log-likelihood with the current values for
@@ -253,10 +270,7 @@ class GammapyLike(PluginPrototype):
         """
         self._likelihood_model_converted._update_parameters()
         self._update_background_models()
-        if gammapy_version >= Version("2.2.0"):
-            return -0.5 * self._datasets.stat_sum_likelihood()
-        else:
-            return -0.5 * self._datasets._stat_sum_likelihood()
+        return self.log_like_func()
 
     def inner_fit(self):
         return self.get_log_like()

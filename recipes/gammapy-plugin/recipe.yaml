@@ -24,9 +24,9 @@ requirements:
     - python
     - numpy
     - matplotlib
-    - astromodels >=2.5.1
-    - threeML >=2.5.0
-    - gammapy >=2.0,<2.1
+    - astromodels >=2.6.0
+    - threeML >=2.6.0
+    - gammapy >=2.0
     - regions <0.12
 
 tests:

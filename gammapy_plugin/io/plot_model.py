@@ -1,8 +1,8 @@
+from typing import TYPE_CHECK
+
 import astropy.units as u
 import numpy as np
 from threeML.io.plotting.data_residual_plot import ResidualPlot
-
-from typing import TYPE_CHECK
 
 if TYPE_CHECK:
     from gammapy.datasets import Datasets

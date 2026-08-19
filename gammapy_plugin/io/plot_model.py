@@ -2,12 +2,24 @@ import astropy.units as u
 import numpy as np
 from threeML.io.plotting.data_residual_plot import ResidualPlot
 
+from typing import TYPE_CHECK
+
+if TYPE_CHECK:
+    from gammapy.datasets import Datasets
+
 
 def plot_model(
-    datasets,
+    datasets: Datasets,
     *args,
     **kwargs,
-) -> "ResidualPlot":
+) -> ResidualPlot:
+    """
+    Plot the model and data for a given datasets object.
+
+    :param datasets: Gammapy Datasets object containing the data and model
+    :type datasets: Datasets
+    :return: ResidualPlot object containing the plot
+    """
 
     residual_plot = ResidualPlot(
         **kwargs,

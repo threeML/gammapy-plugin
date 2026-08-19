@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 
 from astromodels.core.model import Model
 from astromodels.sources import ExtendedSource, PointSource, Source
@@ -28,7 +27,7 @@ class AstromodelConverter:
     """
 
     def __init__(
-        self, model: Model, frame: Optional[str] = None, convert_ps: bool = True
+        self, model: Model, frame: str | None = None, convert_ps: bool = True
     ) -> None:
         """
         :param model: the astromodel model

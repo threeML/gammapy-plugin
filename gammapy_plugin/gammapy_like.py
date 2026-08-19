@@ -47,12 +47,12 @@ class GammapyLike(PluginPrototype):
         """
         nuisance_parameters = kwargs.get("nuisance_parameters", {})
         super(GammapyLike, self).__init__(name, nuisance_parameters=nuisance_parameters)
-        self._frame = kwargs.get("frame", "icrs")
-        self._sources = kwargs.get("sources", None)
+        self._frame: str = kwargs.get("frame", "icrs")
+        self._sources: list[str] | None = kwargs.get("sources", None)
         self._nuisance_mapping = {}
-        self._background_models = kwargs.get("background_models", {})
-        self._background_models_mapper = {}
-        self._nuisance_parameters_dicts = {}
+        self._background_models: dict = kwargs.get("background_models", {})
+        self._background_models_mapper: dict = {}
+        self._nuisance_parameters_dicts: dict = {}
         if len(self._background_models.keys()) > 0:
             self._parse_background_models()
 
@@ -110,7 +110,7 @@ class GammapyLike(PluginPrototype):
             msg += " a single Datasets or Dataset object"
             raise TypeError(msg)
 
-    def set_sources(self, sources: list | str = None) -> None:
+    def set_sources(self, sources: list[str] | str = None) -> None:
         """
         Set the sources to be used by this plugin - No need to specify bkg models
 
@@ -185,7 +185,7 @@ class GammapyLike(PluginPrototype):
             tmp2 = []
         self._global_models = Models(tmp2)
         if hasattr(self, "_background_models"):
-            for m in self._background_models.values():
+            for m in list(self._background_models.values()):
                 tmp.append(m)
         self._gammapy_model = Models(tmp)
 
@@ -270,10 +270,7 @@ class GammapyLike(PluginPrototype):
                 "stat_sum_likelihood - something went fundamentally wrong!"
             )
 
-        def log_like():
-            return -0.5 * func()
-
-        self.log_like_func = log_like
+        self.log_like_func = func
 
     def get_log_like(self) -> float:
         """
@@ -282,7 +279,7 @@ class GammapyLike(PluginPrototype):
         """
         self._likelihood_model_converted._update_parameters()
         self._update_background_models()
-        return self.log_like_func()
+        return -0.5 * self.log_like_func()
 
     def inner_fit(self):
         return self.get_log_like()

@@ -1,18 +1,18 @@
-from typing import TYPE_CHECK
+from typing import TYPE_CHECKING
 
 import astropy.units as u
 import numpy as np
 from threeML.io.plotting.data_residual_plot import ResidualPlot
 
-if TYPE_CHECK:
+if TYPE_CHECKING:
     from gammapy.datasets import Datasets
 
 
 def plot_model(
-    datasets: Datasets,
+    datasets: "Datasets",
     *args,
     **kwargs,
-) -> ResidualPlot:
+) -> "ResidualPlot":
     """
     Plot the model and data for a given datasets object.
 

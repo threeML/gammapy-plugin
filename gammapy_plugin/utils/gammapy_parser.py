@@ -1,5 +1,6 @@
 import logging
 
+import astropy.units as u
 import numpy as np
 from astromodels.core.parameter import Parameter
 from gammapy.modeling.models.core import ModelBase
@@ -7,6 +8,11 @@ from gammapy.modeling.models.core import ModelBase
 __all__ = ["parameter_to_gammapy_dict", "parse_gammapy_model"]
 
 log = logging.getLogger(__name__)
+
+_conversion_list = {
+    u.Unit("keV-1 cm-2 s-1"): [1e9, u.Unit("TeV-1 cm-2 s-1")],
+    u.Unit("keV"): [1e9, u.Unit("TeV")],
+}
 
 
 def parameter_to_gammapy_dict(para: Parameter) -> dict:
@@ -18,15 +24,22 @@ def parameter_to_gammapy_dict(para: Parameter) -> dict:
     :return: dict
     """
     para_dict = {}
-    para_dict["value"] = para.value
-    para_dict["unit"] = para.unit
+
+    if para.unit in _conversion_list:
+        factor = _conversion_list[para.unit][0]
+        para_unit = _conversion_list[para.unit][1]
+    else:
+        factor = 1.0
+        para_unit = para.unit
+    para_dict["value"] = para.value * factor
+    para_dict["unit"] = para_unit
     val = np.nan
     if para.min_value is not None:
-        val = para.min_value
+        val = para.min_value * factor
     para_dict["min"] = val
     val = np.nan
     if para.max_value is not None:
-        val = para.max_value
+        val = para.max_value * factor
     para_dict["max"] = val
     para_dict["frozen"] = not para.free
     para_dict["prior"] = ""

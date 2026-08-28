@@ -49,14 +49,8 @@ from gammapy_plugin.gammapy_like import GammapyLike
 from gammapy_plugin.test.utils import get_close
 ```
 
-We will now set the `astromodels` energy unit to `TeV`.
-This is a feature that requires `astromodels >= 2.5.1`
 
-```python
-get_units().energy = u.TeV
-```
-
-Alright perfect, let's continue by laoding the relevant data
+Let's start by laoding the relevant data
 
 ```python
 datastore = DataStore.from_dir("$GAMMAPY_DATA/hess-dl3-dr1/")
@@ -117,9 +111,9 @@ for obs_id, observation in zip(obs_ids, observations):
 datasets_copy = datasets.copy()
 ```
 
-Let's continue with the `threeML` steps
-- choosing and setting up a model
-
+Let's continue with the `threeML` steps:
+First lets choose and set up a model - we first initalize the spectral shape and
+assign it to the `PointSource` so that the units are already set in `astromodels`.
 
 ```python
 logp = Log_parabola()
@@ -129,24 +123,42 @@ ps = PointSource(
     dec=target_position.dec.deg,
     spectral_shape=logp,
 )
-logp.K.prior = Log_uniform_prior(lower_bound=1e-13, upper_bound=1e-9)
+logp.K.prior = Log_uniform_prior(lower_bound=1e-22, upper_bound=1e-18)  # this is in keV
 logp.K = 1e-11 * u.Unit("TeV-1 cm-2 s-1")
-logp.piv = 1 * u.TeV
+logp.piv = 1e9  # this is in keV
 logp.piv.free = False
-logp.alpha.prior = Uniform_prior(lower_bound=-3, upper_bound=-1)
+logp.alpha.prior = Uniform_prior(lower_bound=-3.5, upper_bound=-0.5)
 logp.alpha = -2
-logp.beta.prior = Uniform_prior(lower_bound=0, upper_bound=2)
+logp.beta.prior = Uniform_prior(lower_bound=-0.2, upper_bound=2)
 logp.beta = 1
 
 model = Model(ps)
 ```
+Let's take a look at it:
+```python
+model
+```
+
+Perfect we have one `PointSource` with a `Log_parabola` spectrum.
+Please be aware of the different defintions of a Logparabolas in `astromodels` and 
+`gammapy`.
+
+
+Now we convert this model. Alternatively we can skip that part and let the
+`GammapyLike` deal with it by not supplying the `converted_model` in the `set_model()`
+method.
 
 ```python
-conv = AstromodelConverter(model, frame="galactic")
+conv = AstromodelConverter(model)
 gl = GammapyLike("hess", sources="crab")
 gl.set_datasets(datasets)
 gl.set_model(model, converted_model=conv)
-
+```
+Nice :)
+We now initialize an `BayesianAnalysis` that links the model to the data and handles 
+the sampling.
+We use `ultranest` as a sampler with the default arguments.
+```python
 ba = BayesianAnalysis(model, DataList(gl))
 ba.set_sampler("ultranest")
 ba.sampler.setup()
@@ -154,7 +166,18 @@ ba.sample()
 res = ba.results
 res
 ```
-
+Perfect! It seems like it succeeded - let's take a look at the parameter distributions:
 ```python tags=["nbsphinx-thumbnail"]
 _ = res.corner_plot()
 ```
+
+Since `threeML v2.6.0` we can also use `display_spectrum_model_counts` to see the 
+modeled and observed count rate and the residuals.
+The units might be a bit unusual for IACT astronomers/astrophysicists ;)
+```python
+from threeML.io.plotting.post_process_data_plots import display_spectrum_model_counts
+
+fig = display_spectrum_model_counts(ba)
+fig
+```
+

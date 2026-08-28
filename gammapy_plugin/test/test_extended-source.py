@@ -24,6 +24,7 @@ from gammapy.modeling.models import (
 )
 from regions import CircleSkyRegion
 from threeML import DataList, JointLikelihood
+from threeML.io.plotting.post_process_data_plots import display_spectrum_model_counts
 
 from gammapy_plugin.converter import AstromodelConverter
 from gammapy_plugin.gammapy_like import GammapyLike
@@ -166,6 +167,7 @@ def test_extended_source_no_fov_bkg(rxj_test_data):
         )
         is np.True_
     )
+    _ = display_spectrum_model_counts(jl)  # will throw warnings for 3ml <2.6.0
 
 
 def test_fov_bkg_model_setting(rxj_test_data):

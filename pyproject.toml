@@ -28,8 +28,8 @@ dynamic = ["version"]
 dependencies = [
     "numpy",
     "matplotlib",
-    "astromodels",
-    "threeml",
+    "astromodels>=2.6.0",
+    "threeml>=2.6.0",
     "gammapy>=2.0",
     "regions<0.12",
 ]
@@ -50,6 +50,9 @@ Issues = "https://github.com/threeML/gammapy-plugin/issues"
 
 [tool.setuptools]
 include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["gammapy_plugin"]
 
 [tool.setuptools.package-data]
 "gammapy_plugin.data.datasets" =  ["*.py","*.fits"]

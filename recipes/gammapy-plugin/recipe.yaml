@@ -7,7 +7,7 @@ package:
   version: ${{ version }}
 
 source:
-  path: .
+  path: ../../
 
 build:
   noarch: python
@@ -24,24 +24,27 @@ requirements:
     - python
     - numpy
     - matplotlib
-    - astromodels >=2.5.1
-    - threeML >=2.5.0
+    - astromodels >=2.6.0
+    - threeML >=2.6.0
     - gammapy >=2.0
+    - regions <0.12
 
 tests:
   - python:
       imports:
         - gammapy_plugin
+        - gammapy_plugin.gammapy_like
 
   - script:
       - gammapy download datasets
-      - export GAMMAPY_DATA=$PWD/gammapy-datasets/2.1
+      - export GAMMAPY_DATA=$PWD/gammapy-datasets/2.0.1
       - pytest -vv --pyargs gammapy_plugin
 
     requirements:
       run:
         - pytest
         - filelock
+        - pytest-xdist
         - if: not (linux and aarch64)
           then:
           - ultranest

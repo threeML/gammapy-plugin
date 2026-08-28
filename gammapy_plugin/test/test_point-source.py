@@ -92,7 +92,6 @@ def test_crab_spectrum():
     jl = JointLikelihood(model, DataList(gl))
     jl.fit()
     res = jl.results
-    gl.distribute_covariance(res)
 
     logp_gammapy = LogParabolaSpectralModel(
         amplitude=1e-12 * u.Unit("cm-2 s-1 TeV-1"), reference=1 * u.TeV

@@ -12,7 +12,6 @@ build:
       - sphinx-apidoc . -o docs/api
       - bash docs/download_notebooks.sh
 
-
 # Build documentation in the "docs/" directory with Sphinx
 sphinx:
   configuration: docs/conf.py

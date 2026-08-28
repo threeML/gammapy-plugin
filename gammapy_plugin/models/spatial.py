@@ -40,7 +40,7 @@ class SpatialModelConverted(SpatialModel):
             log.info("No frame passed - will use ICRS!")
             frame = "icrs"
         self._frame = frame
-        setattr(self, "frame", self._frame)
+        self.frame = self._frame
         self._setup_parameters()
         super().__init__()
 
@@ -104,7 +104,7 @@ class PointSourceModelConverted(PointSpatialModel):
         self._position = self._sky_position.sky_coord.transform_to(frame)
         self._frame = frame
         log.debug(f"PointSpatialMpdel got frame {self._frame}")
-        setattr(self, "frame", self._frame)
+        self.frame = self._frame
         self._setup_parameters()
         super().__init__()
 
@@ -139,8 +139,8 @@ class PointSourceModelConverted(PointSpatialModel):
         lat_0 = Parameter(
             name="lat_0", value=lat.value, unit=lat.unit, frozen=not lat_free
         )
-        setattr(self, "lon_0", lon_0)
-        setattr(self, "lat_0", lat_0)
+        self.lon_0 = lon_0
+        self.lat_0 = lat_0
         self.default_parameters = Parameters([lon_0, lat_0])
         log.debug(f"Set parameters to be {lon_0} and {lat_0}")
 

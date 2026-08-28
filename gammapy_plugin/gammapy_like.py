@@ -46,7 +46,7 @@ class GammapyLike(PluginPrototype):
         :type name: str
         """
         nuisance_parameters = kwargs.get("nuisance_parameters", {})
-        super(GammapyLike, self).__init__(name, nuisance_parameters=nuisance_parameters)
+        super().__init__(name, nuisance_parameters=nuisance_parameters)
         self._frame: str = kwargs.get("frame", "icrs")
         self._sources: list[str] | None = kwargs.get("sources", None)
         self._nuisance_mapping = {}
@@ -75,7 +75,7 @@ class GammapyLike(PluginPrototype):
         ]:
             raise ValueError("mode needs to be individual or stacked")
         if isinstance(datasets, (str, Path)):
-            log.warn(
+            log.warning(
                 "You have provided a path to a file - we will assume this is a Datasets"
                 " file. If not this will likely fail"
             )

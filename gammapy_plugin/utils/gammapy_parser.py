@@ -25,7 +25,7 @@ def parameter_to_gammapy_dict(para: Parameter) -> dict:
     """
     para_dict = {}
 
-    if para.unit in _conversion_list.keys():
+    if para.unit in _conversion_list:
         factor = _conversion_list[para.unit][0]
         para_unit = _conversion_list[para.unit][1]
     else:

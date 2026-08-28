@@ -24,7 +24,7 @@ We start by importing everything for a simple astromodels Model
 from astromodels.core.model import Model
 from astromodels.functions import Powerlaw
 from astromodels.functions import Disk_on_sphere
-from astromodels.sources import ExtendedSource,PointSource
+from astromodels.sources import ExtendedSource, PointSource
 from astromodels.utils.io import display
 import astropy.units as u
 ```
@@ -33,9 +33,9 @@ which we then define
 ```python
 pl = Powerlaw()
 disk = Disk_on_sphere()
-source = ExtendedSource("test_source",spectral_shape=pl,spatial_shape=disk)
-disk.lon0 = 1*u.deg
-disk.lat0 = 10*u.deg
+source = ExtendedSource("test_source", spectral_shape=pl, spatial_shape=disk)
+disk.lon0 = 1 * u.deg
+disk.lat0 = 10 * u.deg
 model = Model(source)
 ```
 
@@ -55,7 +55,7 @@ from gammapy_plugin.converter import AstromodelConverter
 and it is indeed as simple as running
 
 ```python
-conv = AstromodelConverter(model = model)
+conv = AstromodelConverter(model=model)
 ```
 
 We now have an instance of the converter which has already perfomed the conversion 
@@ -98,7 +98,7 @@ you will get a `PointSpatialModel` (see e.g.
 
 ```python
 pl = Powerlaw()
-ps = PointSource("test_ps",spectral_shape=pl,ra = 0, dec =12.3 )
+ps = PointSource("test_ps", spectral_shape=pl, ra=0, dec=12.3)
 model_ps = Model(ps)
 conv_ps = AstromodelConverter(model_ps)
 conv_ps.gammapy_models[0]
@@ -108,9 +108,9 @@ If you set it to `False` you will not get any spatial component:
 
 ```python
 pl = Powerlaw()
-ps = PointSource("test_ps",spectral_shape=pl,ra = 0, dec = 12.3)
+ps = PointSource("test_ps", spectral_shape=pl, ra=0, dec=12.3)
 model_ps = Model(ps)
-conv_ps = AstromodelConverter(model_ps,convert_ps = False)
+conv_ps = AstromodelConverter(model_ps, convert_ps=False)
 conv_ps.gammapy_models[0]
 ```
 
@@ -122,8 +122,8 @@ we can now also use the same plotting routines for the models:
 
 But first let's update our parameters to something in the "`gammapy` energy range"
 ```python
-pl.K = 1*u.Unit("TeV-1 cm-2 s-1")
-pl.piv = 1*u.TeV
+pl.K = 1 * u.Unit("TeV-1 cm-2 s-1")
+pl.piv = 1 * u.TeV
 ```
 and please be aware that `astromodels` uses $K\times\left(\frac{E}{piv}\right)^{i}$
 not $K\times\left(\frac{E}{piv}\right)^{-i}$ for a powerlaw definition.
@@ -136,7 +136,6 @@ import matplotlib.pyplot as plt
 energy_bounds = [0.1, 100] * u.TeV
 conv_ps.gammapy_models[0].spectral_model.plot(energy_bounds)
 plt.grid(which="both")
-
 ```
 
 We can also do the same for the Disk spatial model before
@@ -145,16 +144,16 @@ from gammapy.maps import Map, WcsGeom
 
 pl = Powerlaw()
 disk = Disk_on_sphere()
-source = ExtendedSource("test_source",spectral_shape=pl,spatial_shape=disk)
-disk.lon0 = 20*u.deg
-disk.lat0 = 0*u.deg
-disk.radius = 1*u.deg
+source = ExtendedSource("test_source", spectral_shape=pl, spatial_shape=disk)
+disk.lon0 = 20 * u.deg
+disk.lat0 = 0 * u.deg
+disk.radius = 1 * u.deg
 model = Model(source)
-conv = AstromodelConverter(model = model)
+conv = AstromodelConverter(model=model)
 
 lon_0 = disk.lon0.value
 lat_0 = disk.lat0.value
-reval = 2*disk.radius.value
+reval = 2 * disk.radius.value
 dr = 0.02
 geom = WcsGeom.create(
     skydir=(lon_0, lat_0),

@@ -48,9 +48,9 @@ class SpectralModelConverted(SpectralModel):
             )
         elif isinstance(function, list):
             for f in function:
-                assert isinstance(
-                    f, Function
-                ), f"{f.name} is not a function but {type(f)}"
+                assert isinstance(f, Function), (
+                    f"{f.name} is not a function but {type(f)}"
+                )
             self._astromodel_function = function
             self._components = len(function)
             x_unit = None
@@ -66,9 +66,9 @@ class SpectralModelConverted(SpectralModel):
                             else f.x_unit
                         )
                     elif x_unit is not None and f.x_unit is not None:
-                        assert x_unit.is_equivalent(
-                            f.x_unit
-                        ), "Component x_unit not matching"
+                        assert x_unit.is_equivalent(f.x_unit), (
+                            "Component x_unit not matching"
+                        )
                         # TODO: maybe transform also possible need to check
                     else:
                         raise ValueError(f"Your Component {f.name} has no x_unit")
@@ -86,9 +86,9 @@ class SpectralModelConverted(SpectralModel):
                             else f.y_unit
                         )
                     elif y_unit is not None and f.y_unit is not None:
-                        assert y_unit.is_equivalent(
-                            f.y_unit
-                        ), "Component y_unit not matching"
+                        assert y_unit.is_equivalent(f.y_unit), (
+                            "Component y_unit not matching"
+                        )
                         # TODO: maybe transform also possible need to check
                     else:
                         raise ValueError(f"Your Component {f.name} has no y_unit")

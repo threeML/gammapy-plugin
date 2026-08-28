@@ -37,9 +37,9 @@ class AstromodelConverter:
         :param convert_ps: convert PointSources to a PointSpatialModel, optional
         :type convert_ps: bool
         """
-        assert isinstance(
-            model, Model
-        ), "AstromodelConverter needs an astromodels Model"
+        assert isinstance(model, Model), (
+            "AstromodelConverter needs an astromodels Model"
+        )
         self._astromodel_model = model
         if frame is not None:
             self._frame = frame

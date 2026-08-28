@@ -31,9 +31,9 @@ class SpatialModelConverted(SpatialModel):
 
         """
         log.debug("type of spatial function: " + str(type(function)))
-        assert issubclass(
-            type(function), Function
-        ), "function must be astromodels function"
+        assert issubclass(type(function), Function), (
+            "function must be astromodels function"
+        )
         self._astromodel_function = function
         # self._source_name = self._astromodel_function.name
         if frame is None:
@@ -96,9 +96,9 @@ class PointSourceModelConverted(PointSpatialModel):
     tag = ["PointSourceModelConverted", "ps_conv"]
 
     def __init__(self, sky_position: SkyDirection, frame: str):
-        assert isinstance(
-            sky_position, SkyDirection
-        ), "sky_position must be SkyDirection"
+        assert isinstance(sky_position, SkyDirection), (
+            "sky_position must be SkyDirection"
+        )
         self._sky_position = sky_position
         self._name = self._sky_position.name
         self._position = self._sky_position.sky_coord.transform_to(frame)

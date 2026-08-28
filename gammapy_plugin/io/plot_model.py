@@ -25,7 +25,6 @@ def plot_model(
         **kwargs,
     )
     for i in range(len(datasets)):
-
         y_unweighted = datasets[i].counts.get_spectrum().data.reshape(-1)
         x = datasets[i].counts.geom.axes["energy"].as_plot_center.to("keV").value
         xerr = [

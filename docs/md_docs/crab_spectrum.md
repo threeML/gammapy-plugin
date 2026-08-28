@@ -123,9 +123,9 @@ ps = PointSource(
     dec=target_position.dec.deg,
     spectral_shape=logp,
 )
-logp.K.prior = Log_uniform_prior(lower_bound=1e-22, upper_bound=1e-18) # this is in keV
+logp.K.prior = Log_uniform_prior(lower_bound=1e-22, upper_bound=1e-18)  # this is in keV
 logp.K = 1e-11 * u.Unit("TeV-1 cm-2 s-1")
-logp.piv = 1e9 # this is in keV
+logp.piv = 1e9  # this is in keV
 logp.piv.free = False
 logp.alpha.prior = Uniform_prior(lower_bound=-3.5, upper_bound=-0.5)
 logp.alpha = -2

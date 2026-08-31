@@ -71,6 +71,7 @@ jobs:
           PR_NUMBER: ${{ github.event.number || 'latest' }}
         
   pages:
+    needs: build-notebooks
     runs-on: ubuntu-latest
     environment:
       name: github-pages

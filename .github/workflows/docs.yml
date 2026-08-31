@@ -54,6 +54,17 @@ jobs:
           name: notebooks-for-${{ env.SHA }}
           path: docs/notebooks
 
+      - name: Generate API stubs
+        shell: bash -l {0}
+        run: |
+          sphinx-apidoc -T gammapy_plugin -o docs/api
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: api_stubs-for-${{ env.SHA }}
+          path: docs/api
+
+
       - name: Trigger RTD 
         shell: bash -l {0}
         run: |
@@ -88,10 +99,19 @@ jobs:
           echo "SHA=$SHA" >> "$GITHUB_ENV"
 
       - id: get_artifacts
+        name: Get Notebooks
         uses: actions/download-artifact@v8
         with:
           name: notebooks-for-${{ env.SHA }}
           path: docs/notebooks
+
+      - id: get_artifacts
+        name: Get API stubs
+        uses: actions/download-artifact@v8
+        with:
+          name: api_stubs-for-${{ env.SHA }}
+          path: docs/api
+
       - id: deployment
         uses: sphinx-notes/pages@v3
         with:

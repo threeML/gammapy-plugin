@@ -80,15 +80,17 @@ jobs:
       pages: write
       id-token: write
     steps:
+      - uses: actions/checkout@v7
+
       - name: Set SHA
         run: |
           SHA="${{ github.event.pull_request.head.sha || github.sha }}"
           echo "SHA=$SHA" >> "$GITHUB_ENV"
+
       - id: get_artifacts
         uses: actions/download-artifact@v8
         with:
           name: notebooks-for-${{ env.SHA }}
           path: docs/notebooks
-
       - id: deployment
         uses: sphinx-notes/pages@v3

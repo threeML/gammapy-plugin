@@ -98,6 +98,9 @@ jobs:
           SHA="${{ github.event.pull_request.head.sha || github.sha }}"
           echo "SHA=$SHA" >> "$GITHUB_ENV"
 
+      - name: Install pandoc
+        uses: pandoc/actions/setup@v1
+
       - name: Get Notebooks
         uses: actions/download-artifact@v8
         with:

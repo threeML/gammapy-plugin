@@ -98,15 +98,13 @@ jobs:
           SHA="${{ github.event.pull_request.head.sha || github.sha }}"
           echo "SHA=$SHA" >> "$GITHUB_ENV"
 
-      - id: get_artifacts
-        name: Get Notebooks
+      - name: Get Notebooks
         uses: actions/download-artifact@v8
         with:
           name: notebooks-for-${{ env.SHA }}
           path: docs/notebooks
 
-      - id: get_artifacts
-        name: Get API stubs
+      - name: Get API stubs
         uses: actions/download-artifact@v8
         with:
           name: api_stubs-for-${{ env.SHA }}

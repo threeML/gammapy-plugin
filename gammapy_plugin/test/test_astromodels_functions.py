@@ -43,7 +43,7 @@ def test_exp_cutoff_powerlaw_gammapy():
     expc.K = 1e-11 * u.Unit("TeV-1 cm-2 s-1")
     expc.piv = 2 * u.TeV
     expc.alpha.value = 0.89
-    expc.lambda_ = 10 * 1 / u.TeV
+    expc.curv = 10 * 1 / u.TeV
 
     expc_ref = ExpCutoffPowerLawSpectralModel(
         amplitude=1e-11 * u.Unit("TeV-1 s-1 cm-2"),

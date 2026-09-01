@@ -21,15 +21,17 @@ jobs:
     name: "Build the notebooks for the docs"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Set SHA
         run: |
           SHA="${{ github.event.pull_request.head.sha || github.sha }}"
           echo "SHA=$SHA" >> "$GITHUB_ENV"
+
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
           python-version: 3.13
+
       - name: Install dependencies
         run: |
           pip install black ultranest
@@ -46,10 +48,22 @@ jobs:
           mkdir -p docs/notebooks
           mv docs/md_docs/*.ipynb docs/notebooks
           echo "Next - uploading artifacts for sha ${SHA}"
-      - uses: actions/upload-artifact@v6
+
+      - uses: actions/upload-artifact@v7
         with:
           name: notebooks-for-${{ env.SHA }}
           path: docs/notebooks
+
+      - name: Generate API stubs
+        shell: bash -l {0}
+        run: |
+          sphinx-apidoc -T gammapy_plugin -o docs/api
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: api_stubs-for-${{ env.SHA }}
+          path: docs/api
+
 
       - name: Trigger RTD 
         shell: bash -l {0}
@@ -66,3 +80,40 @@ jobs:
           TOKEN: ${{ secrets.RTD_API }}
           BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
           PR_NUMBER: ${{ github.event.number || 'latest' }}
+        
+  pages:
+    needs: build-notebooks
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set SHA
+        run: |
+          SHA="${{ github.event.pull_request.head.sha || github.sha }}"
+          echo "SHA=$SHA" >> "$GITHUB_ENV"
+
+      - name: Install pandoc
+        uses: pandoc/actions/setup@v1
+
+      - name: Get Notebooks
+        uses: actions/download-artifact@v8
+        with:
+          name: notebooks-for-${{ env.SHA }}
+          path: docs/notebooks
+
+      - name: Get API stubs
+        uses: actions/download-artifact@v8
+        with:
+          name: api_stubs-for-${{ env.SHA }}
+          path: docs/api
+
+      - id: deployment
+        uses: sphinx-notes/pages@v3
+        with:
+          checkout: false

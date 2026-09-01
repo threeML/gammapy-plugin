@@ -10,8 +10,8 @@ jupyter:
     display_name: threeML
     language: python
     name: python3
-    
 ---
+
 # Converting a astromodels Model 
 
 The core concept behind that plugin is the model converter that maps a astromodels
@@ -136,6 +136,7 @@ import matplotlib.pyplot as plt
 energy_bounds = [0.1, 100] * u.TeV
 conv_ps.gammapy_models[0].spectral_model.plot(energy_bounds)
 plt.grid(which="both")
+plt.show()
 ```
 
 We can also do the same for the Disk spatial model before
@@ -167,4 +168,5 @@ fig, ax = plt.subplots(1, figsize=(9, 6))
 meval = conv.gammapy_models[0].spatial_model.evaluate_geom(geom)
 Map.from_geom(geom=geom, data=meval.value, unit=meval.unit).plot(ax=ax)
 plt.tight_layout()
+plt.show()
 ```

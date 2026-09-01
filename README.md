@@ -11,6 +11,12 @@
 This version is based on previous work by [J. Michael Burgess](https://github.com/grburgess), [Sajan
 Kumar](https://github.com/skumarudel) and [AnjanaTel](https://github.com/AnjanaTel).
 
+## Docs
+
+You can find the docs containg also example notebooks 
+either on [readthedocs](https://gammapy-plugin.readthedocs.io/en/latest/) or on the 
+[github pages](https://threeml.github.io/gammapy-plugin/).
+
 ## Installation
 
 The following should be sufficient and install all the relevant dependencies.

@@ -20,6 +20,7 @@ python3 - <<'PY'
 import json
 import os
 import shutil
+import urllib.error
 import urllib.request
 import zipfile
 from pathlib import Path
@@ -32,16 +33,63 @@ token = os.environ["TOKEN"]
 
 api = f"https://api.github.com/repos/{owner}/{repo}"
 
-headers = {
+github_headers = {
     "Accept": "application/vnd.github+json",
-    f"Authorization": f"Bearer {token}",
+    "Authorization": f"Bearer {token}",
     "X-GitHub-Api-Version": "2022-11-28",
 }
 
 
 def github_request(url):
-    request = urllib.request.Request(url, headers=headers)
+    """Make an authenticated request to the GitHub API."""
+    request = urllib.request.Request(
+        url,
+        headers=github_headers,
+    )
     return urllib.request.urlopen(request)
+
+
+class NoRedirect(urllib.request.HTTPRedirectHandler):
+    """Prevent urllib from automatically following redirects."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
+no_redirect_opener = urllib.request.build_opener(NoRedirect)
+
+
+def get_artifact_download_url(url):
+    """
+    Ask GitHub for the artifact download URL without following
+    the redirect.
+
+    The GitHub Authorization header is sent only to api.github.com.
+    """
+    request = urllib.request.Request(
+        url,
+        headers=github_headers,
+    )
+
+    try:
+        no_redirect_opener.open(request)
+
+    except urllib.error.HTTPError as exc:
+        if exc.code != 302:
+            raise
+
+        location = exc.headers.get("Location")
+
+        if not location:
+            raise RuntimeError(
+                "GitHub returned HTTP 302 without a Location header"
+            )
+
+        return location
+
+    raise RuntimeError(
+        "Expected GitHub artifact endpoint to return HTTP 302"
+    )
 
 
 print(f"Searching artifacts for SHA: {sha}")
@@ -78,13 +126,26 @@ for artifact in artifacts:
 
     print(f"Artifact ID: {artifact_id}")
     print(f"Artifact name: {artifact_name}")
+    print("Requesting artifact download URL...")
+
+    github_download_url = (
+        f"{api}/actions/artifacts/{artifact_id}/zip"
+    )
+
+    # GitHub returns a short-lived signed URL via HTTP 302.
+    signed_download_url = get_artifact_download_url(
+        github_download_url
+    )
+
     print("Downloading artifact...")
 
     zip_path = Path(f"artifact-{artifact_id}.zip")
-    download_url = f"{api}/actions/artifacts/{artifact_id}/zip"
 
     try:
-        with github_request(download_url) as response:
+        # IMPORTANT:
+        # Do NOT send the GitHub Authorization header here.
+        # The signed URL already contains its own authentication.
+        with urllib.request.urlopen(signed_download_url) as response:
             with zip_path.open("wb") as output:
                 shutil.copyfileobj(response, output)
 
@@ -97,7 +158,10 @@ for artifact in artifacts:
             print("Found API stubs")
             output_dir = Path("docs/api")
 
-        output_dir.mkdir(parents=True, exist_ok=True)
+        output_dir.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
 
         print(f"Extracting to {output_dir}")
 

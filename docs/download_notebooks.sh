@@ -15,7 +15,7 @@ API="https://api.github.com/repos/$OWNER/$REPO"
 
 echo "Searching artifacts for SHA: $SHA"
 
-ARTIFACT_ID=$(
+ARTIFACT_ID_ARRAY=$(
 python3 - <<PY
 import os, json, urllib.request
 
@@ -39,30 +39,42 @@ for a in data.get("artifacts", []):
     name = a.get("name", "")
     if sha in name:
         print(a["id"])
-        break
+	print(";")
 PY
 )
 
-if [[ -z "$ARTIFACT_ID" ]]; then
+if [[ -z "$ARTIFACT_ID_ARRAY" ]]; then
   echo "No artifact found for SHA: $SHA"
   exit 1
 fi
+IFS=';' read -ra ARTIFACT_IDS <<< "$ARTIFACT_ID_ARRAY"
+for ARTIFACT_ID in "${ARTIFACT_IDS[@]}"; do
 
-echo "Artifact ID: $ARTIFACT_ID"
+	echo "Artifact ID: $ARTIFACT_ID"
 
-echo "Downloading artifact..."
+	echo "Downloading artifact..."
 
-curl -fL \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Accept: application/vnd.github+json" \
-  "$API/actions/artifacts/$ARTIFACT_ID/zip" \
-  -o artifact.zip
+	curl -fL \
+	  -H "Authorization: Bearer $TOKEN" \
+	  -H "Accept: application/vnd.github+json" \
+	  "$API/actions/artifacts/$ARTIFACT_ID/zip" \
+	  -o artifact.zip
 
-echo "Downloaded artifact.zip"
+	echo "Downloaded artifact.zip"
+	if [[ $ARTIFACT_ID == *"notebooks"* ]];
+	then
+		echo "Found a notebooks artifact"
+		mkdir -p docs/notebooks
+		unzip -o artifact.zip -d docs/notebooks
+	else
+		echo "Found API stubs"
 
-mkdir -p docs/notebooks
-unzip -o artifact.zip -d docs/notebooks
+		mkdir -p docs/api
+		unzip -o artifact.zip -d docs/api
 
-rm artifact.zip
+	fi;
+
+	rm artifact.zip
+done
 
 echo "Done unzipping"

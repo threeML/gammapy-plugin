@@ -34,7 +34,7 @@ api = f"https://api.github.com/repos/{owner}/{repo}"
 
 headers = {
     "Accept": "application/vnd.github+json",
-    "Authorization": f"Bearer {token}",
+    f"Authorization": f"Bearer {token}",
     "X-GitHub-Api-Version": "2022-11-28",
 }
 

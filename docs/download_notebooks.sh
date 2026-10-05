@@ -39,7 +39,7 @@ for a in data.get("artifacts", []):
     name = a.get("name", "")
     if sha in name:
         print(a["id"])
-	print(";")
+        print(";")
 PY
 )
 

@@ -11,70 +11,104 @@ if [ -z "$TOKEN" ]; then
 	exit 0
 fi
 
-API="https://api.github.com/repos/$OWNER/$REPO"
+export OWNER
+export REPO
+export SHA
+export TOKEN
 
-echo "Searching artifacts for SHA: $SHA"
+python3 - <<'PY'
+import json
+import os
+import shutil
+import urllib.request
+import zipfile
+from pathlib import Path
 
-ARTIFACT_ID_ARRAY=$(
-python3 - <<PY
-import os, json, urllib.request
 
-owner = "$OWNER"
-repo = "$REPO"
-sha = "$SHA"
-token = "$TOKEN"
+owner = os.environ["OWNER"]
+repo = os.environ["REPO"]
+sha = os.environ["SHA"]
+token = os.environ["TOKEN"]
 
-url = f"https://api.github.com/repos/{owner}/{repo}/actions/artifacts?per_page=100"
+api = f"https://api.github.com/repos/{owner}/{repo}"
 
-req = urllib.request.Request(url)
-req.add_header("Accept", "application/vnd.github+json")
-req.add_header("Authorization", f"Bearer {token}")
+headers = {
+    "Accept": "application/vnd.github+json",
+    "Authorization": f"Bearer {token}",
+    "X-GitHub-Api-Version": "2022-11-28",
+}
 
-with urllib.request.urlopen(req) as r:
-    data = json.load(r)
 
-for a in data.get("artifacts", []):
-    if a.get("expired"):
+def github_request(url):
+    request = urllib.request.Request(url, headers=headers)
+    return urllib.request.urlopen(request)
+
+
+print(f"Searching artifacts for SHA: {sha}")
+
+url = f"{api}/actions/artifacts?per_page=100"
+
+with github_request(url) as response:
+    data = json.load(response)
+
+
+artifacts = []
+
+for artifact in data.get("artifacts", []):
+    if artifact.get("expired"):
         continue
-    name = a.get("name", "")
+
+    name = artifact.get("name", "")
+
     if sha in name:
-        print(a["id"])
-        print(";")
+        artifacts.append(artifact)
+
+
+if not artifacts:
+    print(f"No artifact found for SHA: {sha}")
+    raise SystemExit(1)
+
+
+print(f"Found {len(artifacts)} artifact(s)")
+
+
+for artifact in artifacts:
+    artifact_id = artifact["id"]
+    artifact_name = artifact.get("name", "")
+
+    print(f"Artifact ID: {artifact_id}")
+    print(f"Artifact name: {artifact_name}")
+    print("Downloading artifact...")
+
+    zip_path = Path(f"artifact-{artifact_id}.zip")
+    download_url = f"{api}/actions/artifacts/{artifact_id}/zip"
+
+    try:
+        with github_request(download_url) as response:
+            with zip_path.open("wb") as output:
+                shutil.copyfileobj(response, output)
+
+        print(f"Downloaded {zip_path}")
+
+        if "notebooks" in artifact_name.lower():
+            print("Found a notebooks artifact")
+            output_dir = Path("docs/notebooks")
+        else:
+            print("Found API stubs")
+            output_dir = Path("docs/api")
+
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        print(f"Extracting to {output_dir}")
+
+        with zipfile.ZipFile(zip_path) as archive:
+            archive.extractall(output_dir)
+
+        print(f"Extracted {artifact_name}")
+
+    finally:
+        zip_path.unlink(missing_ok=True)
+
+
+print("Artifact download complete")
 PY
-)
-
-if [[ -z "$ARTIFACT_ID_ARRAY" ]]; then
-  echo "No artifact found for SHA: $SHA"
-  exit 1
-fi
-IFS=';' read -ra ARTIFACT_IDS <<< "$ARTIFACT_ID_ARRAY"
-for ARTIFACT_ID in "${ARTIFACT_IDS[@]}"; do
-
-	echo "Artifact ID: $ARTIFACT_ID"
-
-	echo "Downloading artifact..."
-
-	curl -fL \
-	  -H "Authorization: Bearer $TOKEN" \
-	  -H "Accept: application/vnd.github+json" \
-	  "$API/actions/artifacts/$ARTIFACT_ID/zip" \
-	  -o artifact.zip
-
-	echo "Downloaded artifact.zip"
-	if [[ $ARTIFACT_ID == *"notebooks"* ]];
-	then
-		echo "Found a notebooks artifact"
-		mkdir -p docs/notebooks
-		unzip -o artifact.zip -d docs/notebooks
-	else
-		echo "Found API stubs"
-
-		mkdir -p docs/api
-		unzip -o artifact.zip -d docs/api
-
-	fi;
-
-	rm artifact.zip
-done
-
-echo "Done unzipping"

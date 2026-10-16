@@ -5,22 +5,22 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.17.3
+      jupytext_version: 1.19.5
   kernelspec:
-    display_name: threeML
+    display_name: Python 3 (ipykernel)
     language: python
     name: python3
-    
 ---
-# Spectrum Fitting 
+
+# Spectrum Fitting
 
 In this first basic example we will perform a basic spectral analysis of the Crab nebula
-using the public H.E.S.S. data release (already included in `gammapy`).
+using the public H.E.S.S. data release (already included in `gammapy`) and follow the `gammapy` documentation on [spectral analysis](https://docs.gammapy.org/2.1/tutorials/analysis-1d/spectral_analysis.html) closely so we can compare the results.
 
 Let's get started by importing all the relevant stuff.
 
 ```python
-import astropy.units as u
+import astropy.units as u 
 from astropy.coordinates import Angle, SkyCoord
 
 from astromodels.core.model import Model
@@ -49,7 +49,6 @@ from gammapy_plugin.gammapy_like import GammapyLike
 from gammapy_plugin.test.utils import get_close
 ```
 
-
 Let's start by laoding the relevant data
 
 ```python
@@ -76,15 +75,15 @@ exclusion_region = CircleSkyRegion(
 
 skydir = target_position.galactic
 geom = WcsGeom.create(
-    npix=(250, 250), binsz=0.02, skydir=skydir, proj="TAN", frame="galactic"
+    npix=(150, 150), binsz=0.05, skydir=skydir, proj="TAN", frame="galactic"
 )
 
 exclusion_mask = ~geom.region_mask([exclusion_region])
 energy_axis = MapAxis.from_energy_bounds(
-    0.5, 40, nbin=10, per_decade=True, unit="TeV", name="energy"
+    0.1, 40, nbin=10, per_decade=True, unit="TeV", name="energy"
 )
 energy_axis_true = MapAxis.from_energy_bounds(
-    0.1, 100, nbin=20, per_decade=True, unit="TeV", name="energy_true"
+    0.05, 100, nbin=20, per_decade=True, unit="TeV", name="energy_true"
 )
 
 geom = RegionGeom.create(region=on_region, axes=[energy_axis])
@@ -127,20 +126,20 @@ logp.K.prior = Log_uniform_prior(lower_bound=1e-22, upper_bound=1e-18)  # this i
 logp.K = 1e-11 * u.Unit("TeV-1 cm-2 s-1")
 logp.piv = 1e9  # this is in keV
 logp.piv.free = False
-logp.alpha.prior = Uniform_prior(lower_bound=-3.5, upper_bound=-0.5)
+logp.alpha.prior = Uniform_prior(lower_bound=-5, upper_bound=5)
 logp.alpha = -2
-logp.beta.prior = Uniform_prior(lower_bound=-0.2, upper_bound=2)
-logp.beta = 1
+logp.beta.prior = Uniform_prior(lower_bound=-2, upper_bound=2)
+logp.beta = 0.1
 
 model = Model(ps)
 ```
 Let's take a look at it:
 ```python
-model
+display(model)
 ```
 
 Perfect we have one `PointSource` with a `Log_parabola` spectrum.
-Please be aware of the different defintions of a Logparabolas in `astromodels` and 
+Please be aware of the different defintions of a Logparabolas in `astromodels` and
 `gammapy`.
 
 
@@ -151,33 +150,38 @@ method.
 ```python
 conv = AstromodelConverter(model)
 gl = GammapyLike("hess", sources="crab")
-gl.set_datasets(datasets)
+gl.set_datasets(datasets, "stacked")
 gl.set_model(model, converted_model=conv)
 ```
 Nice :)
-We now initialize an `BayesianAnalysis` that links the model to the data and handles 
+We now initialize an `BayesianAnalysis` that links the model to the data and handles
 the sampling.
-We use `ultranest` as a sampler with the default arguments.
+We use `emcee` as a sampler which is always included in `3ML`.
 ```python
 ba = BayesianAnalysis(model, DataList(gl))
-ba.set_sampler("ultranest")
-ba.sampler.setup()
+ba.set_sampler("emcee")
+ba.sampler.setup(n_iterations=400,n_burn_in = 100)
 ba.sample()
 res = ba.results
 res
 ```
 Perfect! It seems like it succeeded - let's take a look at the parameter distributions:
 ```python tags=["nbsphinx-thumbnail"]
-_ = res.corner_plot()
+res.corner_plot()
 ```
 
-Since `threeML v2.6.0` we can also use `display_spectrum_model_counts` to see the 
+Since `threeML v2.6.0` we can also use `display_spectrum_model_counts` to see the
 modeled and observed count rate and the residuals.
 The units might be a bit unusual for IACT astronomers/astrophysicists ;)
 ```python
 from threeML.io.plotting.post_process_data_plots import display_spectrum_model_counts
 
-fig = display_spectrum_model_counts(ba)
-fig
+display_spectrum_model_counts(ba)
+```
+Please be aware that this is not fully equivalent to the following, as the `3ML` one is plotting the total model as differential count flux (including background) while the gammapy `.plot_fit()` is dispalying the predicted signal excess.
+
+```python
+gl.datasets[0].plot_fit()
 ```
 
+Comparing it to the results and plots from the [`gammapy` documentation](https://docs.gammapy.org/2.1/tutorials/analysis-1d/spectral_analysis.html#fit-quality-and-model-residuals) it looks reasonably well :)

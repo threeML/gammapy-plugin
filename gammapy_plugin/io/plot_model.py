@@ -47,8 +47,15 @@ def plot_model(
             y,
             residuals,
             xerr=xerr,
+            yerr=np.sqrt(y_unweighted)
+            / (
+                widths * datasets[i].gti.time_sum.to(u.s).value
+            ),  # just the poisson error
             label=datasets[i].name,
             show_data=kwargs.get("show_data", True),
+            linestyle="",
+            marker="s",
+            markersize=3,
         )
 
         residual_plot.add_model(

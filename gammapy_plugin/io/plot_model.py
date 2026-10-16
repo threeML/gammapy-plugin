@@ -1,19 +1,30 @@
+from typing import TYPE_CHECKING
+
 import astropy.units as u
 import numpy as np
 from threeML.io.plotting.data_residual_plot import ResidualPlot
 
+if TYPE_CHECKING:
+    from gammapy.datasets import Datasets
+
 
 def plot_model(
-    datasets,
+    datasets: "Datasets",
     *args,
     **kwargs,
 ) -> "ResidualPlot":
+    """
+    Plot the model and data for a given datasets object.
+
+    :param datasets: Gammapy Datasets object containing the data and model
+    :type datasets: Datasets
+    :return: ResidualPlot object containing the plot
+    """
 
     residual_plot = ResidualPlot(
         **kwargs,
     )
     for i in range(len(datasets)):
-
         y_unweighted = datasets[i].counts.get_spectrum().data.reshape(-1)
         x = datasets[i].counts.geom.axes["energy"].as_plot_center.to("keV").value
         xerr = [
@@ -36,8 +47,15 @@ def plot_model(
             y,
             residuals,
             xerr=xerr,
+            yerr=np.sqrt(y_unweighted)
+            / (
+                widths * datasets[i].gti.time_sum.to(u.s).value
+            ),  # just the poisson error
             label=datasets[i].name,
             show_data=kwargs.get("show_data", True),
+            linestyle="",
+            marker="s",
+            markersize=3,
         )
 
         residual_plot.add_model(

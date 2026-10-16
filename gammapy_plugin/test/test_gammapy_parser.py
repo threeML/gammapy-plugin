@@ -20,7 +20,7 @@ def test_parameter_to_gammapy_dict():
         free=True,
     )
     para_dict = parameter_to_gammapy_dict(para)
-    for k in compare_dict.keys():
+    for k in compare_dict:
         assert para_dict[k] == compare_dict[k]
 
 

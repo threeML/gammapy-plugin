@@ -20,6 +20,7 @@ using the public H.E.S.S. data release (already included in `gammapy`) and follo
 Let's get started by importing all the relevant stuff.
 
 ```python
+%matplotlib inline
 import astropy.units as u 
 from astropy.coordinates import Angle, SkyCoord
 

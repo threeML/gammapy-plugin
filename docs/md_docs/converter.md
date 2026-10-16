@@ -21,6 +21,7 @@ Let's have a look!
 
 We start by importing everything for a simple astromodels Model
 ```python
+%matplotlib notebook
 from astromodels.core.model import Model
 from astromodels.functions import Powerlaw
 from astromodels.functions import Disk_on_sphere

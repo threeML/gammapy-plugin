@@ -150,14 +150,22 @@ method.
 
 ```python
 conv = AstromodelConverter(model)
+```
+
+Let's create our "hess" plugin and already set the sources (optional) to "crab".
+When setting the datsets we can either stick with the default "individual" mode
+or we can use the "stacked" mode - which will stack the dataset for us.
+```python
 gl = GammapyLike("hess", sources="crab")
 gl.set_datasets(datasets, "stacked")
 gl.set_model(model, converted_model=conv)
 ```
+
 Nice :)
 We now initialize an `BayesianAnalysis` that links the model to the data and handles
 the sampling.
-We use `emcee` as a sampler which is always included in `3ML`.
+We use `emcee` as a sampler which is always installed when installing `3ML`.
+
 ```python
 ba = BayesianAnalysis(model, DataList(gl))
 ba.set_sampler("emcee")
@@ -166,6 +174,7 @@ ba.sample()
 res = ba.results
 res
 ```
+
 Perfect! It seems like it succeeded - let's take a look at the parameter distributions:
 ```python tags=["nbsphinx-thumbnail"]
 res.corner_plot()
@@ -182,7 +191,9 @@ display_spectrum_model_counts(ba)
 Please be aware that this is not fully equivalent to the following, as the `3ML` one is plotting the total model as differential count flux (including background) while the gammapy `.plot_fit()` is dispalying the predicted signal excess.
 
 ```python
-gl.datasets[0].plot_fit()
+ax_spectrum, ax_residuals = gl.datasets[0].plot_fit()
+ax_spectrum.set_ylim(0.1, 40)
+plt.show()
 ```
 
 Comparing it to the results and plots from the [`gammapy` documentation](https://docs.gammapy.org/2.1/tutorials/analysis-1d/spectral_analysis.html#fit-quality-and-model-residuals) it looks reasonably well :)

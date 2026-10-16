@@ -129,7 +129,7 @@ pl.piv = 1 * u.TeV
 and please be aware that `astromodels` uses $K\times\left(\frac{E}{piv}\right)^{i}$
 not $K\times\left(\frac{E}{piv}\right)^{-i}$ for a powerlaw definition.
 
-```python
+```python tags=["nbsphinx-thumbnail"]
 from astropy import units as u
 import matplotlib.pyplot as plt
 

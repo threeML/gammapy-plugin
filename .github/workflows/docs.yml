@@ -46,10 +46,26 @@ jobs:
           mkdir -p $GAMMAPY_DATA
           git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
 
-          jupytext --to ipynb --pipe black --execute docs/md_docs/*.md
+          # jupytext --to ipynb --pipe black --execute docs/md_docs/*.md
 
           mkdir -p docs/notebooks
-          mv docs/md_docs/*.ipynb docs/notebooks
+          for notebook in docs/md_docs/*.md; do
+            name="$(basename "${notebook%.md}")"
+
+            jupytext \
+              --to ipynb \
+              --output "docs/notebooks/${name}.ipynb" \
+              "$notebook"
+
+            # Execute explicitly
+            jupyter nbconvert \
+              --to notebook \
+              --execute \
+              --inplace \
+              --ExecutePreprocessor.timeout=600 \
+              "docs/notebooks/${name}.ipynb"
+          done
+
           echo "Next - uploading artifacts for sha ${SHA}"
 
       - uses: actions/upload-artifact@v7

@@ -41,10 +41,13 @@ jobs:
       - name: Execute the notebooks
         shell: bash -l {0}
         run: |
+          set -e
           export GAMMAPY_DATA="/home/runner/work/gammapy_data"
           mkdir -p $GAMMAPY_DATA
           git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
+
           jupytext --to ipynb --pipe black --execute docs/md_docs/*.md
+
           mkdir -p docs/notebooks
           mv docs/md_docs/*.ipynb docs/notebooks
           echo "Next - uploading artifacts for sha ${SHA}"

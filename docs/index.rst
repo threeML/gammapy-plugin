@@ -44,6 +44,7 @@ To get started check out the `get-started`_ section.
         
    intro
    notebooks/converter.ipynb
+   notebooks/am_in_gp.ipynb
 
    api/API.rst
 
@@ -51,4 +52,5 @@ To get started check out the `get-started`_ section.
 
    notebooks/crab_spectrum.ipynb
    notebooks/converter.ipynb
+   notebooks/am_in_gp.ipynb
      

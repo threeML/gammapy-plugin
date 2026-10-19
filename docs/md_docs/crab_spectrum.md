@@ -21,6 +21,7 @@ Let's get started by importing all the relevant stuff.
 
 ```python
 %matplotlib inline
+import matplotlib.pyplot as plt
 import astropy.units as u 
 from astropy.coordinates import Angle, SkyCoord
 

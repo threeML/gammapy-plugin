@@ -72,3 +72,7 @@ testpaths = ["gammapy_plugin/test"]
 
 [tool.isort]
 profile = "black"
+
+[tool.ruff]
+line-length = 88
+indent-width = 4

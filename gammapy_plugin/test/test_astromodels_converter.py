@@ -21,7 +21,6 @@ def test_source_converter():
 def test_parameter_mapping():
     pl1 = Powerlaw(index=-9.9, K=12)
     pl2 = Powerlaw()
-    pl2.K
     sc1 = SpectralComponent("comp1", pl1)
     sc2 = SpectralComponent("comp2", pl2)
     ps1 = PointSource(ra=0, dec=0, components=[sc1, sc2], source_name="test_ps")

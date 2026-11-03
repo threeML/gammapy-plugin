@@ -36,6 +36,7 @@ dependencies = [
 
 [project.optional-dependencies]
 tests = [
+    "coverage",
     "pytest",
     "pytest-cov",
     "pytest-xdist",

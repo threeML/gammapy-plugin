@@ -23,7 +23,7 @@ class SpatialModelConverted(SpatialModel):
     def __init__(
         self,
         function: Function,
-        frame: str = None,
+        frame: str | None = None,
     ) -> None:
         """
         :param function: astromodel function describing the morphology
@@ -51,7 +51,7 @@ class SpatialModelConverted(SpatialModel):
         # needed later for correctly evaluating the function
         self._mapping = {}
         self._mapping_free = {}
-        for k, v in self._astromodel_function.parameters.items():
+        for v in self._astromodel_function.parameters.values():
             vmin = np.nan
             vmax = np.nan
             if v.min_value is not None:

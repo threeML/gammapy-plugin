@@ -110,7 +110,7 @@ class GammapyLike(PluginPrototype):
             msg += " a single Datasets or Dataset object"
             raise TypeError(msg)
 
-    def set_sources(self, sources: list[str] | str = None) -> None:
+    def set_sources(self, sources: list[str] | str | None = None) -> None:
         """
         Set the sources to be used by this plugin - No need to specify bkg models
 
@@ -195,10 +195,8 @@ class GammapyLike(PluginPrototype):
         """
         for d in self._datasets:
             d.models = []
-            tmp = []
-            for g in self._global_models:
-                tmp.append(g)
-            if d.name in self._background_models_mapper.keys():
+            tmp = list(self._global_models).copy()
+            if d.name in self._background_models_mapper:
                 tmp.append(
                     self._background_models[self._background_models_mapper[d.name]]
                 )
@@ -233,7 +231,7 @@ class GammapyLike(PluginPrototype):
         nuissance parameters of this plugin and set the prior.
         """
         # TODO: way of manually specifying the priors
-        for name, bkg in self._background_models.items():
+        for bkg in self._background_models.values():
             bkg_paras = parse_gammapy_model(bkg, self._name)
             for k, v in bkg_paras.items():
                 para_path = k.split(".")

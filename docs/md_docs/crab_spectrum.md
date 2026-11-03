@@ -170,7 +170,7 @@ We use `emcee` as a sampler which is always installed when installing `3ML`.
 ```python
 ba = BayesianAnalysis(model, DataList(gl))
 ba.set_sampler("emcee")
-ba.sampler.setup(n_iterations=400,n_burn_in = 100)
+ba.sampler.setup(n_iterations=400, n_burn_in=100)
 ba.sample()
 res = ba.results
 res

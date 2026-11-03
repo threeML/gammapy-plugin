@@ -41,7 +41,7 @@ tests = [
     "pytest-xdist",
     "filelock",
 ]
-flake = ["flake8"]
+all = ["gammapy_plugin[tests]"]
 
 [project.urls]
 Homepage = "https://github.com/threeML/gammapy-plugin"

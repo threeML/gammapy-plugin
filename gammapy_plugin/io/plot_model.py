@@ -10,6 +10,7 @@ if TYPE_CHECKING:
 
 def plot_model(
     datasets: "Datasets",
+    method: str = "diff",
     *args,
     **kwargs,
 ) -> "ResidualPlot":
@@ -37,9 +38,10 @@ def plot_model(
         y = y_unweighted / widths
         y /= datasets[i].gti.time_sum.to(u.s).value
 
-        residuals = (
-            datasets[i].counts.get_spectrum() - datasets[i].npred().get_spectrum()
-        ) / datasets[i].npred().get_spectrum()
+        counts_spec = datasets[i].counts.get_spectrum()
+        npred_spec = datasets[i].npred().get_spectrum()
+
+        residuals = datasets[i]._compute_residuals(counts_spec, npred_spec, method)
         residuals = residuals.data.reshape(-1)
 
         residual_plot.add_data(

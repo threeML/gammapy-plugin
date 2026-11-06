@@ -36,7 +36,7 @@ def test_extended_source_no_fov_bkg(rxj_test_data):
     try:
         target_position = SkyCoord.from_name("RX J1713.7-3946").galactic
     except NameResolveError:
-        target_position = SkyCoord(l=347.3355, b=-0.4727, frame="galactic", unit="deg")
+        target_position = SkyCoord(l=347.2695, b=-0.2569, frame="galactic", unit="deg")
 
     selection = {
         "type": "sky_circle",
@@ -178,7 +178,7 @@ def test_fov_bkg_model_setting(rxj_test_data):
     try:
         target_position = SkyCoord.from_name("RX J1713.7-3946").galactic
     except NameResolveError:
-        target_position = SkyCoord(l=347.3355, b=-0.4727, frame="galactic", unit="deg")
+        target_position = SkyCoord(l=347.2695, b=-0.2569, frame="galactic", unit="deg")
 
     datasets = rxj_test_data
     geom = datasets[0].geoms["geom"]

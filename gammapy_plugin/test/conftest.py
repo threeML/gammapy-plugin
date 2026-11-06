@@ -25,7 +25,7 @@ def produce_rxj_test_data():
     try:
         target_position = SkyCoord.from_name("RX J1713.7-3946").galactic
     except NameResolveError:
-        target_position = SkyCoord(l=347.3355, b=-0.4727, frame="galactic", unit="deg")
+        target_position = SkyCoord(l=347.2695, b=-0.2569, frame="galactic", unit="deg")
 
     selection = {
         "type": "sky_circle",

@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 
 from astromodels.core.model import Model
 from astromodels.sources import ExtendedSource, PointSource, Source
@@ -10,7 +9,9 @@ from gammapy_plugin.models import (
     SpatialModelConverted,
     SpectralModelConverted,
 )
-from gammapy_plugin.utils.gammapy_parser import parameter_to_gammapy_dict
+from gammapy_plugin.utils.gammapy_parser import (
+    parameter_to_gammapy_dict,
+)
 
 __all__ = ["AstromodelConverter", "SourceConverter"]
 
@@ -26,7 +27,7 @@ class AstromodelConverter:
     """
 
     def __init__(
-        self, model: Model, frame: Optional[str] = None, convert_ps: bool = True
+        self, model: Model, frame: str | None = None, convert_ps: bool = True
     ) -> None:
         """
         :param model: the astromodel model
@@ -36,9 +37,9 @@ class AstromodelConverter:
         :param convert_ps: convert PointSources to a PointSpatialModel, optional
         :type convert_ps: bool
         """
-        assert isinstance(
-            model, Model
-        ), "AstromodelConverter needs an astromodels Model"
+        assert isinstance(model, Model), (
+            "AstromodelConverter needs an astromodels Model"
+        )
         self._astromodel_model = model
         if frame is not None:
             self._frame = frame
@@ -75,13 +76,13 @@ class AstromodelConverter:
 
     def _create_gammapy_models_list(self) -> None:
         """Creates a list with all SkyModels fro the converted sources."""
-        for name, source in self._converted_sources.items():
+        for source in self._converted_sources.values():
             self._gammapy_models.append(source.skymodel)
 
     def _update_parameters(self) -> None:
         """Update all the parameters in the SkyModels with the values from the
         astromodels model using the underlying SourceConverters."""
-        for name, source in self._converted_sources.items():
+        for source in self._converted_sources.values():
             source._update_parameters()
 
     def update(self) -> None:
@@ -196,7 +197,9 @@ class SourceConverter:
 
         else:
             self._spectral_model = SpectralModelConverted(
-                self._source.components[list(self._source.components.keys())[0]].shape,
+                self._source.components[
+                    next(iter(self._source.components.keys()))
+                ].shape,
             )
 
     def _convert_spatial_model(self) -> None:

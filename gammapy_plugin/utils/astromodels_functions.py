@@ -63,8 +63,8 @@ class Log_parabola_gammapy(Function1D, metaclass=FunctionMeta):
 class Exp_cutoff_powerlaw_gammapy(Function1D, metaclass=FunctionMeta):
     r"""
     description :
-
         A exp cutoff  function.
+
     latex :
         $K\left(\frac{x}{piv}\right)^{-index}\exp{-(\lambda x)^\alpha}$
 
@@ -87,8 +87,8 @@ class Exp_cutoff_powerlaw_gammapy(Function1D, metaclass=FunctionMeta):
             desc : index
             initial value : 2.0
 
-        lambda_ :
-            desc : curvature (= 1/xc)
+        curv:
+            desc : curvature (= 1/xc) - also called lambda
             initial value : 0.1
 
         alpha :
@@ -107,12 +107,12 @@ class Exp_cutoff_powerlaw_gammapy(Function1D, metaclass=FunctionMeta):
 
         # alpha and beta are dimensionless
         self.alpha.unit = u.dimensionless_unscaled
-        self.lambda_.unit = 1 / x_unit
+        self.curv.unit = 1 / x_unit
         self.index.unit = u.dimensionless_unscaled
 
-    def evaluate(self, x, K, piv, index, lambda_, alpha):
+    def evaluate(self, x, K, piv, index, curv, alpha):
         # print("Receiving %s" % ([K, piv, alpha, beta]))
 
         xx = np.divide(x, piv)
-        xy = np.multiply(x, lambda_)
+        xy = np.multiply(x, curv)
         return K * np.power(xx, -index) * np.exp(-np.power(xy, alpha))

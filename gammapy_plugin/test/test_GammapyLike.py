@@ -2,6 +2,7 @@ import pytest
 from astromodels.core.model import Model
 from astromodels.functions import Powerlaw
 from astromodels.sources import PointSource
+from filelock import FileLock
 from gammapy.modeling.models import FoVBackgroundModel, SkyModel
 
 from gammapy_plugin.converter import AstromodelConverter
@@ -25,6 +26,19 @@ def test_set_datasets_list(rxj_test_data):
     gl_list = GammapyLike(name="list")
     datasets_list = [d for d in rxj_test_data]
     gl_list.set_datasets(datasets_list, mode="stacked")
+
+
+def test_set_datasets_file(rxj_test_data, tmp_path_factory, worker_id):
+    gl = GammapyLike(name="file")
+    root_tmp_dir = tmp_path_factory.getbasetemp().parent
+    fn = root_tmp_dir / "rxj.fits"
+    with FileLock(str(fn) + ".lock"):
+        if fn.is_file():
+            gl.set_datasets(fn)
+    gl_stacked = GammapyLike(name="file_stacked")
+    with FileLock(str(fn) + ".lock"):
+        if fn.is_file():
+            gl_stacked.set_datasets(fn, mode="stacked")
 
 
 def test_set_multiple_datasets(rxj_test_data):

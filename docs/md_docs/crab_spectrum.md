@@ -5,22 +5,26 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.17.3
+      jupytext_version: 1.19.5
   kernelspec:
-    display_name: threeML
+    display_name: Python 3 (ipykernel)
     language: python
     name: python3
-    
 ---
-# Spectrum Fitting 
+
+# Spectrum Fitting
 
 In this first basic example we will perform a basic spectral analysis of the Crab nebula
-using the public H.E.S.S. data release (already included in `gammapy`).
+using the public H.E.S.S. data release (easily accessable trough `gammapy`)
+and follow the `gammapy` documentation on 
+[spectral analysis](https://docs.gammapy.org/2.1/tutorials/analysis-1d/spectral_analysis.html)
+closely so we can compare the results.
 
 Let's get started by importing all the relevant stuff.
-
 ```python
-import astropy.units as u
+%matplotlib inline
+import matplotlib.pyplot as plt
+import astropy.units as u 
 from astropy.coordinates import Angle, SkyCoord
 
 from astromodels.core.model import Model
@@ -41,7 +45,7 @@ from gammapy.modeling.models import LogParabolaSpectralModel, SkyModel
 
 from regions import CircleSkyRegion
 
-from threeML import BayesianAnalysis
+from threeML import BayesianAnalysis,plot_spectra
 from threeML.data_list import DataList
 
 from gammapy_plugin.converter import AstromodelConverter
@@ -49,14 +53,7 @@ from gammapy_plugin.gammapy_like import GammapyLike
 from gammapy_plugin.test.utils import get_close
 ```
 
-We will now set the `astromodels` energy unit to `TeV`.
-This is a feature that requires `astromodels >= 2.5.1`
-
-```python
-get_units().energy = u.TeV
-```
-
-Alright perfect, let's continue by laoding the relevant data
+Let's start by laoding the relevant data
 
 ```python
 datastore = DataStore.from_dir("$GAMMAPY_DATA/hess-dl3-dr1/")
@@ -70,6 +67,7 @@ We perform a standard `gammapy`-workflow of creating a dataset
 - excluding the target region
 - creating our energy axis
 
+
 ```python
 target_position = SkyCoord(ra=83.63, dec=22.01, unit="deg", frame="icrs")
 
@@ -82,23 +80,24 @@ exclusion_region = CircleSkyRegion(
 
 skydir = target_position.galactic
 geom = WcsGeom.create(
-    npix=(250, 250), binsz=0.02, skydir=skydir, proj="TAN", frame="galactic"
+    npix=(150, 150), binsz=0.05, skydir=skydir, proj="TAN", frame="galactic"
 )
 
 exclusion_mask = ~geom.region_mask([exclusion_region])
 energy_axis = MapAxis.from_energy_bounds(
-    0.5, 40, nbin=10, per_decade=True, unit="TeV", name="energy"
+    0.1, 40, nbin=10, per_decade=True, unit="TeV", name="energy"
 )
 energy_axis_true = MapAxis.from_energy_bounds(
-    0.1, 100, nbin=20, per_decade=True, unit="TeV", name="energy_true"
+    0.05, 100, nbin=20, per_decade=True, unit="TeV", name="energy_true"
 )
 
 geom = RegionGeom.create(region=on_region, axes=[energy_axis])
 dataset_empty = SpectrumDataset.create(geom=geom, energy_axis_true=energy_axis_true)
 ```
 
-We now have everything to create our `makers` and run them.
-In this example we use a `ReflectedRegionsBackgroundMaker`
+We now have everything to create our `makers` and run them to get the result the 
+`gammapy-plugin` can use - the DL4 `Dataset`.
+In this example we use a `ReflectedRegionsBackgroundMaker` to estimate the background.
 
 ```python
 dataset_maker = SpectrumDatasetMaker(
@@ -114,12 +113,12 @@ for obs_id, observation in zip(obs_ids, observations):
     dataset_on_off = bkg_maker.run(dataset, observation)
     dataset_on_off = safe_mask_maker.run(dataset_on_off, observation)
     datasets.append(dataset_on_off)
-datasets_copy = datasets.copy()
 ```
+Now we have `Dataset` objects stored away in a `Datasets` object.
 
-Let's continue with the `threeML` steps
-- choosing and setting up a model
-
+Let's continue with the `threeML` steps:
+First lets choose and set up a model - we first initalize the spectral shape and
+assign it to the `PointSource` so that the units are already set in `astromodels`.
 
 ```python
 logp = Log_parabola()
@@ -129,32 +128,94 @@ ps = PointSource(
     dec=target_position.dec.deg,
     spectral_shape=logp,
 )
-logp.K.prior = Log_uniform_prior(lower_bound=1e-13, upper_bound=1e-9)
+logp.K.prior = Log_uniform_prior(lower_bound=1e-22, upper_bound=1e-18)  # this is in keV
 logp.K = 1e-11 * u.Unit("TeV-1 cm-2 s-1")
-logp.piv = 1 * u.TeV
+logp.piv = 1e9  # this is in keV
 logp.piv.free = False
-logp.alpha.prior = Uniform_prior(lower_bound=-3, upper_bound=-1)
+logp.alpha.prior = Uniform_prior(lower_bound=-5, upper_bound=5)
 logp.alpha = -2
-logp.beta.prior = Uniform_prior(lower_bound=0, upper_bound=2)
-logp.beta = 1
+logp.beta.prior = Uniform_prior(lower_bound=-2, upper_bound=2)
+logp.beta = 0.1
 
 model = Model(ps)
 ```
+Let's take a look at it:
+```python
+display(model)
+```
+Perfect we have one `PointSource` with a `Log_parabola` spectrum.
+Please be aware of the different definitions of a Logparabolas in `astromodels` and
+`gammapy`.
+
+Now we convert this model. Alternatively we can skip that part and let the
+`GammapyLike` deal with it by not supplying the `converted_model` in the `set_model()`
+method.
 
 ```python
-conv = AstromodelConverter(model, frame="galactic")
-gl = GammapyLike("hess", sources="crab")
-gl.set_datasets(datasets)
-gl.set_model(model, converted_model=conv)
+conv = AstromodelConverter(model)
+```
 
+Let's create our "hess" plugin and already set the sources (optional) to "crab".
+When setting the datsets we can either stick with the default "individual" mode
+or we can use the "stacked" mode - which will stack the dataset for us.
+That is equivalent to the `gammapy` joint vs. stacked analysis.
+
+```python
+gl = GammapyLike("hess", sources="crab")
+gl.set_datasets(datasets, "stacked")
+gl.set_model(model, converted_model=conv)
+```
+
+Nice :)
+We now initialize an `BayesianAnalysis` that links the model to the data and handles
+the sampling.
+We use `emcee` as a sampler which is always installed when installing `3ML`.
+
+```python
 ba = BayesianAnalysis(model, DataList(gl))
-ba.set_sampler("ultranest")
-ba.sampler.setup()
+ba.set_sampler("emcee")
+ba.sampler.setup(n_iterations=400, n_burn_in=100)
 ba.sample()
 res = ba.results
 res
 ```
 
+Perfect! It seems like it succeeded - let's take a look at the parameter distributions:
 ```python tags=["nbsphinx-thumbnail"]
-_ = res.corner_plot()
+res.corner_plot()
+```
+
+Since `threeML v2.6.0` we can also use `display_spectrum_model_counts` to see the
+modeled and observed count rate and the residuals.
+Please be aware that we calculate the [Li \& Ma](https://ui.adsabs.harvard.edu/abs/1983ApJ...272..317L)
+significance.
+
+The units of the count rates might be a bit unusual for IACT astronomers/astrophysicists ;)
+
+```python
+from threeML.io.plotting.post_process_data_plots import display_spectrum_model_counts
+
+display_spectrum_model_counts(ba)
+```
+Please be aware that this is not equivalent to the following, as the `3ML` one is plotting the total model as differential count flux (including background) while the gammapy `.plot_fit()` is dispalying the predicted signal excess.
+Additionally the residuals for `3ML` are given as deviance resiudals in units of $\sigma$.
+
+```python
+ax_spectrum, ax_residuals = gl.datasets[0].plot_fit()
+ax_spectrum.set_xlim(0.1, 40)
+plt.show()
+```
+
+Comparing it to the results and plots from the [`gammapy` documentation](https://docs.gammapy.org/2.1/tutorials/analysis-1d/spectral_analysis.html#fit-quality-and-model-residuals) it looks reasonably well :)
+
+And finally let's take a look at the spectrum with its 68\% Confidence Interval:
+```python
+plot_spectra(
+    ba.results,
+    energy_unit="TeV",
+    ene_min=0.1 * u.TeV,
+    ene_max=100 * u.TeV,
+    num_ene=100,
+    flux_unit=u.Unit("TeV m-2 s-1"),
+)
 ```

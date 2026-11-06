@@ -8,7 +8,6 @@ from gammapy_plugin.models import (
     PointSourceModelConverted,
     SpatialModelConverted,
     SpectralModelConverted,
-    TemporalModelConverted,
 )
 
 
@@ -20,7 +19,7 @@ def test_spectral_model_converted():
     spec = SpectralModelConverted(pl)
     x = 0.5 * u.TeV
     para_dict = {}
-    for k, v in pl.parameters.items():
+    for v in pl.parameters.values():
         para_dict[v.path] = v
     assert spec.evaluate(x, **para_dict) == pl(x)
     x = np.ones(10).reshape((2, 5)) * 0.5 * u.TeV
@@ -35,7 +34,7 @@ def test_spectral_model_converted():
     x = 0.5 * u.TeV
     para_dict = {}
     for pl_x in [pl1, pl2]:
-        for k, v in pl_x.parameters.items():
+        for v in pl_x.parameters.values():
             para_dict[v.path] = v
     assert spec_comps.evaluate(x, **para_dict) == pl1(x) + pl2(x)
     x = np.ones(10).reshape((2, 5)) * 0.5 * u.TeV
@@ -68,9 +67,3 @@ def test_point_spatial_model_converted():
     PointSourceModelConverted(sd, frame="icrs")
     with pytest.raises(NotImplementedError):
         PointSourceModelConverted(sd, frame="fk5")
-
-
-def test_temporal_model_converted():
-    with pytest.raises(NotImplementedError):
-        pl = Powerlaw()
-        TemporalModelConverted(pl)

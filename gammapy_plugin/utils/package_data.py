@@ -2,8 +2,8 @@ import importlib
 from pathlib import Path
 
 __all__ = [
-    "get_path_of_data_file",
     "get_path_of_data_dir",
+    "get_path_of_data_file",
 ]
 
 

@@ -1,8 +1,12 @@
+import logging
 from typing import TYPE_CHECKING
 
 import astropy.units as u
 import numpy as np
 from threeML.io.plotting.data_residual_plot import ResidualPlot
+from threeML.utils.statistics.stats_tools import Significance
+
+log = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from gammapy.datasets import Datasets
@@ -10,7 +14,6 @@ if TYPE_CHECKING:
 
 def plot_model(
     datasets: "Datasets",
-    method: str = "diff",
     *args,
     **kwargs,
 ) -> "ResidualPlot":
@@ -26,6 +29,10 @@ def plot_model(
         **kwargs,
     )
     for i in range(len(datasets)):
+        if datasets[i].stat_type != "wstat":
+            log.warning("Can only plot currently for datasets using wstat")
+            continue
+
         y_unweighted = datasets[i].counts.get_spectrum().data.reshape(-1)
         x = datasets[i].counts.geom.axes["energy"].as_plot_center.to("keV").value
         xerr = [
@@ -39,10 +46,16 @@ def plot_model(
         y /= datasets[i].gti.time_sum.to(u.s).value
 
         counts_spec = datasets[i].counts.get_spectrum()
-        npred_spec = datasets[i].npred().get_spectrum()
+        npred_bkg = datasets[i].npred_background().get_spectrum()
+        npred_signal = datasets[i].npred_signal().get_spectrum()
+        npred_spec = npred_bkg + npred_signal
 
-        residuals = datasets[i]._compute_residuals(counts_spec, npred_spec, method)
-        residuals = residuals.data.reshape(-1)
+        significance = Significance(
+            counts_spec.data.reshape(-1),
+            npred_spec.data.reshape(-1),
+            1.0,
+        )
+        residuals = significance.li_and_ma()
 
         residual_plot.add_data(
             x,

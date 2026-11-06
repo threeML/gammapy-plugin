@@ -1,6 +1,8 @@
 import logging
 
 import astropy.units as u
+from astropy.coordinates.name_resolve import NameResolveError
+
 import pytest
 from astropy.coordinates import Angle, SkyCoord
 from filelock import FileLock
@@ -20,15 +22,18 @@ log = logging.getLogger(__name__)
 
 def produce_rxj_test_data():
     datastore = DataStore.from_dir("$GAMMAPY_DATA/hess-dl3-dr1/")
-    target_position = SkyCoord.from_name("RX J1713.7-3946").galactic
+    try:
+        target_position = SkyCoord.from_name("RX J1713.7-3946").galactic
+    except NameResolveError:
+        target_position = SkyCoord(l=347.2695, b=-0.2569, frame="galactic", unit="deg")
 
-    selection = dict(
-        type="sky_circle",
-        frame="galactic",
-        lon=target_position.l,
-        lat=target_position.b,
-        radius="5deg",
-    )
+    selection = {
+        "type": "sky_circle",
+        "frame": "galactic",
+        "lon": target_position.l,
+        "lat": target_position.b,
+        "radius": "5deg",
+    }
     select_obs_tab = datastore.obs_table.select_observations(selection)
 
     obs = datastore.get_observations(select_obs_tab["OBS_ID"])
@@ -82,13 +87,13 @@ def rxj_test_data(tmp_path_factory, worker_id):
 
 def produce_crab_test_data():
     datastore = DataStore.from_dir("$GAMMAPY_DATA/hess-dl3-dr1/")
-    selection = dict(
-        type="sky_circle",
-        frame="icrs",
-        lon="83.633 deg",
-        lat="22.014 deg",
-        radius="5 deg",
-    )
+    selection = {
+        "type": "sky_circle",
+        "frame": "icrs",
+        "lon": "83.633 deg",
+        "lat": "22.014 deg",
+        "radius": "5 deg",
+    }
     selected_obs_table = datastore.obs_table.select_observations(selection)
     observations = datastore.get_observations(selected_obs_table["OBS_ID"])
     target_position = SkyCoord(ra=83.63, dec=22.01, unit="deg", frame="icrs")
@@ -147,20 +152,25 @@ def crab_test_data(tmp_path_factory, worker_id):
 
 def produce_pks2155304_test_data():
     datastore = DataStore.from_dir("$GAMMAPY_DATA/hess-dl3-dr1/")
-    selection = dict(
-        type="sky_circle",
-        frame="icrs",
-        lon="329.72 deg",
-        lat="-30.22 deg",
-        radius="5 deg",
-    )
+    selection = {
+        "type": "sky_circle",
+        "frame": "icrs",
+        "lon": "329.72 deg",
+        "lat": "-30.22 deg",
+        "radius": "5 deg",
+    }
     selected_obs_table = datastore.obs_table.select_observations(selection)
     selected_obs_table = selected_obs_table[
         selected_obs_table["TARGET_NAME"] == "PKS 2155-304 (steady)"
     ]
 
     observations = datastore.get_observations(selected_obs_table["OBS_ID"])
-    target_position = SkyCoord.from_name("PKS 2155-304")
+    try:
+        target_position = SkyCoord.from_name("PKS 2155-304")
+    except NameResolveError:
+        target_position = SkyCoord(
+            l=17.7373, b=-52.2477, frame="galactic", unit="deg"
+        ).transform_to("icrs")
 
     on_region_radius = Angle("0.125 deg")
     on_region = CircleSkyRegion(

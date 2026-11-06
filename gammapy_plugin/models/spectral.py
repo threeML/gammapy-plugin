@@ -33,14 +33,10 @@ class SpectralModelConverted(SpectralModel):
                 temp_y = self._astromodel_function.y_unit
 
             self._x_unit = (
-                _conversion_list[temp_x][1]
-                if temp_x in _conversion_list.keys()
-                else temp_x
+                _conversion_list[temp_x][1] if temp_x in _conversion_list else temp_x
             )
             self._y_unit = (
-                _conversion_list[temp_y][1]
-                if temp_y in _conversion_list.keys()
-                else temp_y
+                _conversion_list[temp_y][1] if temp_y in _conversion_list else temp_y
             )
 
             self._components_parameters = list(
@@ -62,7 +58,7 @@ class SpectralModelConverted(SpectralModel):
                     if x_unit is None and f.x_unit is not None:
                         x_unit = (
                             _conversion_list[f.x_unit][1]
-                            if f.x_unit in _conversion_list.keys()
+                            if f.x_unit in _conversion_list
                             else f.x_unit
                         )
                     elif x_unit is not None and f.x_unit is not None:
@@ -75,14 +71,14 @@ class SpectralModelConverted(SpectralModel):
                 else:
                     x_unit = (
                         _conversion_list[f._requested_x_unit][1]
-                        if f._requested_x_unit in _conversion_list.keys()
+                        if f._requested_x_unit in _conversion_list
                         else f._requested_x_unit
                     )
                 if not hasattr(f, "_requested_y_unit"):
                     if y_unit is None and f.y_unit is not None:
                         y_unit = (
                             _conversion_list[f.y_unit][1]
-                            if f.y_unit in _conversion_list.keys()
+                            if f.y_unit in _conversion_list
                             else f.y_unit
                         )
                     elif y_unit is not None and f.y_unit is not None:
@@ -95,7 +91,7 @@ class SpectralModelConverted(SpectralModel):
                 else:
                     y_unit = (
                         _conversion_list[f._requested_y_unit][1]
-                        if f._requested_y_unit in _conversion_list.keys()
+                        if f._requested_y_unit in _conversion_list
                         else f._requested_y_unit
                     )
 
@@ -127,7 +123,7 @@ class SpectralModelConverted(SpectralModel):
         self._mapping_free = {}
         parameter_dict = self._components_parameters
         for v in parameter_dict:
-            if v.unit in _conversion_list.keys():
+            if v.unit in _conversion_list:
                 unit = _conversion_list[v.unit][1]
                 factor = _conversion_list[v.unit][0]
             else:

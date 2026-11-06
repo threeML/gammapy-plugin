@@ -76,13 +76,13 @@ class AstromodelConverter:
 
     def _create_gammapy_models_list(self) -> None:
         """Creates a list with all SkyModels fro the converted sources."""
-        for name, source in self._converted_sources.items():
+        for source in self._converted_sources.values():
             self._gammapy_models.append(source.skymodel)
 
     def _update_parameters(self) -> None:
         """Update all the parameters in the SkyModels with the values from the
         astromodels model using the underlying SourceConverters."""
-        for name, source in self._converted_sources.items():
+        for source in self._converted_sources.values():
             source._update_parameters()
 
     def update(self) -> None:
@@ -197,7 +197,9 @@ class SourceConverter:
 
         else:
             self._spectral_model = SpectralModelConverted(
-                self._source.components[list(self._source.components.keys())[0]].shape,
+                self._source.components[
+                    next(iter(self._source.components.keys()))
+                ].shape,
             )
 
     def _convert_spatial_model(self) -> None:

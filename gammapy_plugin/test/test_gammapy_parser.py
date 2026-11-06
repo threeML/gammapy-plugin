@@ -45,9 +45,9 @@ def test_parse_gammapy_model():
         if v.min_value is not None:
             assert v.min_value == pl.parameters[pn].min
         else:
-            assert pl.parameters[pn].min is np.nan
+            assert np.isnan(pl.parameters[pn].min)
         if v.max_value is not None:
             assert v.max_value == pl.parameters[pn].max
         else:
-            assert pl.parameters[pn].max is np.nan
+            assert np.isnan(pl.parameters[pn].max)
         assert v.free is not pl.parameters[pn].frozen

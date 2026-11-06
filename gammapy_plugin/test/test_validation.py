@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+from astropy.coordinates.name_resolve import NameResolveError
 from astromodels.core.model import Model
 from astromodels.functions import Log_uniform_prior, Powerlaw, Uniform_prior
 from astromodels.sources import PointSource
@@ -12,8 +13,12 @@ from gammapy_plugin.gammapy_like import GammapyLike
 
 def test_crab_spectrum(crab_test_data, tmp_path):
     _ = pytest.importorskip("ultranest")
-
-    position = SkyCoord.from_name("Crab")
+    try:
+        position = SkyCoord.from_name("Crab")
+    except NameResolveError:
+        position = SkyCoord(
+            l=184.5572, b=-5.7888, frame="galactic", unit="deg"
+        ).transform_to("icrs")
     pl = Powerlaw()
     ps = PointSource(
         "crab", ra=position.ra.deg, dec=position.dec.deg, spectral_shape=pl
@@ -49,8 +54,13 @@ def test_crab_spectrum(crab_test_data, tmp_path):
 
 def test_pks2155304_spectrum(pks2155304_test_data, tmp_path):
     _ = pytest.importorskip("ultranest")
+    try:
+        position = SkyCoord.from_name("PKS 2155-304")
+    except NameResolveError:
+        position = SkyCoord(
+            l=17.7373, b=-52.2477, frame="galactic", unit="deg"
+        ).transform_to("icrs")
 
-    position = SkyCoord.from_name("PKS 2155-304")
     pl = Powerlaw()
     ps = PointSource("pks", ra=position.ra.deg, dec=position.dec.deg, spectral_shape=pl)
     pl.K.prior = Log_uniform_prior(lower_bound=1e-25, upper_bound=1e-19)

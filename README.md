@@ -21,16 +21,14 @@ either on [readthedocs](https://gammapy-plugin.readthedocs.io/en/latest/) or on 
 The following should be sufficient and install all the relevant dependencies.
 
 ```bash
-git clone https://github.com/threeML/gammapy-plugin.git
-cd gammapy-plugin
-pip install .
+pip install gammapy-plugin
 ```
 
 You can test the installation using `pytest`. To get all the dependencies it is
 recommeneded to run 
 ```bash
 # install test dependenices
-pip install gammapy_plugin[tests]
+pip install gammapy-plugin[tests]
 
 # equivalent to gammapy download datasets
 export GAMMAPY_DATA=/path/to/gammapy_datasets/

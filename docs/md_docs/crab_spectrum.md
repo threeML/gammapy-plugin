@@ -15,10 +15,12 @@ jupyter:
 # Spectrum Fitting
 
 In this first basic example we will perform a basic spectral analysis of the Crab nebula
-using the public H.E.S.S. data release (already included in `gammapy`) and follow the `gammapy` documentation on [spectral analysis](https://docs.gammapy.org/2.1/tutorials/analysis-1d/spectral_analysis.html) closely so we can compare the results.
+using the public H.E.S.S. data release (easily accessable trough `gammapy`)
+and follow the `gammapy` documentation on 
+[spectral analysis](https://docs.gammapy.org/2.1/tutorials/analysis-1d/spectral_analysis.html)
+closely so we can compare the results.
 
 Let's get started by importing all the relevant stuff.
-
 ```python
 %matplotlib inline
 import matplotlib.pyplot as plt
@@ -43,7 +45,7 @@ from gammapy.modeling.models import LogParabolaSpectralModel, SkyModel
 
 from regions import CircleSkyRegion
 
-from threeML import BayesianAnalysis
+from threeML import BayesianAnalysis,plot_spectra
 from threeML.data_list import DataList
 
 from gammapy_plugin.converter import AstromodelConverter
@@ -64,6 +66,7 @@ We perform a standard `gammapy`-workflow of creating a dataset
 - setting as target
 - excluding the target region
 - creating our energy axis
+
 
 ```python
 target_position = SkyCoord(ra=83.63, dec=22.01, unit="deg", frame="icrs")
@@ -92,8 +95,9 @@ geom = RegionGeom.create(region=on_region, axes=[energy_axis])
 dataset_empty = SpectrumDataset.create(geom=geom, energy_axis_true=energy_axis_true)
 ```
 
-We now have everything to create our `makers` and run them.
-In this example we use a `ReflectedRegionsBackgroundMaker`
+We now have everything to create our `makers` and run them to get the result the 
+`gammapy-plugin` can use - the DL4 `Dataset`.
+In this example we use a `ReflectedRegionsBackgroundMaker` to estimate the background.
 
 ```python
 dataset_maker = SpectrumDatasetMaker(
@@ -109,8 +113,8 @@ for obs_id, observation in zip(obs_ids, observations):
     dataset_on_off = bkg_maker.run(dataset, observation)
     dataset_on_off = safe_mask_maker.run(dataset_on_off, observation)
     datasets.append(dataset_on_off)
-datasets_copy = datasets.copy()
 ```
+Now we have `Dataset` objects stored away in a `Datasets` object.
 
 Let's continue with the `threeML` steps:
 First lets choose and set up a model - we first initalize the spectral shape and
@@ -139,11 +143,9 @@ Let's take a look at it:
 ```python
 display(model)
 ```
-
 Perfect we have one `PointSource` with a `Log_parabola` spectrum.
-Please be aware of the different defintions of a Logparabolas in `astromodels` and
+Please be aware of the different definitions of a Logparabolas in `astromodels` and
 `gammapy`.
-
 
 Now we convert this model. Alternatively we can skip that part and let the
 `GammapyLike` deal with it by not supplying the `converted_model` in the `set_model()`
@@ -156,6 +158,8 @@ conv = AstromodelConverter(model)
 Let's create our "hess" plugin and already set the sources (optional) to "crab".
 When setting the datsets we can either stick with the default "individual" mode
 or we can use the "stacked" mode - which will stack the dataset for us.
+That is equivalent to the `gammapy` joint vs. stacked analysis.
+
 ```python
 gl = GammapyLike("hess", sources="crab")
 gl.set_datasets(datasets, "stacked")
@@ -183,18 +187,35 @@ res.corner_plot()
 
 Since `threeML v2.6.0` we can also use `display_spectrum_model_counts` to see the
 modeled and observed count rate and the residuals.
-The units might be a bit unusual for IACT astronomers/astrophysicists ;)
+Please be aware that we calculate the [Li \& Ma](https://ui.adsabs.harvard.edu/abs/1983ApJ...272..317L)
+significance.
+
+The units of the count rates might be a bit unusual for IACT astronomers/astrophysicists ;)
+
 ```python
 from threeML.io.plotting.post_process_data_plots import display_spectrum_model_counts
 
 display_spectrum_model_counts(ba)
 ```
-Please be aware that this is not fully equivalent to the following, as the `3ML` one is plotting the total model as differential count flux (including background) while the gammapy `.plot_fit()` is dispalying the predicted signal excess.
+Please be aware that this is not equivalent to the following, as the `3ML` one is plotting the total model as differential count flux (including background) while the gammapy `.plot_fit()` is dispalying the predicted signal excess.
+Additionally the residuals for `3ML` are given as deviance resiudals in units of $\sigma$.
 
 ```python
 ax_spectrum, ax_residuals = gl.datasets[0].plot_fit()
-ax_spectrum.set_ylim(0.1, 40)
+ax_spectrum.set_xlim(0.1, 40)
 plt.show()
 ```
 
 Comparing it to the results and plots from the [`gammapy` documentation](https://docs.gammapy.org/2.1/tutorials/analysis-1d/spectral_analysis.html#fit-quality-and-model-residuals) it looks reasonably well :)
+
+And finally let's take a look at the spectrum with its 68\% Confidence Interval:
+```python
+plot_spectra(
+    ba.results,
+    energy_unit="TeV",
+    ene_min=0.1 * u.TeV,
+    ene_max=100 * u.TeV,
+    num_ene=100,
+    flux_unit=u.Unit("TeV m-2 s-1"),
+)
+```

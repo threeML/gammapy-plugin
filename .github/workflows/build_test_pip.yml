@@ -33,7 +33,7 @@ jobs:
                   do_not_skip: '["pull_request",  "schedule"]'
 
   test-dev:
-    name: Build and Test gammapy@main (${{ matrix.os}}, Python ${{ matrix.python-version}})
+    name: Build and Test latest (${{ matrix.os}}, Python ${{ matrix.python-version}})
     needs: skip_duplicate
     runs-on: ${{ matrix.os }}
     strategy:
@@ -56,11 +56,12 @@ jobs:
           cache: pip
       - name: Install dependencies
         run: |
-          pip install --upgrade --pre astromodels 
-          pip install --upgrade --pre threeML
-          pip install -e ".[all]"
+          pip install --upgrade --pre git+https://github.com/threeML/astromodels.git@dev
+          pip install --upgrade --pre git+https://github.com/threeML/threeML.git@dev
           pip install --upgrade git+https://github.com/gammapy/gammapy.git@main
           pip install --upgrade ultranest
+
+          pip install -e ".[all]"
 
       - name: List installed packages
         run: |

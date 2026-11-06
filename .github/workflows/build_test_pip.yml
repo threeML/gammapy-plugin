@@ -39,7 +39,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["ubuntu-latest"]
+        os: ["ubuntu-latest","macos-latest"]
         python-version: ["3.12","3.13"]
         gammapy_data: ["/home/runner/work/gammapy_data"]
 
@@ -87,7 +87,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["ubuntu-latest"]
+        os: ["ubuntu-latest","macos-latest"]
         python-version: ["3.12","3.13"]
         gammapy_data: ["/home/runner/work/gammapy_data"]
        

@@ -1,6 +1,7 @@
 from warnings import warn
 
 import astropy.units as u
+from astropy.coordinates.name_resolve import NameResolveError
 import numpy as np
 from astromodels.core.model import Model
 from astromodels.functions import (
@@ -32,7 +33,10 @@ from gammapy_plugin.gammapy_like import GammapyLike
 
 def test_extended_source_no_fov_bkg(rxj_test_data):
     datastore = DataStore.from_dir("$GAMMAPY_DATA/hess-dl3-dr1/")
-    target_position = SkyCoord.from_name("RX J1713.7-3946").galactic
+    try:
+        target_position = SkyCoord.from_name("RX J1713.7-3946").galactic
+    except NameResolveError:
+        target_position = SkyCoord(l=347.3355, b=-0.4727, frame="galactic", unit="deg")
 
     selection = {
         "type": "sky_circle",
@@ -171,7 +175,10 @@ def test_extended_source_no_fov_bkg(rxj_test_data):
 
 
 def test_fov_bkg_model_setting(rxj_test_data):
-    target_position = SkyCoord.from_name("RX J1713.7-3946").galactic
+    try:
+        target_position = SkyCoord.from_name("RX J1713.7-3946").galactic
+    except NameResolveError:
+        target_position = SkyCoord(l=347.3355, b=-0.4727, frame="galactic", unit="deg")
 
     datasets = rxj_test_data
     geom = datasets[0].geoms["geom"]

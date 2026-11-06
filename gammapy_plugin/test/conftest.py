@@ -1,6 +1,8 @@
 import logging
 
 import astropy.units as u
+from astropy.coordinates.name_resolve import NameResolveError
+
 import pytest
 from astropy.coordinates import Angle, SkyCoord
 from filelock import FileLock
@@ -20,7 +22,10 @@ log = logging.getLogger(__name__)
 
 def produce_rxj_test_data():
     datastore = DataStore.from_dir("$GAMMAPY_DATA/hess-dl3-dr1/")
-    target_position = SkyCoord.from_name("RX J1713.7-3946").galactic
+    try:
+        target_position = SkyCoord.from_name("RX J1713.7-3946").galactic
+    except NameResolveError:
+        target_position = SkyCoord(l=347.3355, b=-0.4727, frame="galactic", unit="deg")
 
     selection = {
         "type": "sky_circle",
@@ -160,7 +165,12 @@ def produce_pks2155304_test_data():
     ]
 
     observations = datastore.get_observations(selected_obs_table["OBS_ID"])
-    target_position = SkyCoord.from_name("PKS 2155-304")
+    try:
+        target_position = SkyCoord.from_name("PKS 2155-304")
+    except NameResolveError:
+        target_position = SkyCoord(
+            l=17.7373, b=-52.2477, frame="galactic", unit="deg"
+        ).transform_to("icrs")
 
     on_region_radius = Angle("0.125 deg")
     on_region = CircleSkyRegion(

@@ -41,7 +41,7 @@ jobs:
       matrix:
         os: ["ubuntu-latest","macos-latest"]
         python-version: ["3.12","3.13"]
-        gammapy_data: ["/home/runner/work/gammapy_data"]
+        gammapy_data: ["~/work/gammapy_data"]
 
     if: ${{ needs.skip_duplicate.outputs.should_skip != 'true' && ((github.event_name == 'push' && github.ref == 'refs/heads/dev') || (github.event_name == 'pull_request' && github.base_ref == 'dev')) }} 
 

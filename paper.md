@@ -20,6 +20,8 @@ bibliography: paper.bib
 ---
 
 # Summary
+gammapy-plugin provides a plugin for the 3ML framework which enables joint Multi-Mission
+analysis of Very High Energy data via the state-of-the-art software in this field, gammapy.
 
 # Statement of need
 Often MWL analysis of astrophysical sources rely on fitting flux points derived for
@@ -55,7 +57,17 @@ In the case of the gammapy-plugin those steps are fully performed by gammapy its
 The main task of this plugin is to convert the astromodel model into a gammapy model
 and updating the parameters in the latter when they get changed during the fitting process.
 
-Additionally the gammapy-plugin provides a 
+Joint multiwavelength analysis in astrophysics plays a crucial role in constraining and
+determining e.g. different emission mechanisms.
+As different models can often reproduce similar observations, systematics from e.g. using
+flux points produced for a different model, as little uncertainties as possible are 
+required to determine the best fitting model.
+
+While there exist solutions using a Common Data Format like OGIP to included other observations
+directly in gammapy, 3ML uses the approach of providing a common interface to the official instrument
+softwares.
+This enables the user to not make any sacrifices 
+
 
 # Research impact statement
 This will plugin allows e.g. for joint analysis of IACT data with the native HAL plugin 

@@ -2,10 +2,9 @@ import logging
 
 import astropy.units as u
 import numpy as np
-from astropy.coordinates.name_resolve import NameResolveError
-
 import pytest
 from astropy.coordinates import Angle, SkyCoord
+from astropy.coordinates.name_resolve import NameResolveError
 from filelock import FileLock
 from gammapy.data import DataStore
 from gammapy.datasets import Datasets, MapDataset, SpectrumDataset

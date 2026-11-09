@@ -30,14 +30,15 @@ You can test the installation using `pytest`. To get all the dependencies it is
 recommeneded to run 
 ```bash
 # install test dependenices
-pip install gammapy_plugin[tests]
+pip install "gammapy_plugin[tests]"
 
-# equivalent to gammapy download datasets
+# equivalent to gammapy download datasets - no need to do that if you already have them
+# downloaded and stored in  $GAMMAPY_DATA
 export GAMMAPY_DATA=/path/to/gammapy_datasets/
 git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
 
 # run pytests
-python -m pytest -n auto --dist worksteal gammapy_plugin
+python -m pytest --pyargs gammapy_plugin -n auto --dist worksteal 
 ```
 
 The first part is equivalent to running `gammapy download datasets` [(see the `gammapy` installation

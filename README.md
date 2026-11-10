@@ -1,8 +1,8 @@
 [![CI](https://github.com/threeML/gammapy-plugin/actions/workflows/build_test_pip.yml/badge.svg?branch=main)](https://github.com/threeML/gammapy-plugin/actions/workflows/build_test_pip.yml)
-[![Docs](https://app.readthedocs.org/projects/gammapy-plugin/badge/?version=latest&style=flat)](https://gammapy-plugin.readthedocs.io/en/latest/)
 [![codecov](https://codecov.io/github/threeML/gammapy-plugin/graph/badge.svg?token=EGG9OUMT9J)](https://codecov.io/github/threeML/gammapy-plugin)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/threeML/gammapy-plugin/main.svg)](https://results.pre-commit.ci/latest/github/threeML/gammapy-plugin/main)
+[![Docs](https://img.shields.io/readthedocs/gammapy-plugin/latest)](https://gammapy-plugin.readthedocs.io/en/latest/)
 
 # Gammapy Plugin
 ![A gammapy plugin for threeML](docs/_static/banner-dark.svg)
@@ -21,9 +21,7 @@ either on [readthedocs](https://gammapy-plugin.readthedocs.io/en/latest/) or on 
 The following should be sufficient and install all the relevant dependencies.
 
 ```bash
-git clone https://github.com/threeML/gammapy-plugin.git
-cd gammapy-plugin
-pip install .
+pip install gammapy-plugin
 ```
 
 You can test the installation using `pytest`. To get all the dependencies it is

@@ -53,7 +53,7 @@ Issues = "https://github.com/threeML/gammapy-plugin/issues"
 include-package-data = true
 
 [tool.setuptools.packages.find]
-include = ["gammapy_plugin"]
+include = ["gammapy_plugin", "gammapy_plugin.*"]
 
 [tool.setuptools.package-data]
 "gammapy_plugin.data.datasets" =  ["*.py","*.fits"]

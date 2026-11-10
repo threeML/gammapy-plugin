@@ -3,6 +3,9 @@
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/threeML/gammapy-plugin/main.svg)](https://results.pre-commit.ci/latest/github/threeML/gammapy-plugin/main)
 [![Docs](https://img.shields.io/readthedocs/gammapy-plugin/latest)](https://gammapy-plugin.readthedocs.io/en/latest/)
+---
+![PyPI Version](https://img.shields.io/pypi/v/gammapy-plugin)
+
 
 # Gammapy Plugin
 ![A gammapy plugin for threeML](docs/_static/banner-dark.svg)

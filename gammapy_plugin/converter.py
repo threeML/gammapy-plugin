@@ -193,6 +193,7 @@ class SourceConverter:
         if len(self._source.components.keys()) > 1:
             self._spectral_model = SpectralModelConverted(
                 [x.shape for x in self._source.components.values()],
+                am_model=self._converter._astromodel_model,
             )
 
         else:
@@ -200,6 +201,7 @@ class SourceConverter:
                 self._source.components[
                     next(iter(self._source.components.keys()))
                 ].shape,
+                am_model=self._converter._astromodel_model,
             )
 
     def _convert_spatial_model(self) -> None:

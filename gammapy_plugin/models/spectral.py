@@ -1,13 +1,16 @@
 import logging
 
 import numpy as np
+from astromodels.core.model import Model
+from astromodels.core.parameter_transformation import LogarithmicTransformation
 from astromodels.functions.function import Function
 from gammapy.modeling.models import (
     SpectralModel,
 )
-from gammapy.modeling.parameter import Parameter, Parameters
 
 from gammapy_plugin.utils.gammapy_parser import _conversion_list
+
+from .parameters import ParametersWrapped, ParameterWrapped
 
 log = logging.getLogger(__name__)
 
@@ -18,9 +21,10 @@ class SpectralModelConverted(SpectralModel):
 
     tag = ["SpectralModelConverted", "spec_conv"]
 
-    def __init__(self, function: Function | list, **kwargs) -> None:
+    def __init__(self, function: Function | list, am_model: Model, **kwargs) -> None:
 
         self._components_parameters = None
+        self._am_model = am_model
         if isinstance(function, Function):
             self._astromodel_function = function
             self._components = None
@@ -124,11 +128,10 @@ class SpectralModelConverted(SpectralModel):
         parameter_dict = self._components_parameters
         for v in parameter_dict:
             if v.unit in _conversion_list:
-                unit = _conversion_list[v.unit][1]
-                factor = _conversion_list[v.unit][0]
+                _conversion_list[v.unit][1]
+                _conversion_list[v.unit][0]
             else:
-                unit = v.unit
-                factor = 1.0
+                pass
             vmin = np.nan
             vmax = np.nan
             if v.min_value is not None:
@@ -138,18 +141,26 @@ class SpectralModelConverted(SpectralModel):
             self._mapping[v.path] = v.path
             if v.free:
                 self._mapping_free[v.path] = v.path
+
+            if v.has_transformation:
+                if isinstance(v.transformation, LogarithmicTransformation):
+                    interp = "log"
+
             paras.append(
-                Parameter(
+                ParameterWrapped(
                     name=v.path,
-                    value=v.value * factor,
-                    unit=unit,
-                    min=vmin * factor,
-                    max=vmax * factor,
+                    value=v.value,
+                    unit=v.unit,
+                    min=vmin,
+                    max=vmax,
                     frozen=not bool(v.free),
+                    astromodels_model=self._am_model,
+                    astromodels_factor=1.0,
+                    interp=interp,
                 )
             )
             setattr(self, v.path, paras[-1])
-        self.default_parameters = Parameters(paras)
+        self.default_parameters = ParametersWrapped(paras)
 
     def evaluate(self, energy, **kwargs):
         """Evaluates the astromodels function instead of a gammapy one."""

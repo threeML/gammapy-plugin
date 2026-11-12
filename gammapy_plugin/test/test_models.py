@@ -1,8 +1,10 @@
 import astropy.units as u
 import numpy as np
 import pytest
+from astromodels.core.model import Model
 from astromodels.core.sky_direction import SkyDirection
 from astromodels.functions import Gaussian_on_sphere, Powerlaw
+from astromodels.sources import PointSource
 
 from gammapy_plugin.models import (
     PointSourceModelConverted,
@@ -15,8 +17,12 @@ def test_spectral_model_converted():
     pl = Powerlaw()
     with pytest.raises(ValueError):
         SpectralModelConverted(pl)
+    with pytest.raises(TypeError):
+        spec = SpectralModelConverted(pl)
+    ps = PointSource("test", ra=0, dec=0, spectral_shape=pl)
     pl.set_units(u.TeV, u.Unit("TeV-1 cm-2 s-1"))
-    spec = SpectralModelConverted(pl)
+    model = Model(ps)
+    spec = SpectralModelConverted(pl, am_model=model)
     x = 0.5 * u.TeV
     para_dict = {}
     for v in pl.parameters.values():
@@ -57,8 +63,10 @@ def test_spatial_model_converted():
     gauss = Gaussian_on_sphere()
     from astromodels.core.parameter_transformation import LogarithmicTransformation
 
+    gauss.sigma.value = 1.0
     gauss.sigma._transformation = LogarithmicTransformation()
     SpatialModelConverted(gauss)
+    # FIXME:
 
 
 def test_point_spatial_model_converted():

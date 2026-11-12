@@ -9,7 +9,8 @@ from gammapy.modeling.models import (
     PointSpatialModel,
     SpatialModel,
 )
-from gammapy.modeling.parameter import Parameter, Parameters
+
+from .parameters import ParametersWrapped, ParameterWrapped
 
 log = logging.getLogger(__name__)
 
@@ -41,6 +42,7 @@ class SpatialModelConverted(SpatialModel):
             frame = "icrs"
         self._frame = frame
         self.frame = self._frame
+        self._am_model = None
         self._setup_parameters()
         super().__init__()
 
@@ -65,7 +67,7 @@ class SpatialModelConverted(SpatialModel):
             if isinstance(v.transformation, LogarithmicTransformation):
                 interp = "log"
             paras.append(
-                Parameter(
+                ParameterWrapped(
                     name=v.name,
                     value=v.value,
                     unit=v.unit,
@@ -73,10 +75,11 @@ class SpatialModelConverted(SpatialModel):
                     max=vmax,
                     frozen=not bool(v.free),
                     interp=interp,
+                    astromodels_model=self._am_model,
                 )
             )
             setattr(self, v.name, paras[-1])
-        self.default_parameters = Parameters(paras)
+        self.default_parameters = ParametersWrapped(paras)
 
     # todo check return type
     def evaluate(self, *args, **kwargs):
@@ -133,15 +136,15 @@ class PointSourceModelConverted(PointSpatialModel):
             self._mapping[v.path] = para_name
             if v.free:
                 self._mapping_free[v.path] = para_name
-        lon_0 = Parameter(
+        lon_0 = ParameterWrapped(
             name="lon_0", value=lon.value, unit=lon.unit, frozen=not lon_free
         )
-        lat_0 = Parameter(
+        lat_0 = ParameterWrapped(
             name="lat_0", value=lat.value, unit=lat.unit, frozen=not lat_free
         )
         self.lon_0 = lon_0
         self.lat_0 = lat_0
-        self.default_parameters = Parameters([lon_0, lat_0])
+        self.default_parameters = ParametersWrapped([lon_0, lat_0])
         log.debug(f"Set parameters to be {lon_0} and {lat_0}")
 
     @property

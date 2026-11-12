@@ -142,9 +142,10 @@ class SpectralModelConverted(SpectralModel):
             if v.free:
                 self._mapping_free[v.path] = v.path
 
-            if v.has_transformation:
-                if isinstance(v.transformation, LogarithmicTransformation):
-                    interp = "log"
+            if v.has_transformation and isinstance(
+                v.transformation, LogarithmicTransformation
+            ):
+                interp = "log"
 
             paras.append(
                 ParameterWrapped(

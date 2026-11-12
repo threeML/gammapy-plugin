@@ -17,10 +17,28 @@ def test_gammapy_fit(crab_test_data):
 
     pl = Powerlaw()
     ps = PointSource("crab", spectral_shape=pl, ra=83.63, dec=22.01)
+    pl.piv.value = 1e9
+    pl.index.min_value = 1
+    pl.index.max_value = 4
+
+    pl.index.value = 2.0
+    pl.K.value = 1e-21
+    pl.K.min_value = 1e-22
+    pl.K.max_value = 1e-18
     model = Model(ps)
     conv = AstromodelConverter(model)
 
-    datasets.models = [conv.gammapy_models[0]]  # using ReflectedRegionsBackground
+    datasets.models = conv.gammapy_models
+    print(datasets.stat_sum())
+    conv.update()
+
+    datasets.parameters.autoscale()
+    print(datasets.stat_sum())
+    conv.update()
+
+    datasets.parameters.set_parameter_factors([0.9, 0.9])
+    print(datasets.stat_sum())
+    conv.update()
 
     fit = Fit()
     result = fit.run(datasets=datasets)
@@ -65,7 +83,7 @@ def test_xspec_wrapping(crab_test_data):
     conv = AstromodelConverter(model)
     datasets.models = [conv.gammapy_models[0]]  # using ReflectedRegionsBackground
     fit = Fit()
-    result = fit.run(datasets=datasets)
+    fit.run(datasets=datasets)
 
     spectral_model = PowerLawSpectralModel(
         amplitude=100 * u.Unit("cm-2 s-1 keV-1"),
@@ -77,4 +95,4 @@ def test_xspec_wrapping(crab_test_data):
     datasets_gp.models = [model_gp]
 
     fit_joint = Fit()
-    result_joint = fit_joint.run(datasets=datasets_gp)
+    fit_joint.run(datasets=datasets_gp)

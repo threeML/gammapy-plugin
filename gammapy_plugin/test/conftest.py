@@ -1,10 +1,10 @@
 import logging
 
 import astropy.units as u
-from astropy.coordinates.name_resolve import NameResolveError
-
+import numpy as np
 import pytest
 from astropy.coordinates import Angle, SkyCoord
+from astropy.coordinates.name_resolve import NameResolveError
 from filelock import FileLock
 from gammapy.data import DataStore
 from gammapy.datasets import Datasets, MapDataset, SpectrumDataset
@@ -18,6 +18,13 @@ from gammapy.maps import MapAxis, RegionGeom, WcsGeom
 from regions import CircleSkyRegion
 
 log = logging.getLogger(__name__)
+
+
+@pytest.fixture(scope="function", autouse=True)
+def reset_random_seed():
+    # Reset the random seed so the results of the tests using
+    # random numbers are actually predictable
+    np.random.seed(1234)
 
 
 def produce_rxj_test_data():

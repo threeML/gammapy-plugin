@@ -3,6 +3,9 @@
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/threeML/gammapy-plugin/main.svg)](https://results.pre-commit.ci/latest/github/threeML/gammapy-plugin/main)
 [![Docs](https://img.shields.io/readthedocs/gammapy-plugin/latest)](https://gammapy-plugin.readthedocs.io/en/latest/)
+---
+![PyPI Version](https://img.shields.io/pypi/v/gammapy-plugin)
+
 
 # Gammapy Plugin
 ![A gammapy plugin for threeML](docs/_static/banner-dark.svg)
@@ -28,14 +31,15 @@ You can test the installation using `pytest`. To get all the dependencies it is
 recommeneded to run 
 ```bash
 # install test dependenices
-pip install gammapy-plugin[tests]
+pip install "gammapy_plugin[tests]"
 
-# equivalent to gammapy download datasets
+# equivalent to gammapy download datasets - no need to do that if you already have them
+# downloaded and stored in  $GAMMAPY_DATA
 export GAMMAPY_DATA=/path/to/gammapy_datasets/
 git clone https://github.com/gammapy/gammapy-data.git $GAMMAPY_DATA
 
 # run pytests
-python -m pytest -n auto --dist worksteal gammapy_plugin
+python -m pytest --pyargs gammapy_plugin -n auto --dist worksteal 
 ```
 
 The first part is equivalent to running `gammapy download datasets` [(see the `gammapy` installation

@@ -11,7 +11,7 @@ log = logging.getLogger(__name__)
 
 _conversion_list = {
     u.Unit("keV-1 cm-2 s-1"): [1e9, u.Unit("TeV-1 cm-2 s-1")],
-    u.Unit("keV"): [1e9, u.Unit("TeV")],
+    u.Unit("keV"): [1e-9, u.Unit("TeV")],
 }
 
 

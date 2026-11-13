@@ -108,10 +108,12 @@ class PointSourceModelConverted(PointSpatialModel):
         self._name = self._sky_position.name
         self._position = self._sky_position.sky_coord.transform_to(frame)
         self._frame = frame
-        log.debug(f"PointSpatialMpdel got frame {self._frame}")
+        log.debug(f"PointSpatialModel got frame {self._frame}")
         self.frame = self._frame
         self._setup_parameters()
         super().__init__()
+        for name, am_parameter in self._am_parameter_mapping.items():
+            self.parameters[name].bind(am_parameter)
 
     def _setup_parameters(self):
         """Setup the parameters by creating gammapy Parameters and setting them
@@ -139,7 +141,7 @@ class PointSourceModelConverted(PointSpatialModel):
             self._mapping[v.path] = para_name
             if v.free:
                 self._mapping_free[v.path] = para_name
-                self._am_parameter_mapping[v.path] = v
+                self._am_parameter_mapping[para_name] = v
         lon_0 = ParameterWrapped(
             name="lon_0", value=lon.value, unit=lon.unit, frozen=not lon_free
         )

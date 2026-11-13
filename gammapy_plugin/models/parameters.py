@@ -1,5 +1,5 @@
 import astropy.units as u
-from gammapy.modeling.parameter import Parameter, Parameters
+from gammapy.modeling.parameter import Parameter
 
 
 class ParameterWrapped(Parameter):
@@ -49,20 +49,3 @@ class ParameterWrapped(Parameter):
         # always uses the correct physical unit.
         self.unit = quantity.unit
         self.value = quantity.value
-
-
-class ParametersWrapped(Parameters):
-    """
-    Class for updating the astromodels parameters according to the gammapy parameters.
-    """
-
-    def set_parameter_factors(self, factors):
-        """Set factor of all parameters.
-
-        Used in the optimizer interface.
-        """
-        idx = 0
-        for parameter in self._parameters:
-            if not parameter.frozen:
-                parameter.factor = factors[idx]
-                idx += 1

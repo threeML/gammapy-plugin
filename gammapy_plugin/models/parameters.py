@@ -1,41 +1,54 @@
-import numpy as np
+import astropy.units as u
 from gammapy.modeling.parameter import Parameter, Parameters
 
 
 class ParameterWrapped(Parameter):
+    """Gammapy parameter linked to an astromodels parameter."""
+
     def __init__(self, *args, **kwargs):
-        self._am_model = kwargs.pop("astromodels_model", None)
-        self._am_factor = kwargs.pop("astromodels_factor", 1.0)
+        # Do not bind during construction:
+        # Gammapy will deepcopy these parameters.
+        self._am_parameter = None
         super().__init__(*args, **kwargs)
 
-    @property
-    def factor(self):
-        """Factor as a float."""
-        return self._factor
+    def bind(self, am_parameter):
+        """Connect to the actual astromodels Parameter object."""
+        if not self.unit.is_equivalent(am_parameter.unit):
+            raise u.UnitConversionError(
+                f"Incompatible units: {self.unit} and {am_parameter.unit}"
+            )
 
-    @factor.setter
-    def factor(self, val):
-        self._factor = float(np.nan_to_num(val))
-        self._value = float(self.inverse_transform(self._factor))
-        if self._am_model is not None:
-            # print(
-            #   f"Setting new value via factor {self._factor}: {self._value/self._am_factor} for {self._name}"
-            # )
+        self._am_parameter = am_parameter
 
-            self._am_model.parameters[self.name] = self._value / self._am_factor
+    def _sync_to_astromodels(self):
+        if self._am_parameter is None:
+            return
 
-    @property
-    def value(self):
-        """Value = factor x scale (float)."""
-        return self._value
+        # Convert into the units used by astromodels.
+        value = self.quantity.to_value(self._am_parameter.unit)
+        self._am_parameter.value = value
 
-    @value.setter
+    @Parameter.value.setter
     def value(self, val):
-        self._value = float(val)
-        self._factor = self.transform(val)
-        if self._am_model is not None:
-            # print(f"Setting new value {self._value} for {self._name}")
-            self._am_model.parameters[self.name] = self._value / self._am_factor
+        Parameter.value.fset(self, val)
+        self._sync_to_astromodels()
+
+    @Parameter.factor.setter
+    def factor(self, val):
+        Parameter.factor.fset(self, val)
+        self._sync_to_astromodels()
+
+    @Parameter.quantity.setter
+    def quantity(self, val):
+        quantity = u.Quantity(val)
+
+        if not quantity.unit.is_equivalent(self.unit):
+            raise u.UnitConversionError(f"Incompatible unit for {self.name}")
+
+        # Set unit before value, so synchronization
+        # always uses the correct physical unit.
+        self.unit = quantity.unit
+        self.value = quantity.value
 
 
 class ParametersWrapped(Parameters):

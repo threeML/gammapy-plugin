@@ -1,4 +1,5 @@
 import logging
+from copy import deepcopy
 
 import astropy.units as u
 import numpy as np
@@ -9,8 +10,11 @@ from gammapy.modeling.models import (
     PointSpatialModel,
     SpatialModel,
 )
+from gammapy.modeling.parameter import Parameters
 
-from .parameters import ParametersWrapped, ParameterWrapped
+from gammapy_plugin.utils.gammapy_parser import _conversion_list
+
+from .parameters import ParameterWrapped
 
 log = logging.getLogger(__name__)
 
@@ -42,9 +46,10 @@ class SpatialModelConverted(SpatialModel):
             frame = "icrs"
         self._frame = frame
         self.frame = self._frame
-        self._am_model = None
         self._setup_parameters()
         super().__init__()
+        for name, am_parameter in self._am_parameter_mapping.items():
+            self.parameters[name].bind(am_parameter)
 
     def _setup_parameters(self):
         """Setup the parameters by creating gammapy Parameters and setting them
@@ -53,33 +58,30 @@ class SpatialModelConverted(SpatialModel):
         # needed later for correctly evaluating the function
         self._mapping = {}
         self._mapping_free = {}
+        self._am_parameter_mapping = {}
         for v in self._astromodel_function.parameters.values():
-            vmin = np.nan
-            vmax = np.nan
-            if v.min_value is not None:
-                vmin = v.min_value
-            if v.max_value is not None:
-                vmax = v.max_value
-            self._mapping[v.path] = v.name
+            factor, unit = _conversion_list.get(v.unit, (1.0, v.unit))
+            vmin = v.min_value * factor if v.min_value is not None else np.nan
+            vmax = v.max_value * factor if v.max_value is not None else np.nan
+            self._mapping[v.path] = v.path
             if v.free:
-                self._mapping_free[v.path] = v.name
-            interp = "linear"
-            if isinstance(v.transformation, LogarithmicTransformation):
-                interp = "log"
-            paras.append(
-                ParameterWrapped(
-                    name=v.name,
-                    value=v.value,
-                    unit=v.unit,
-                    min=vmin,
-                    max=vmax,
-                    frozen=not bool(v.free),
-                    interp=interp,
-                    astromodels_model=self._am_model,
-                )
+                self._mapping_free[v.path] = v.path
+            is_log = v.has_transformation() and isinstance(
+                v.transformation, LogarithmicTransformation
             )
-            setattr(self, v.name, paras[-1])
-        self.default_parameters = ParametersWrapped(paras)
+            par = ParameterWrapped(
+                name=v.path,
+                value=v.value * factor,
+                unit=unit,
+                min=vmin,
+                max=vmax,
+                frozen=not v.free,
+                interp="log" if is_log else "lin",
+            )
+            paras.append(par)
+            self._am_parameter_mapping[v.path] = v
+            setattr(self, v.path, par)
+        self.default_parameters = Parameters(paras)
 
     # todo check return type
     def evaluate(self, *args, **kwargs):
@@ -144,7 +146,7 @@ class PointSourceModelConverted(PointSpatialModel):
         )
         self.lon_0 = lon_0
         self.lat_0 = lat_0
-        self.default_parameters = ParametersWrapped([lon_0, lat_0])
+        self.default_parameters = Parameters([lon_0, lat_0])
         log.debug(f"Set parameters to be {lon_0} and {lat_0}")
 
     @property
@@ -154,3 +156,53 @@ class PointSourceModelConverted(PointSpatialModel):
     @property
     def mapping_free(self):
         return self._mapping_free
+
+    def _rebind_parameters(self):
+        """Bind Gammapy parameters to the actual evaluation function."""
+
+        functions = self._sky_position
+
+        # Get parameters from the function actually used
+        # by evaluate(), not from an independently copied
+        # astromodels model or parameter mapping.
+
+        if not hasattr(self, "_inv_mapping"):
+            self._inv_mapping = {v: k for k, v in self._mapping.items()}
+
+        am_parameters = {par.path: par for par in functions.parameters.values()}
+
+        for gp_parameter in self.parameters:
+            if isinstance(gp_parameter, ParameterWrapped):
+                am_parameter = am_parameters[self._inv_mapping[gp_parameter.name]]
+                gp_parameter.bind(am_parameter)
+
+        # Keep the cached parameter list consistent too.
+        self._components_parameters = list(am_parameters.values())
+
+    def __deepcopy__(self, memo):
+        """Deep-copy model and restore astromodels parameter bindings."""
+
+        # Respect already-copied objects.
+        if id(self) in memo:
+            return memo[id(self)]
+
+        # Create an uninitialized instance.
+        cls = type(self)
+        copied = cls.__new__(cls)
+
+        # Register immediately to handle circular references.
+        memo[id(self)] = copied
+
+        # Copy all instance attributes using the SAME memo.
+        for name, value in self.__dict__.items():
+            object.__setattr__(
+                copied,
+                name,
+                deepcopy(value, memo),
+            )
+
+        # Restore parameter references to the copied
+        # astromodels function actually used by evaluate().
+        copied._rebind_parameters()
+
+        return copied

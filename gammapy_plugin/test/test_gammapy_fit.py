@@ -13,32 +13,21 @@ from gammapy_plugin.converter import AstromodelConverter
 def test_gammapy_fit(crab_test_data):
     datasets = crab_test_data.copy()
     datasets_gp = crab_test_data.copy()
-    np.random.seed(1234)
 
     pl = Powerlaw()
     ps = PointSource("crab", spectral_shape=pl, ra=83.63, dec=22.01)
     pl.piv.value = 1e9
-    pl.index.min_value = 1
-    pl.index.max_value = 4
+    pl.index.min_value = -4
+    pl.index.max_value = -1
 
-    pl.index.value = 2.0
+    pl.index.value = -2.0
     pl.K.value = 1e-21
-    pl.K.min_value = 1e-22
-    pl.K.max_value = 1e-18
+    pl.K.min_value = 1e-23
+    pl.K.max_value = 1e-19
     model = Model(ps)
     conv = AstromodelConverter(model)
 
     datasets.models = conv.gammapy_models
-    print(datasets.stat_sum())
-    conv.update()
-
-    datasets.parameters.autoscale()
-    print(datasets.stat_sum())
-    conv.update()
-
-    datasets.parameters.set_parameter_factors([0.9, 0.9])
-    print(datasets.stat_sum())
-    conv.update()
 
     fit = Fit()
     result = fit.run(datasets=datasets)

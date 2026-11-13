@@ -1,6 +1,7 @@
 import copy
 
 import pytest
+import astropy.units as u
 from astromodels.core.model import Model
 from astromodels.functions import Powerlaw
 from astromodels.sources import PointSource
@@ -118,3 +119,16 @@ def test_copy_preserves_astromodels_bindings(copy_method):
     assert gp_model.spectral_model.parameters[pl.index.path].value == pytest.approx(
         original_value
     )
+
+
+def test_gammapy_parameter_setter():
+    pl = Powerlaw()
+    ps = PointSource("test", ra=0, dec=0, spectral_shape=pl)
+    am_model = Model(ps)
+
+    converter = AstromodelConverter(am_model)
+    gp_model = converter.gammapy_models[0]
+
+    gp_model.parameters[pl.index.path].quantity = -3 * u.dimensionless_unscaled
+    with pytest.raises(u.UnitConversionError):
+        gp_model.parameters[pl.index.path].quantity = -3 * u.keV

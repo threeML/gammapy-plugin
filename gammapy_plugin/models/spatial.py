@@ -118,6 +118,7 @@ class PointSourceModelConverted(PointSpatialModel):
         as attributes to this class."""
         self._mapping = {}
         self._mapping_free = {}
+        self._am_parameter_mapping = {}
         if self._frame == "galactic":
             lon = self._position.l
             lat = self._position.b
@@ -138,6 +139,7 @@ class PointSourceModelConverted(PointSpatialModel):
             self._mapping[v.path] = para_name
             if v.free:
                 self._mapping_free[v.path] = para_name
+                self._am_parameter_mapping[v.path] = v
         lon_0 = ParameterWrapped(
             name="lon_0", value=lon.value, unit=lon.unit, frozen=not lon_free
         )
@@ -146,7 +148,9 @@ class PointSourceModelConverted(PointSpatialModel):
         )
         self.lon_0 = lon_0
         self.lat_0 = lat_0
+
         self.default_parameters = Parameters([lon_0, lat_0])
+
         log.debug(f"Set parameters to be {lon_0} and {lat_0}")
 
     @property

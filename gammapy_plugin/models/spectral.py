@@ -1,13 +1,17 @@
 import logging
+from copy import deepcopy
 
 import numpy as np
+from astromodels.core.parameter_transformation import LogarithmicTransformation
 from astromodels.functions.function import Function
 from gammapy.modeling.models import (
     SpectralModel,
 )
-from gammapy.modeling.parameter import Parameter, Parameters
+from gammapy.modeling.parameter import Parameters
 
 from gammapy_plugin.utils.gammapy_parser import _conversion_list
+
+from .parameters import ParameterWrapped
 
 log = logging.getLogger(__name__)
 
@@ -113,6 +117,8 @@ class SpectralModelConverted(SpectralModel):
 
         self._integral_unit = self._y_unit * self._x_unit
         super().__init__()
+        for name, am_parameter in self._am_parameter_mapping.items():
+            self.parameters[name].bind(am_parameter)
 
     def _setup_parameters(self):
         """Setup the parameters by creating gammapy Parameters and setting them
@@ -121,34 +127,31 @@ class SpectralModelConverted(SpectralModel):
         # needed later for correctly evaluating the function
         self._mapping = {}
         self._mapping_free = {}
-        parameter_dict = self._components_parameters
-        for v in parameter_dict:
-            if v.unit in _conversion_list:
-                unit = _conversion_list[v.unit][1]
-                factor = _conversion_list[v.unit][0]
-            else:
-                unit = v.unit
-                factor = 1.0
-            vmin = np.nan
-            vmax = np.nan
-            if v.min_value is not None:
-                vmin = v.min_value
-            if v.max_value is not None:
-                vmax = v.max_value
+        self._am_parameter_mapping = {}
+        for v in self._components_parameters:
+            factor, unit = _conversion_list.get(v.unit, (1.0, v.unit))
+            vmin = v.min_value * factor if v.min_value is not None else np.nan
+            vmax = v.max_value * factor if v.max_value is not None else np.nan
+
             self._mapping[v.path] = v.path
             if v.free:
                 self._mapping_free[v.path] = v.path
-            paras.append(
-                Parameter(
-                    name=v.path,
-                    value=v.value * factor,
-                    unit=unit,
-                    min=vmin * factor,
-                    max=vmax * factor,
-                    frozen=not bool(v.free),
-                )
+
+            is_log = v.has_transformation() and isinstance(
+                v.transformation, LogarithmicTransformation
             )
-            setattr(self, v.path, paras[-1])
+            par = ParameterWrapped(
+                name=v.path,
+                value=v.value * factor,
+                unit=unit,
+                min=vmin,
+                max=vmax,
+                frozen=not v.free,
+                interp="log" if is_log else "lin",
+            )
+            paras.append(par)
+            self._am_parameter_mapping[v.path] = v
+            setattr(self, v.path, par)
         self.default_parameters = Parameters(paras)
 
     def evaluate(self, energy, **kwargs):
@@ -182,3 +185,56 @@ class SpectralModelConverted(SpectralModel):
     @property
     def mapping_free(self):
         return self._mapping_free
+
+    def _rebind_parameters(self):
+        """Bind Gammapy parameters to the actual evaluation function."""
+
+        functions = self._astromodel_function
+
+        if not isinstance(functions, list):
+            functions = [functions]
+
+        # Get parameters from the function actually used
+        # by evaluate(), not from an independently copied
+        # astromodels model or parameter mapping.
+        am_parameters = {
+            par.path: par
+            for function in functions
+            for par in function.parameters.values()
+        }
+
+        for gp_parameter in self.parameters:
+            if isinstance(gp_parameter, ParameterWrapped):
+                am_parameter = am_parameters[gp_parameter.name]
+                gp_parameter.bind(am_parameter)
+
+        # Keep the cached parameter list consistent too.
+        self._components_parameters = list(am_parameters.values())
+
+    def __deepcopy__(self, memo):
+        """Deep-copy model and restore astromodels parameter bindings."""
+
+        # Respect already-copied objects.
+        if id(self) in memo:
+            return memo[id(self)]
+
+        # Create an uninitialized instance.
+        cls = type(self)
+        copied = cls.__new__(cls)
+
+        # Register immediately to handle circular references.
+        memo[id(self)] = copied
+
+        # Copy all instance attributes using the SAME memo.
+        for name, value in self.__dict__.items():
+            object.__setattr__(
+                copied,
+                name,
+                deepcopy(value, memo),
+            )
+
+        # Restore parameter references to the copied
+        # astromodels function actually used by evaluate().
+        copied._rebind_parameters()
+
+        return copied

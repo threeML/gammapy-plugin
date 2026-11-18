@@ -47,7 +47,7 @@ def test_gammapy_fit(crab_test_data):
     assert np.isclose(
         result.models[0].parameters["crab.spectrum.main.Powerlaw.index"].value,
         -result_joint.models[0].parameters["index"].value,
-        rtol=0.1,
+        rtol=1e-3,
     )
 
 

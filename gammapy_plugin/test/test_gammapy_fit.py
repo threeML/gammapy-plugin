@@ -72,16 +72,27 @@ def test_xspec_wrapping(crab_test_data):
     conv = AstromodelConverter(model)
     datasets.models = [conv.gammapy_models[0]]  # using ReflectedRegionsBackground
     fit = Fit()
-    fit.run(datasets=datasets)
+    result_xspec = fit.run(datasets=datasets)
 
     spectral_model = PowerLawSpectralModel(
-        amplitude=100 * u.Unit("cm-2 s-1 keV-1"),
+        amplitude=1 * u.Unit("cm-2 s-1 keV-1"),
         index=2,
         reference=1 * u.keV,
     )
+    spectral_model.amplitude.min = 0.5 * u.Unit("cm-2 s-1 keV-1")
+
     model_gp = SkyModel(spectral_model=spectral_model, name="crab")
 
     datasets_gp.models = [model_gp]
 
     fit_joint = Fit()
-    fit_joint.run(datasets=datasets_gp)
+    result_gp = fit_joint.run(datasets=datasets_gp)
+
+    for p in result_xspec.models[0].parameters:
+        if "index" in p.name:
+            para_name = p.name
+    assert np.isclose(
+        result_gp.models[0].parameters["index"].value,
+        result_xspec.models[0].parameters[para_name].value,
+        rtol=0.05,
+    )

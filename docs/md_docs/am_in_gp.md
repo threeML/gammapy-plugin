@@ -169,19 +169,3 @@ ax.set_xlim(0.6, 40)
 plt.show()
 ```
 
-```python
-from gammapy.modeling.models import Models
-```
-
-```python
-flux_points_dataset = FluxPointsDataset(
-    data=flux_points, models=Models(conv.gammapy_models[0].copy())
-)
-ax, _ = flux_points_dataset.plot_fit()
-ax.set_xlim(0.6, 40)
-plt.show()
-```
-
-So we can also model in `astromodels` and fit in `gammapy`.
-
-The `gammapy-plugin` also is running tests in the CI on this, including `XSPEC` models via `astromodels`.

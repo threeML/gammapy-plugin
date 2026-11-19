@@ -1,4 +1,4 @@
-Welcome to Gammapy Plugin's documentation!
+Welcome to the gammapy-plugin's documentation!
 ===========================================================
 .. image:: _static/banner-light.svg
    :class: only-light banner
@@ -20,7 +20,7 @@ Welcome to Gammapy Plugin's documentation!
    We are working on implementing this in `astromodels`.
    
 
-About gammapy_plugin
+About gammapy-plugin
 --------------------
 
 

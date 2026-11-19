@@ -1,7 +1,7 @@
 import copy
 
-import pytest
 import astropy.units as u
+import pytest
 from astromodels.core.model import Model
 from astromodels.functions import Powerlaw
 from astromodels.sources import PointSource

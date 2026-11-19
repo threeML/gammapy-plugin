@@ -24,10 +24,10 @@ About gammapy_plugin
 --------------------
 
 
-`Gammapy`_ Plugin is a plugin for `threeML`_ that allows to incorporate all
+`gammapy`_-plugin is a plugin for `threeML`_ that allows to incorporate all
 gammapy-supported instruments in your threeML analysis.
 
-.. _Gammapy: https://gammapy.org/
+.. _gammapy: https://gammapy.org/
 .. _threeML: https://threeml.readthedocs.io/en/stable/
 
 
@@ -37,6 +37,12 @@ gammapy-supported instruments in your threeML analysis.
 To get started check out the `get-started`_ section.
 
 .. _get-started: intro.rst
+
+In case you run into issues please open up an issue at our `github`_ repo.
+All contributions are more than welcome - consider opening up a pull request :)
+
+.. _github: https://github.com/threeML/gammapy-plugin/
+
 
 .. toctree::
    :maxdepth: 1

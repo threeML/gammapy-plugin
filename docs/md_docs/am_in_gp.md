@@ -7,53 +7,58 @@ jupyter:
       format_version: '1.3'
       jupytext_version: 1.19.3
   kernelspec:
-    display_name: Python (threeml)
+    display_name: Python 3 (ipykernel)
     language: python
     name: python3
 ---
 
 # Using astromodels in gammapy
 
-In case you do not want to use `threeML` for fitting but want to use `astromodels` for
-modelling you can use the [converter](./converter.ipynb) to do so.
+In case you do not want to use `threeML` for fitting or sampling but still want to use
+`astromodels` for modelling you can use the [converter](./converter.ipynb) to do so.
+
+Let's start by defining an `astromodels` model for the Crab Nebula and doing some experimental `astromodels` stuff:
+
+
+The default energy unit in `astromodels` is `keV` - which makes all values quiet small when having data in the `TeV` range.
+There is currently no fully supported workaround for this and the easiest thing is to just be aware of this while modelling:
+multiply your energies by `1e9` and your differential photon fluxes `1e-9` and you should be good.
+
+Also consider setting the `min_value` and `max_value` to reasonably small values so the fitting engine will not have a hard time:
 
 ```python
-from gammapy_plugin.converter import AstromodelConverter
-from gammapy_plugin.models import SpectralModelConverted
+%matplotlib inline
 from astromodels.functions import Powerlaw
 from astromodels.core.model import Model
 from astromodels.sources import PointSource
-import astropy.units as u
-from astromodels.core.units import get_units
 
-get_units().energy = u.TeV  # this is HIGHLY EXPERIMENTAL!!!
+
 pl = Powerlaw()
 ps = PointSource("crab", ra=83.63, dec=22.01, spectral_shape=pl)
-pl.piv = 1 * u.TeV
-pl.K = 1e-12 * u.Unit("TeV-1 cm-2 s-1")
-pl.index = -2
+pl.piv.value = 1e9 # 1 TeV
+pl.K.value = 1e-21 # 1e-12 TeV-1 cm-2 s-1
+pl.K.min_value = 1e-23 
+pl.K.max_value = 1e-17
+pl.index = -2 # remember the different powerlaw definitions
 model = Model(ps)
-conv = AstromodelConverter(model)
+
 ```
 
 
-pl = Powerlaw()
-ps = PointSource("crab",ra=83.63, dec=22.01,spectral_shape = pl)
+Okay we are all set and can convert our model:
 
-model = Model(ps)
+```python
+from gammapy_plugin.converter import AstromodelConverter
+
 conv = AstromodelConverter(model)
+```
 
-
-Okay now go to all the gammapy setup
+Let's do all the `gammapy` stuff - that is highly inspired by their [1D Spectral Analysis Tutorial](https://docs.gammapy.org/2.1/tutorials/analysis-1d/spectral_analysis.html) so you can compare the result
 ```python
 from pathlib import Path
-import astropy.units as u
+from IPython.display import display
 from astropy.coordinates import Angle, SkyCoord
 from regions import CircleSkyRegion
-
-# %matplotlib inline
-import matplotlib.pyplot as plt
-from IPython.display import display
 from gammapy.data import DataStore
 from gammapy.datasets import (
     Datasets,
@@ -61,7 +66,6 @@ from gammapy.datasets import (
     SpectrumDataset,
 )
 from gammapy.estimators import FluxPointsEstimator
-from gammapy.estimators.utils import resample_energy_edges
 from gammapy.makers import (
     ReflectedRegionsBackgroundMaker,
     SafeMaskMaker,
@@ -69,19 +73,16 @@ from gammapy.makers import (
 )
 from gammapy.maps import MapAxis, RegionGeom, WcsGeom
 from gammapy.modeling import Fit
-from gammapy.modeling.models import (
-    ExpCutoffPowerLawSpectralModel,
-    SkyModel,
-    create_crab_spectral_model,
-)
-from gammapy.visualization import plot_spectrum_datasets_off_regions
 
 datastore = DataStore.from_dir("$GAMMAPY_DATA/hess-dl3-dr1/")
 obs_ids = [23523, 23526, 23559, 23592]
 observations = datastore.get_observations(obs_ids)
+
+
 target_position = SkyCoord(ra=83.63, dec=22.01, unit="deg", frame="icrs")
 on_region_radius = Angle("0.11 deg")
 on_region = CircleSkyRegion(center=target_position, radius=on_region_radius)
+
 exclusion_region = CircleSkyRegion(
     center=SkyCoord(183.604, -8.708, unit="deg", frame="galactic"),
     radius=0.5 * u.deg,
@@ -93,8 +94,7 @@ geom = WcsGeom.create(
 )
 
 exclusion_mask = ~geom.region_mask([exclusion_region])
-exclusion_mask.plot()
-plt.show()
+
 energy_axis = MapAxis.from_energy_bounds(
     0.1, 40, nbin=10, per_decade=True, unit="TeV", name="energy"
 )
@@ -118,32 +118,67 @@ for obs_id, observation in zip(obs_ids, observations):
     dataset_on_off = bkg_maker.run(dataset, observation)
     dataset_on_off = safe_mask_maker.run(dataset_on_off, observation)
     datasets.append(dataset_on_off)
-
 print(datasets)
-plt.figure()
-ax = exclusion_mask.plot()
-on_region.to_pixel(ax.wcs).plot(ax=ax, edgecolor="k")
-plot_spectrum_datasets_off_regions(ax=ax, datasets=datasets)
-plt.show()
+```
+Now that we have our `Datasets` we can assign the `SkyModel`s we have created using the `AstromodelsConverter` and run the fit using
+`gammapy` after that.
 
-
-datasets.models = [conv.gammapy_models[0]]
-
+```python
+datasets.models = conv.gammapy_models
 
 fit_joint = Fit()
 result_joint = fit_joint.run(datasets=datasets)
 ```
+
+Moment of truth... did we converge?
+
 ```python
 print(result_joint)
 ```
 
+We did! &#x1F389;
+
+And the parameter results also look good:
+
 ```python
 display(result_joint.models.to_parameters_table())
 ```
+
+We can also inspect our `gammapy` result as usual
 
 ```python
 ax_spectrum, ax_residuals = datasets[0].plot_fit()
 ax_spectrum.set_ylim(0.1, 40)
 plt.show()
 ```
+We can also calculate the flux points for this model
 
+(please ignore all those "The current value of the parameter K (1.0) was above the new maximum 1e-17." warnings - that's a `astromodels` issue - everything else works like it should)
+
+```python
+fpe = FluxPointsEstimator(
+    energy_edges=energy_axis.edges, source="crab", selection_optional="all"
+)
+flux_points = fpe.run(datasets=datasets)
+```
+
+```python
+fig, ax = plt.subplots()
+flux_points.plot(ax=ax, sed_type="e2dnde", color="darkorange")
+flux_points.plot_ts_profiles(ax=ax, sed_type="e2dnde")
+ax.set_xlim(0.6, 40)
+plt.show()
+```
+
+```python
+flux_points_dataset = FluxPointsDataset(
+    data=flux_points, models=conv.gammapy_models[0].copy()
+)
+ax, _ = flux_points_dataset.plot_fit()
+ax.set_xlim(0.6, 40)
+plt.show()
+```
+
+So we can also model in `astromodels` and fit in `gammapy`.
+
+The `gammapy-plugin` also is running tests in the CI on this, including `XSPEC` models via `astromodels`.

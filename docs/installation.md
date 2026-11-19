@@ -11,8 +11,7 @@ conda install -c threeML -c conda-forge gammapy-plugin
 
 Important here is the channel priority as the `conda-forge` `threeML` and `astromodels`
 packages are not officially supported by the threeML Team. Make sure those packages
-come from the `threeML` channel.
-
+actually come from the `threeML` channel and not `conda-forge`.
 
 ## PyPi
 `gammapy-plugin` is also available on PyPi and installable via pip. This should
@@ -28,5 +27,5 @@ If you read this you probably know how this works:
 ```bash
 git clone https://github.com/threeML/gammapy-plugin.git
 cd gammapy-plugin
-pip install .
+pip install . # optional with a -e
 ```

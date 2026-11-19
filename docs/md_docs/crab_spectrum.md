@@ -5,7 +5,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.19.5
+      jupytext_version: 1.19.6
   kernelspec:
     display_name: Python 3 (ipykernel)
     language: python
@@ -16,22 +16,19 @@ jupyter:
 
 In this first basic example we will perform a basic spectral analysis of the Crab nebula
 using the public H.E.S.S. data release (easily accessable trough `gammapy`)
-and follow the `gammapy` documentation on 
+and follow the `gammapy` documentation on
 [spectral analysis](https://docs.gammapy.org/2.1/tutorials/analysis-1d/spectral_analysis.html)
 closely so we can compare the results.
 
 Let's get started by importing all the relevant stuff.
 ```python
 %matplotlib inline
+import astropy.units as u
 import matplotlib.pyplot as plt
-import astropy.units as u 
-from astropy.coordinates import Angle, SkyCoord
-
 from astromodels.core.model import Model
-from astromodels.core.units import get_units
 from astromodels.functions import Log_parabola, Log_uniform_prior, Uniform_prior
 from astromodels.sources import PointSource
-
+from astropy.coordinates import Angle, SkyCoord
 from gammapy.data import DataStore
 from gammapy.datasets import Datasets, SpectrumDataset
 from gammapy.makers import (
@@ -40,17 +37,12 @@ from gammapy.makers import (
     SpectrumDatasetMaker,
 )
 from gammapy.maps import MapAxis, RegionGeom, WcsGeom
-from gammapy.modeling import Fit
-from gammapy.modeling.models import LogParabolaSpectralModel, SkyModel
-
 from regions import CircleSkyRegion
-
-from threeML import BayesianAnalysis,plot_spectra
+from threeML import BayesianAnalysis, plot_spectra
 from threeML.data_list import DataList
 
 from gammapy_plugin.converter import AstromodelConverter
 from gammapy_plugin.gammapy_like import GammapyLike
-from gammapy_plugin.test.utils import get_close
 ```
 
 Let's start by laoding the relevant data
@@ -95,7 +87,7 @@ geom = RegionGeom.create(region=on_region, axes=[energy_axis])
 dataset_empty = SpectrumDataset.create(geom=geom, energy_axis_true=energy_axis_true)
 ```
 
-We now have everything to create our `makers` and run them to get the result the 
+We now have everything to create our `makers` and run them to get the result the
 `gammapy-plugin` can use - the DL4 `Dataset`.
 In this example we use a `ReflectedRegionsBackgroundMaker` to estimate the background.
 

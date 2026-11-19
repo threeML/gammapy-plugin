@@ -5,7 +5,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.19.3
+      jupytext_version: 1.19.6
   kernelspec:
     display_name: Python 3 (ipykernel)
     language: python
@@ -28,20 +28,18 @@ Also consider setting the `min_value` and `max_value` to reasonably small values
 
 ```python
 %matplotlib inline
-from astromodels.functions import Powerlaw
 from astromodels.core.model import Model
+from astromodels.functions import Powerlaw
 from astromodels.sources import PointSource
-
 
 pl = Powerlaw()
 ps = PointSource("crab", ra=83.63, dec=22.01, spectral_shape=pl)
-pl.piv.value = 1e9 # 1 TeV
-pl.K.value = 1e-21 # 1e-12 TeV-1 cm-2 s-1
-pl.K.min_value = 1e-23 
+pl.piv.value = 1e9  # 1 TeV
+pl.K.value = 1e-21  # 1e-12 TeV-1 cm-2 s-1
+pl.K.min_value = 1e-23
 pl.K.max_value = 1e-17
-pl.index = -2 # remember the different powerlaw definitions
+pl.index = -2  # remember the different powerlaw definitions
 model = Model(ps)
-
 ```
 
 
@@ -55,10 +53,9 @@ conv = AstromodelConverter(model)
 
 Let's do all the `gammapy` stuff - that is highly inspired by their [1D Spectral Analysis Tutorial](https://docs.gammapy.org/2.1/tutorials/analysis-1d/spectral_analysis.html) so you can compare the result
 ```python
-from pathlib import Path
-from IPython.display import display
+import astropy.units as u
+import matplotlib.pyplot as plt
 from astropy.coordinates import Angle, SkyCoord
-from regions import CircleSkyRegion
 from gammapy.data import DataStore
 from gammapy.datasets import (
     Datasets,
@@ -73,6 +70,8 @@ from gammapy.makers import (
 )
 from gammapy.maps import MapAxis, RegionGeom, WcsGeom
 from gammapy.modeling import Fit
+from IPython.display import display
+from regions import CircleSkyRegion
 
 datastore = DataStore.from_dir("$GAMMAPY_DATA/hess-dl3-dr1/")
 obs_ids = [23523, 23526, 23559, 23592]
@@ -153,7 +152,7 @@ plt.show()
 ```
 We can also calculate the flux points for this model
 
-(please ignore all those "The current value of the parameter K (1.0) was above the new maximum 1e-17." warnings - that's a `astromodels` issue - everything else works like it should)
+(please ignore all those "The current value of the parameter K (1.0) was above the new maximum 1e-17." warnings that may pop up - that's a `astromodels` issue - everything else works like it should)
 
 ```python
 fpe = FluxPointsEstimator(
@@ -171,8 +170,12 @@ plt.show()
 ```
 
 ```python
+from gammapy.modeling.models import Models
+```
+
+```python
 flux_points_dataset = FluxPointsDataset(
-    data=flux_points, models=conv.gammapy_models[0].copy()
+    data=flux_points, models=Models(conv.gammapy_models[0].copy())
 )
 ax, _ = flux_points_dataset.plot_fit()
 ax.set_xlim(0.6, 40)

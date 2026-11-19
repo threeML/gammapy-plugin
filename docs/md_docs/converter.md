@@ -5,7 +5,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.19.3
+      jupytext_version: 1.19.6
   kernelspec:
     display_name: Python 3 (ipykernel)
     language: python
@@ -22,12 +22,11 @@ Let's have a look!
 We start by importing everything for a simple astromodels Model
 ```python
 %matplotlib inline
+import astropy.units as u
 from astromodels.core.model import Model
-from astromodels.functions import Powerlaw
-from astromodels.functions import Disk_on_sphere
+from astromodels.functions import Disk_on_sphere, Powerlaw
 from astromodels.sources import ExtendedSource, PointSource
 from astromodels.utils.io import display
-import astropy.units as u
 ```
 
 which we then define
@@ -164,8 +163,8 @@ and please be aware that `astromodels` uses $K\times\left(\frac{E}{piv}\right)^{
 not $K\times\left(\frac{E}{piv}\right)^{-i}$ for a powerlaw definition.
 
 ```python tags=["nbsphinx-thumbnail"]
-from astropy import units as u
 import matplotlib.pyplot as plt
+from astropy import units as u
 
 energy_bounds = [0.1, 100] * u.TeV
 conv_ps.gammapy_models[0].spectral_model.plot(energy_bounds)

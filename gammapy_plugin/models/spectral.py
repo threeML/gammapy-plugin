@@ -1,5 +1,6 @@
 import logging
 from copy import deepcopy
+from operator import attrgetter
 
 import numpy as np
 from astromodels.core.parameter_transformation import LogarithmicTransformation
@@ -154,12 +155,19 @@ class SpectralModelConverted(SpectralModel):
             setattr(self, v.path, par)
         self.default_parameters = Parameters(paras)
 
-    def evaluate(self, energy, **kwargs):
+    def evaluate(self, energy, *args, **kwargs):
         """Evaluates the astromodels function instead of a gammapy one."""
         shape = None
+
         if len(energy.shape) > 1:
             shape = energy.shape
             energy = energy.flatten()
+        if len(args) == 0:
+            return self._evaluate_no_args(energy, shape)
+        else:
+            return self._evaluate_args(energy, shape, *args)
+
+    def _evaluate_no_args(self, energy, shape):
         if self._components is not None:
             vals = []
             if shape is None:
@@ -177,6 +185,47 @@ class SpectralModelConverted(SpectralModel):
                 return self._astromodel_function(energy)
             else:
                 return self._astromodel_function(energy).reshape(shape)
+
+    def _evaluate_args(self, energy, shape, *args):
+        """
+        Evaluates the astromdoels function with parameter values passed as arguments
+        Way much slower likely
+        """
+
+        assert len(args) == len(self._astromodel_function.parameters.keys()), (
+            "The number of passed non-keyword arguments does not match the number of "
+            "parameters"
+        )
+        am_para_ordering = list(
+            map(attrgetter("path"), self._astromodel_function._get_parameters())
+        )
+
+        gp_para_ordering = [p.name for p in self.parameters]
+        mapping = [gp_para_ordering.index(x) for x in am_para_ordering]
+        new_args = [args[i] for i in mapping]
+        if self._components is not None:
+            vals = []
+            if shape is None:
+                for i in range(self._components):
+                    val = self._astromodel_function[i].evaluate(energy, *new_args)
+                    vals.append(val)
+            else:
+                for i in range(self._components):
+                    vals.append(
+                        self._astromodel_function[i]
+                        .evaluate(energy, *new_args)
+                        .reshape(shape)
+                    )
+
+            return sum(vals)
+
+        else:
+            if shape is None:
+                return self._astromodel_function.evaluate(energy, *new_args)
+            else:
+                return self._astromodel_function.evaluate(energy, *new_args).reshape(
+                    shape
+                )
 
     @property
     def mapping(self):

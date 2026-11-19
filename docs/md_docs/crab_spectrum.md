@@ -45,7 +45,7 @@ from gammapy_plugin.converter import AstromodelConverter
 from gammapy_plugin.gammapy_like import GammapyLike
 ```
 
-Let's start by laoding the relevant data
+Let's start by loading the relevant data
 
 ```python
 datastore = DataStore.from_dir("$GAMMAPY_DATA/hess-dl3-dr1/")

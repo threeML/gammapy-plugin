@@ -145,10 +145,10 @@ display(result_joint.models.to_parameters_table())
 
 We can also inspect our `gammapy` result as usual
 
-```python
+```python tags=["nbsphinx-thumbnail"]
 ax_spectrum, ax_residuals = datasets[0].plot_fit()
 ax_spectrum.set_ylim(0.1, 40)
-plt.show()
+plt.gcf()
 ```
 We can also calculate the flux points for this model
 
@@ -166,6 +166,6 @@ fig, ax = plt.subplots()
 flux_points.plot(ax=ax, sed_type="e2dnde", color="darkorange")
 flux_points.plot_ts_profiles(ax=ax, sed_type="e2dnde")
 ax.set_xlim(0.6, 40)
-plt.show()
+plt.gcf()
 ```
 

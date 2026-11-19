@@ -169,7 +169,7 @@ from astropy import units as u
 energy_bounds = [0.1, 100] * u.TeV
 conv_ps.gammapy_models[0].spectral_model.plot(energy_bounds)
 plt.grid(which="both")
-plt.show()
+plt.gcf()
 ```
 
 This in fact looks like a powerlaw
@@ -204,11 +204,8 @@ fig, ax = plt.subplots(1, figsize=(9, 6))
 meval = conv.gammapy_models[0].spatial_model.evaluate_geom(geom)
 Map.from_geom(geom=geom, data=meval.value, unit=meval.unit).plot(ax=ax)
 plt.tight_layout()
-plt.show()
+plt.gcf()
 ```
 
-Awesome! We can convert `astromodels` models into `gammapy` models - the core ingredient for using `gammapy` datasets in a `threeML` analysis.
+Awesome! We can convert `astromodels` models into `gammapy` models - the core ingredient for using `gammapy` datasets in a `threeML` analysis :)
 
-```python
-
-```

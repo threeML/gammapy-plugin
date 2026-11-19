@@ -5,17 +5,17 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.17.3
+      jupytext_version: 1.19.3
   kernelspec:
-    display_name: threeML
+    display_name: Python 3 (ipykernel)
     language: python
     name: python3
 ---
 
-# Converting a astromodels Model 
+# Converting a astromodels Model
 
 The core concept behind that plugin is the model converter that maps a astromodels
-Model to a gammapy SkyModel, so we can perform the forward folding of said model in 
+Model to a gammapy SkyModel, so we can perform the forward folding of said model in
 gammapy.
 Let's have a look!
 
@@ -45,7 +45,9 @@ and take a look at what we created
 display(model)
 ```
 
-B.E.A.U.T.I.F.U.L.
+<h1 style="font-size: 20px;">
+  <span style="color: red;">B.</span><span style="color: orange;">E.</span><span style="color: gold;">A.</span><span style="color: green;">U.</span><span style="color: turquoise;">T.</span><span style="color: blue;">I.</span><span style="color: indigo;">F.</span><span style="color: violet;">U.</span><span style="color: purple;">L</span>
+</h1>
 
 Ok, now for the conversion - first we need to import stuff again:
 
@@ -59,7 +61,7 @@ and it is indeed as simple as running
 conv = AstromodelConverter(model=model)
 ```
 
-We now have an instance of the converter which has already perfomed the conversion 
+We now have an instance of the converter which has already perfomed the conversion
 up on initialization.
 We only created one single source so we only have one single model which we can index
 
@@ -88,13 +90,45 @@ Perfect!
 
 This calls the indiviudal update methods of the sources which then update all the models.
 
+
+Just a quick word on the types of the parameters:
+`astromodels` and `gammapy` sort their parameters differently so be aware of that.
+
+When looking at the first parameter in the `astromodels` model we see that the we have here the `lon0` parameter which is of the type ` astromodels.core.parameter.Parameter`
+
+```python
+(
+    next(iter(conv.model.parameters.values())),
+    type(next(iter(conv.model.parameters.values()))),
+)
+```
+
+however the first parameter in the first `gammapy` `SkyModel` is the amplitude of our Powerlaw.
+And its type is a `gammapy_plugin.models.parameters.ParameterWrapped`.
+
+```python
+(
+    next(iter(conv.gammapy_models[0].parameters)),
+    type(next(iter(conv.gammapy_models[0].parameters))),
+)
+```
+
+The `gammapy-plugin` wraps the `gammapy` parameters in a custom class which allows for updating the `astromodels` model by setting the values of the `gammapy` model.
+But for this checkout the docs on [astromodels in gammapy](./am_in_gp.ipynb).
+
+```python
+from gammapy.modeling.parameter import Parameter
+
+isinstance(next(iter(conv.gammapy_models[0].parameters)), Parameter)
+```
+
 ## Point Sources
 
 In case you are only analysing a spectrum dataset and do not care about pixelatiion on a
 map or the PSF at all you can set the `convert_ps` flag to `False`.
 
 By default this is set to true, meaning when you transform an astromodels `PointSource`
-you will get a `PointSpatialModel` (see e.g. 
+you will get a `PointSpatialModel` (see e.g.
 [here](https://docs.gammapy.org/2.1/user-guide/model-gallery/spatial/plot_point.html)):
 
 ```python
@@ -117,7 +151,7 @@ conv_ps.gammapy_models[0]
 
 
 ## Plotting
-Stealing from the 
+Stealing from the
 [gammapy docs](https://docs.gammapy.org/2.1/user-guide/model-gallery/spectral/plot_powerlaw.html)
 we can now also use the same plotting routines for the models:
 
@@ -133,12 +167,14 @@ not $K\times\left(\frac{E}{piv}\right)^{-i}$ for a powerlaw definition.
 from astropy import units as u
 import matplotlib.pyplot as plt
 
-
 energy_bounds = [0.1, 100] * u.TeV
 conv_ps.gammapy_models[0].spectral_model.plot(energy_bounds)
 plt.grid(which="both")
 plt.show()
 ```
+
+This in fact looks like a powerlaw
+
 
 We can also do the same for the Disk spatial model before
 ```python
@@ -170,4 +206,10 @@ meval = conv.gammapy_models[0].spatial_model.evaluate_geom(geom)
 Map.from_geom(geom=geom, data=meval.value, unit=meval.unit).plot(ax=ax)
 plt.tight_layout()
 plt.show()
+```
+
+Awesome! We can convert `astromodels` models into `gammapy` models - the core ingredient for using `gammapy` datasets in a `threeML` analysis.
+
+```python
+
 ```

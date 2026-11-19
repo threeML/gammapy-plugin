@@ -1,10 +1,10 @@
 import numpy as np
 import pytest
-from astropy.coordinates.name_resolve import NameResolveError
 from astromodels.core.model import Model
 from astromodels.functions import Log_uniform_prior, Powerlaw, Uniform_prior
 from astromodels.sources import PointSource
 from astropy.coordinates import SkyCoord
+from astropy.coordinates.name_resolve import NameResolveError
 from threeML import BayesianAnalysis
 from threeML.data_list import DataList
 

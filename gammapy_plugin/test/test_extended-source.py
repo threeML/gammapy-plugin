@@ -1,7 +1,6 @@
 from warnings import warn
 
 import astropy.units as u
-from astropy.coordinates.name_resolve import NameResolveError
 import numpy as np
 from astromodels.core.model import Model
 from astromodels.functions import (
@@ -12,6 +11,7 @@ from astromodels.functions import (
 )
 from astromodels.sources.extended_source import ExtendedSource
 from astropy.coordinates import SkyCoord
+from astropy.coordinates.name_resolve import NameResolveError
 from gammapy.data import DataStore
 from gammapy.datasets import Datasets, MapDataset
 from gammapy.makers import FoVBackgroundMaker, MapDatasetMaker, SafeMaskMaker

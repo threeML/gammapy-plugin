@@ -15,6 +15,8 @@ def test_spectral_model_converted():
     pl = Powerlaw()
     with pytest.raises(ValueError):
         SpectralModelConverted(pl)
+    with pytest.raises(ValueError):
+        spec = SpectralModelConverted(pl)
     pl.set_units(u.TeV, u.Unit("TeV-1 cm-2 s-1"))
     spec = SpectralModelConverted(pl)
     x = 0.5 * u.TeV
@@ -57,8 +59,10 @@ def test_spatial_model_converted():
     gauss = Gaussian_on_sphere()
     from astromodels.core.parameter_transformation import LogarithmicTransformation
 
+    gauss.sigma.value = 1.0
     gauss.sigma._transformation = LogarithmicTransformation()
     SpatialModelConverted(gauss)
+    # FIXME:
 
 
 def test_point_spatial_model_converted():

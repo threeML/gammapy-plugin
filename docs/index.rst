@@ -1,4 +1,4 @@
-Welcome to Gammapy Plugin's documentation!
+Welcome to the gammapy-plugin's documentation!
 ===========================================================
 .. image:: _static/banner-light.svg
    :class: only-light banner
@@ -20,14 +20,14 @@ Welcome to Gammapy Plugin's documentation!
    We are working on implementing this in `astromodels`.
    
 
-About gammapy_plugin
+About gammapy-plugin
 --------------------
 
 
-`Gammapy`_ Plugin is a plugin for `threeML`_ that allows to incorporate all
+`gammapy`_-plugin is a plugin for `threeML`_ that allows to incorporate all
 gammapy-supported instruments in your threeML analysis.
 
-.. _Gammapy: https://gammapy.org/
+.. _gammapy: https://gammapy.org/
 .. _threeML: https://threeml.readthedocs.io/en/stable/
 
 
@@ -38,12 +38,19 @@ To get started check out the `get-started`_ section.
 
 .. _get-started: intro.rst
 
+In case you run into issues please open up an issue at our `github`_ repo.
+All contributions are more than welcome - consider opening up a pull request :)
+
+.. _github: https://github.com/threeML/gammapy-plugin/
+
+
 .. toctree::
    :maxdepth: 1
    :caption: Contents
         
    intro
    notebooks/converter.ipynb
+   notebooks/am_in_gp.ipynb
 
    api/API.rst
 
@@ -51,4 +58,5 @@ To get started check out the `get-started`_ section.
 
    notebooks/crab_spectrum.ipynb
    notebooks/converter.ipynb
+   notebooks/am_in_gp.ipynb
      

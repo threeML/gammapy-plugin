@@ -155,6 +155,7 @@ We can also calculate the flux points for this model
 (please ignore all those "The current value of the parameter K (1.0) was above the new maximum 1e-17." warnings that may pop up - that's a `astromodels` issue - everything else works like it should)
 
 ```python
+%%capture --no-stderr --no-stdout --no-display
 fpe = FluxPointsEstimator(
     energy_edges=energy_axis.edges, source="crab", selection_optional="all"
 )

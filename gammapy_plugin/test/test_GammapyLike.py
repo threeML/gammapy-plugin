@@ -101,7 +101,7 @@ def test_properties(rxj_test_data):
         )
     gl = GammapyLike(name="init_bkg")
     gl.set_datasets(rxj_test_data, mode="individual")
-    gl.gammapy_model
+    _ = gl.gammapy_model
     gl.set_background_models(list(bkg_models.values()))
     pl = Powerlaw()
     ps = PointSource(source_name="test", ra=0, dec=0, spectral_shape=pl)

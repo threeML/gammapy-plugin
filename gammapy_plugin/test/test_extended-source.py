@@ -11,6 +11,7 @@ from astromodels.functions import (
 )
 from astromodels.sources.extended_source import ExtendedSource
 from astropy.coordinates import SkyCoord
+from astropy.coordinates.name_resolve import NameResolveError
 from gammapy.data import DataStore
 from gammapy.datasets import Datasets, MapDataset
 from gammapy.makers import FoVBackgroundMaker, MapDatasetMaker, SafeMaskMaker
@@ -32,15 +33,18 @@ from gammapy_plugin.gammapy_like import GammapyLike
 
 def test_extended_source_no_fov_bkg(rxj_test_data):
     datastore = DataStore.from_dir("$GAMMAPY_DATA/hess-dl3-dr1/")
-    target_position = SkyCoord.from_name("RX J1713.7-3946").galactic
+    try:
+        target_position = SkyCoord.from_name("RX J1713.7-3946").galactic
+    except NameResolveError:
+        target_position = SkyCoord(l=347.2695, b=-0.2569, frame="galactic", unit="deg")
 
-    selection = dict(
-        type="sky_circle",
-        frame="galactic",
-        lon=target_position.l,
-        lat=target_position.b,
-        radius="5deg",
-    )
+    selection = {
+        "type": "sky_circle",
+        "frame": "galactic",
+        "lon": target_position.l,
+        "lat": target_position.b,
+        "radius": "5deg",
+    }
     select_obs_tab = datastore.obs_table.select_observations(selection)
 
     obs = datastore.get_observations(select_obs_tab["OBS_ID"])
@@ -171,7 +175,10 @@ def test_extended_source_no_fov_bkg(rxj_test_data):
 
 
 def test_fov_bkg_model_setting(rxj_test_data):
-    target_position = SkyCoord.from_name("RX J1713.7-3946").galactic
+    try:
+        target_position = SkyCoord.from_name("RX J1713.7-3946").galactic
+    except NameResolveError:
+        target_position = SkyCoord(l=347.2695, b=-0.2569, frame="galactic", unit="deg")
 
     datasets = rxj_test_data
     geom = datasets[0].geoms["geom"]

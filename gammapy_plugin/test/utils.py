@@ -27,7 +27,7 @@ def get_close(threeML_results, gammapy_result_dict):
     else:
         raise NotImplementedError
     hdp = threeML_results.get_data_frame(error_type="hpd")
-    for p in bm.keys():
+    for p in bm:
         pn = p.split(".")[-1]
         if pn == "K":
             pn = "amplitude"

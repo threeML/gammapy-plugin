@@ -46,3 +46,6 @@ html_theme_options = {
 }
 autodoc_typehints = "description"
 myst_enable_extensions = ["colon_fence"]
+
+pygments_style = "sphinx"
+pygments_dark_style = "monokai"

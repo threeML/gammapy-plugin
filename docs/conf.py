@@ -34,7 +34,10 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "md_docs"]
 
 html_theme = "furo"
 html_static_path = ["_static"]
-html_css_files = ["css/overrides.css"]
+html_css_files = [
+    ("css/overrides.css", {"priority": 1000}),
+    ("css/notebooks.css", {"priority": 1000}),
+]
 
 html_logo = "_static/logo.svg"
 html_theme_options = {

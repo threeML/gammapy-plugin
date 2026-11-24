@@ -1,6 +1,7 @@
 import logging
 from copy import deepcopy
 
+import astropy.units as u
 import numpy as np
 from astromodels.core.parameter_transformation import LogarithmicTransformation
 from astromodels.functions.function import Function
@@ -177,6 +178,32 @@ class SpectralModelConverted(SpectralModel):
                 return self._astromodel_function(energy)
             else:
                 return self._astromodel_function(energy).reshape(shape)
+
+    def integral(self, energy_min, energy_max, **kwargs):
+        if isinstance(energy_min, u.Quantity):
+            energy_min = energy_min.to_value(self._x_unit)
+        if isinstance(energy_max, u.Quantity):
+            energy_max = energy_max.to_value(self._x_unit)
+
+        energy_min, energy_max = np.broadcast_arrays(energy_min, energy_max)
+        integrals = np.empty(energy_min.shape, dtype=float)
+        functions = (
+            self._astromodel_function
+            if isinstance(self._astromodel_function, list)
+            else [self._astromodel_function]
+        )
+
+        for index in np.ndindex(energy_min.shape):
+            lower = energy_min[index] * self._x_unit
+            upper = energy_max[index] * self._x_unit
+            integral = sum(
+                (function.integrate(lower, upper, **kwargs) for function in functions),
+                0 * self._integral_unit,
+            )
+            integrals[index] = integral.to_value(self._integral_unit)
+
+        result = integrals * self._integral_unit
+        return result[()] if result.ndim == 0 else result
 
     @property
     def mapping(self):

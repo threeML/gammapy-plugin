@@ -41,12 +41,14 @@ def test_parameter_mapping():
         == 100
     )
     pl1.index.value = 3.1415
+    conv.update()
     assert (
         conv._converted_sources["test_ps"]
         .astromodels_source.components["comp1"]
         .shape.index.value
         == 3.1415
     )
+    assert conv.gammapy_models[0].parameters[pl1.index.path].value == 3.1415
     assert (
         conv._converted_sources[
             "source2"

@@ -54,7 +54,12 @@ def test_set_multiple_datasets(rxj_test_data):
     gl_multi_individual.set_background_models(bkg_models)
     for d in gl_multi_individual.datasets:
         assert len(d.models) == 2, f"Too many models in dataset {d.name}"
+    key, nuisance_parameter = next(
+        iter(gl_multi_individual._nuisance_parameters.items())
+    )
+    nuisance_parameter.value = 1.25
     gl_multi_individual._update_background_models()
+    assert gl_multi_individual._background_parameter_targets[key].value == 1.25
 
 
 def test_set_datasets_error():

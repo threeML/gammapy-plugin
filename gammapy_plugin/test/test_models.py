@@ -55,6 +55,47 @@ def test_spectral_model_converted():
         SpectralModelConverted(string)
 
 
+def test_spectral_model_integral_preserves_integral_units():
+    pl = Powerlaw()
+    pl.set_units(u.keV, u.Unit("keV-1 cm-2 s-1"))
+    spec = SpectralModelConverted(pl)
+
+    energy_min = np.array([1.0, 2.0]) * u.TeV
+    energy_max = np.array([2.0, 4.0]) * u.TeV
+    result = spec.integral(energy_min, energy_max)
+
+    expected = u.Quantity(
+        [
+            pl.integrate(lo, hi).to_value(spec._integral_unit)
+            for lo, hi in zip(energy_min, energy_max, strict=True)
+        ],
+        spec._integral_unit,
+    )
+    assert result.unit == spec._integral_unit
+    assert np.allclose(result.value, expected.value)
+
+    scalar_result = spec.integral(1 * u.TeV, 2 * u.TeV)
+    assert scalar_result.isscalar
+    assert scalar_result.unit == spec._integral_unit
+    assert np.isclose(scalar_result.value, expected[0].value)
+
+
+def test_spectral_model_integral_multiple_components():
+    components = [Powerlaw(), Powerlaw()]
+    for component in components:
+        component.set_units(u.TeV, u.Unit("TeV-1 cm-2 s-1"))
+    spec = SpectralModelConverted(components)
+
+    actual = spec.integral(1 * u.TeV, 2 * u.TeV)
+    expected = sum(
+        (component.integrate(1 * u.TeV, 2 * u.TeV) for component in components),
+        0 * spec._integral_unit,
+    )
+
+    assert actual.unit == spec._integral_unit
+    assert np.isclose(actual.value, expected.to_value(spec._integral_unit))
+
+
 def test_spatial_model_converted():
     gauss = Gaussian_on_sphere()
     from astromodels.core.parameter_transformation import LogarithmicTransformation

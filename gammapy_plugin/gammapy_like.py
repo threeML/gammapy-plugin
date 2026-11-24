@@ -13,10 +13,7 @@ from threeML.plugin_prototype import PluginPrototype
 
 from gammapy_plugin.converter import AstromodelConverter
 from gammapy_plugin.io.plot_model import plot_model
-from gammapy_plugin.utils.gammapy_parser import (
-    parameter_to_gammapy_dict,
-    parse_gammapy_model,
-)
+from gammapy_plugin.utils.gammapy_parser import parse_gammapy_model
 
 if TYPE_CHECKING:
     from threeML.io.plotting.data_residual_plot import ResidualPlot
@@ -49,10 +46,9 @@ class GammapyLike(PluginPrototype):
         super().__init__(name, nuisance_parameters=nuisance_parameters)
         self._frame: str = kwargs.get("frame", "icrs")
         self._sources: list[str] | None = kwargs.get("sources", None)
-        self._nuisance_mapping = {}
+        self._background_parameter_targets = {}
         self._background_models: dict = kwargs.get("background_models", {})
         self._background_models_mapper: dict = {}
-        self._nuisance_parameters_dicts: dict = {}
         if len(self._background_models.keys()) > 0:
             self._parse_background_models()
 
@@ -234,28 +230,21 @@ class GammapyLike(PluginPrototype):
         for bkg in self._background_models.values():
             bkg_paras = parse_gammapy_model(bkg, self._name)
             for k, v in bkg_paras.items():
-                para_path = k.split(".")
-                self._nuisance_mapping[k] = para_path
+                para_name = k.rsplit(".", maxsplit=1)[-1]
+                self._background_parameter_targets[k] = bkg.parameters[para_name]
                 self._nuisance_parameters[k] = v
                 if v.is_normalization and v.free:
                     self._nuisance_parameters[k].prior = Truncated_gaussian(
                         mu=1.0, sigma=0.1, lower_bound=0.2, upper_bound=1.8
                     )
-                self._nuisance_parameters_dicts[k] = parameter_to_gammapy_dict(v)
 
     def _update_background_models(self):
         """
         Update the background models with the current values of the nuisance
         parameters.
         """
-        # TODO: rewrite this to directly update
         for k, v in self._nuisance_parameters.items():
-            self._nuisance_parameters_dicts[k]["value"] = v.value
-            p = self._nuisance_mapping[k]
-            # TODO find an elegant way to not hardcode this
-            self._background_models[p[1]].parameters[p[2]].update_from_dict(
-                self._nuisance_parameters_dicts[k]
-            )
+            self._background_parameter_targets[k].value = v.value
 
     def _set_get_log_like(self):
         if hasattr(self._datasets, "_stat_sum_likelihood"):

@@ -9,9 +9,7 @@ from gammapy_plugin.models import (
     SpatialModelConverted,
     SpectralModelConverted,
 )
-from gammapy_plugin.utils.gammapy_parser import (
-    parameter_to_gammapy_dict,
-)
+from gammapy_plugin.utils.gammapy_parser import _conversion_list
 
 __all__ = ["AstromodelConverter", "SourceConverter"]
 
@@ -166,27 +164,29 @@ class SourceConverter:
         Gather all the parameter mappings from astromodels to gammapy for the individual
         spectral and spatial models
         """
-        self._mapping = None
-        self._mapping_free = None
+        self._mapping = {}
+        self._mapping_free = {}
         for comp in [self._spectral_model, self._spatial_model]:
             if comp is not None:
-                if self._mapping is None:
-                    self._mapping = comp.mapping
-                else:
-                    self._mapping.update(comp.mapping)
-                if self._mapping_free is None:
-                    self._mapping_free = comp.mapping_free
-                else:
-                    self._mapping_free.update(comp.mapping_free)
+                self._mapping.update(comp.mapping)
+                self._mapping_free.update(comp.mapping_free)
+
+        # Cache the parameter pairs and unit conversions once. Likelihood
+        # evaluations only change values; rebuilding full parameter dictionaries
+        # (including bounds, units, and priors) on every call is unnecessary.
+        self._parameter_updates = []
+        for astromodels_name, gammapy_name in self._mapping_free.items():
+            astromodels_parameter = self._converter.model[astromodels_name]
+            factor = _conversion_list.get(astromodels_parameter.unit, (1.0, None))[0]
+            gammapy_parameter = self.skymodel.parameters[gammapy_name]
+            self._parameter_updates.append(
+                (gammapy_parameter, astromodels_parameter, factor)
+            )
 
     def _update_parameters(self) -> None:
-        """Update the skymodel parameters during the sampling process using the
-        parameter dict."""
-        # update the parameter dict for this skymodel
-        for k, v in self._mapping_free.items():
-            self.skymodel.parameters[v].update_from_dict(
-                parameter_to_gammapy_dict(self._converter.model[k])
-            )
+        """Synchronize free parameter values from astromodels to Gammapy."""
+        for gammapy_parameter, astromodels_parameter, factor in self._parameter_updates:
+            gammapy_parameter.value = astromodels_parameter.value * factor
 
     def _convert_spectral_model(self) -> None:
         """Convert the spectral model of the source."""
